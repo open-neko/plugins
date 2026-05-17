@@ -17,7 +17,7 @@ const SITE_STATIC = path.join(ROOT, "site", "static");
 const SITE_DIST = path.join(ROOT, "site", "dist");
 
 const REPO_URL = "https://github.com/open-neko/plugins";
-const NEKO_URL = "https://github.com/open-neko/neko";
+const NEKO_URL = "https://getneko.app";
 const SITE_URL = "https://open-neko.github.io/plugins/";
 const MARKETPLACE_URL = "https://open-neko.github.io/plugins/marketplace.json";
 
