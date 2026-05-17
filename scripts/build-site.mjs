@@ -164,7 +164,7 @@ export async function buildSite() {
       <div class="support-rail reveal reveal-delay-3">
         <div class="support-intro">
           <p class="support-kicker">How operators install</p>
-          <p class="support-summary"><code>openneko install &lt;name&gt;</code> — pulls from npm, verifies the integrity hash, boots in a microsandbox VM.</p>
+          <p class="support-summary"><code>openneko install &lt;name&gt;</code> writes the manifest entry and pulls the pinned version from npm. On the next worker start, every listed plugin boots in its own microsandbox VM.</p>
         </div>
         <div class="support-item">
           <p class="support-label">Marketplace URL</p>
