@@ -43,6 +43,14 @@ export const PluginCapabilities = z
 
 export type PluginCapabilities = z.infer<typeof PluginCapabilities>;
 
+export const ActionKindName = z
+  .string()
+  .min(1)
+  .regex(
+    /^[a-z][a-z0-9_]*$/,
+    "action kind must be lowercase snake_case",
+  );
+
 export const PluginManifestEntry = z.object({
   name: z
     .string()
@@ -61,6 +69,15 @@ export const PluginManifestEntry = z.object({
     .string()
     .regex(/^sha512-[A-Za-z0-9+/=]+$/, "integrity must be sha512-<base64>"),
   capabilities: PluginCapabilities,
+  /**
+   * Action kinds this plugin handles — copied at install time from
+   * the marketplace entry's `kinds`. Lets the worker build a kind →
+   * plugin map from the file alone, without spawning a VM to call
+   * register(). Optional so older manifests written before this
+   * field existed still parse; the worker treats a missing list as
+   * "discover via register() at boot" (legacy fallback).
+   */
+  kinds: z.array(ActionKindName).optional(),
   /**
    * Inline env values to set for this plugin. The CLI normally writes
    * secrets to the gitignored per-user store at ~/.config/openneko/
