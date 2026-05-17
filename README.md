@@ -17,6 +17,14 @@ openneko install @example/plugin-foo
 
 OpenNeko has nothing to say about whether a third-party marketplace is trustworthy — that's between the operator and the publisher. What OpenNeko guarantees is that **every plugin, official or not, runs inside a microsandbox microVM whose outbound network is limited to what the plugin's manifest declared**. That's the floor; curation is on top of it.
 
+There's also an escape hatch for operators who want to install a plugin without any marketplace at all (plugin authoring, emergency hotfix before a listing exists):
+
+```sh
+openneko install <npm-package-name> --unverified
+```
+
+The CLI prints a loud warning. The integrity hash is taken on trust from npm; sandboxing and manifest capability enforcement still apply.
+
 If you want to publish your own marketplace, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Layout

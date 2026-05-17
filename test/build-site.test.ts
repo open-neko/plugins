@@ -32,4 +32,28 @@ describe("build-site", () => {
       "https://open-neko.github.io/plugins/marketplace.schema.json",
     );
   });
+
+  it("inlines style.css so the page renders without an external CSS request", async () => {
+    await buildSite();
+    const html = readFileSync(path.join(SITE_DIST, "index.html"), "utf8");
+    expect(html).not.toContain('href="style.css"');
+    expect(html).toMatch(/<style>[\s\S]*--accent: #6cff7f[\s\S]*<\/style>/);
+  });
+
+  it("embeds marketplace.json content into the page in a <details> block", async () => {
+    await buildSite();
+    const html = readFileSync(path.join(SITE_DIST, "index.html"), "utf8");
+    expect(html).toContain('<details class="embed-details" open>');
+    expect(html).toContain("marketplace.json");
+    // The actual escaped JSON should be inside the embedded view, not just
+    // a link to fetch it.
+    expect(html).toContain("&quot;@open-neko/plugin-parallel-search&quot;");
+    expect(html).toContain("marketplace.schema.json");
+  });
+
+  it("mentions the --unverified escape hatch in the trust band", async () => {
+    await buildSite();
+    const html = readFileSync(path.join(SITE_DIST, "index.html"), "utf8");
+    expect(html).toContain("--unverified");
+  });
 });

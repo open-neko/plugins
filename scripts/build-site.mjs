@@ -5,7 +5,14 @@
 // Aesthetic matches getneko.app: warm off-white background, near-black
 // ink, signature green accent, Archivo display + Manrope body, sticky
 // pill header, soft green gradient wash, hairline-bordered cards.
-import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+//
+// The stylesheet and the marketplace.json/schema contents are inlined
+// into the HTML so the page is self-contained: zero external CSS round
+// trips, no cache invalidation games on CSS deploys, JSON visible to
+// operators on the page instead of behind raw-file links. The raw
+// JSON files are STILL served at /marketplace.json and
+// /marketplace.schema.json so the openneko CLI can fetch them.
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -71,17 +78,32 @@ function shortHost(url) {
   }
 }
 
+function humanSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}
+
 export async function buildSite() {
   mkdirSync(SITE_DIST, { recursive: true });
 
-  const marketplace = JSON.parse(readFileSync(MARKETPLACE_PATH, "utf8"));
+  const marketplaceRaw = readFileSync(MARKETPLACE_PATH, "utf8");
+  const schemaRaw = readFileSync(SCHEMA_PATH, "utf8");
+  const styleRaw = readFileSync(path.join(SITE_STATIC, "style.css"), "utf8");
+  const marketplace = JSON.parse(marketplaceRaw);
 
-  // Raw artifacts the CLI fetches
-  copyFileSync(MARKETPLACE_PATH, path.join(SITE_DIST, "marketplace.json"));
+  // Pretty-print marketplace.json once so the inline <pre> view matches what
+  // operators see when they curl the URL — and so the file the CLI reads
+  // matches byte-for-byte with what the page shows.
+  const marketplacePretty = JSON.stringify(marketplace, null, 2) + "\n";
+
+  // Write the raw files so the CLI can fetch them at known URLs.
+  writeFileSync(path.join(SITE_DIST, "marketplace.json"), marketplacePretty, "utf8");
   copyFileSync(SCHEMA_PATH, path.join(SITE_DIST, "marketplace.schema.json"));
 
-  // Static assets (style.css, cat.png)
+  // Static assets that aren't the stylesheet (the stylesheet is inlined
+  // below). Today this is just cat.png.
   for (const file of readdirSync(SITE_STATIC)) {
+    if (file === "style.css") continue;
     copyFileSync(path.join(SITE_STATIC, file), path.join(SITE_DIST, file));
   }
 
@@ -89,6 +111,9 @@ export async function buildSite() {
   const cards = (marketplace.plugins ?? [])
     .map((p, i) => renderPluginCard(p, i))
     .join("\n");
+
+  const marketplaceSize = humanSize(Buffer.byteLength(marketplacePretty, "utf8"));
+  const schemaSize = humanSize(statSync(path.join(SITE_DIST, "marketplace.schema.json")).size);
 
   const html = `<!doctype html>
 <html lang="en">
@@ -101,7 +126,7 @@ export async function buildSite() {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <style>${styleRaw}</style>
   <meta property="og:title" content="${escape(marketplace.name)} — OpenNeko Plugins">
   <meta property="og:description" content="${escape(marketplace.description)}">
   <meta property="og:type" content="website">
@@ -119,7 +144,7 @@ export async function buildSite() {
     <nav class="site-nav" aria-label="Primary">
       <a href="#plugins" class="nav-link">Plugins</a>
       <a href="#trust" class="nav-link">Trust model</a>
-      <a href="${REPO_URL}/blob/main/CONTRIBUTING.md" class="nav-link">Publish</a>
+      <a href="#raw" class="nav-link">Raw data</a>
       <a href="${REPO_URL}" class="nav-link">GitHub</a>
     </nav>
     <a class="button button-primary" href="${NEKO_URL}">Get OpenNeko</a>
@@ -132,8 +157,7 @@ export async function buildSite() {
       <p class="hero-subtitle reveal reveal-delay-2">${escape(marketplace.description)}</p>
       <div class="hero-actions reveal reveal-delay-3">
         <a class="button button-primary" href="#plugins">Browse plugins</a>
-        <a class="nav-link" href="marketplace.json">marketplace.json ↗</a>
-        <a class="nav-link" href="marketplace.schema.json">schema ↗</a>
+        <a class="nav-link" href="#raw">View raw data ↓</a>
       </div>
 
       <div class="support-rail reveal reveal-delay-3">
@@ -151,7 +175,7 @@ export async function buildSite() {
         </div>
         <div class="support-item">
           <p class="support-label">Schema</p>
-          <p class="support-value"><a href="marketplace.schema.json">draft 2020-12</a></p>
+          <p class="support-value">draft 2020-12</p>
         </div>
       </div>
     </section>
@@ -183,7 +207,35 @@ export async function buildSite() {
             <h3>Add your own</h3>
             <p>Publish your <code>marketplace.json</code> at any HTTPS URL, then operators trust it with <code>openneko marketplace add &lt;url&gt;</code>. OpenNeko makes no representation about non-official marketplaces.</p>
           </div>
+          <div class="trust-column">
+            <p class="trust-label">Bypass</p>
+            <h3><code style="color: var(--accent);">openneko install &lt;name&gt; --unverified</code></h3>
+            <p>Skip every marketplace and install straight from npm. Loud warning. For plugin authoring or emergency hotfixes — the integrity hash is taken on trust, but sandboxing and capability enforcement still apply.</p>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <section class="page section" id="raw">
+      <header class="section-heading">
+        <h2 class="section-title">Raw data</h2>
+        <p class="section-copy">The exact bytes the <code>openneko</code> CLI fetches when an operator runs <code>openneko marketplace add</code> or <code>openneko install</code>. Each block is also served at a stable URL.</p>
+      </header>
+      <div class="embed-section">
+        <details class="embed-details" open>
+          <summary>
+            <span>marketplace.json</span>
+            <span class="embed-summary-meta"><code>GET ${escape(MARKETPLACE_URL)}</code> · ${marketplaceSize}</span>
+          </summary>
+          <pre class="embed-body">${escape(marketplacePretty)}</pre>
+        </details>
+        <details class="embed-details">
+          <summary>
+            <span>marketplace.schema.json</span>
+            <span class="embed-summary-meta"><code>GET ${escape(SITE_URL)}marketplace.schema.json</code> · ${schemaSize}</span>
+          </summary>
+          <pre class="embed-body">${escape(schemaRaw)}</pre>
+        </details>
       </div>
     </section>
   </main>

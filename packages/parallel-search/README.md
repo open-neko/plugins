@@ -6,8 +6,12 @@ The plugin connects to `https://search.parallel.ai/mcp` over Streamable HTTP and
 
 ## Install
 
-```
-openneko plugin install @open-neko/plugin-parallel-search
+```sh
+# From the official OpenNeko marketplace (verified integrity hash):
+openneko install @open-neko/plugin-parallel-search
+
+# Or, bypassing every marketplace (e.g. while testing a local build):
+openneko install @open-neko/plugin-parallel-search --unverified
 ```
 
 The anonymous tier works without any API key — try it first. To use the authenticated tier (higher rate limits), set your key in either:
