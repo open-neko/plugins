@@ -63,7 +63,7 @@ describe("PluginManifest", () => {
 
   it("accepts an empty plugin list", () => {
     const parsed = PluginManifest.parse({
-      schema: "https://open-neko.github.io/registry/manifest.schema.json",
+      schema: "https://open-neko.github.io/plugins/manifest.schema.json",
       plugins: [],
     });
     expect(parsed.plugins).toEqual([]);

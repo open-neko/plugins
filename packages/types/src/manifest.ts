@@ -36,12 +36,14 @@ export const PluginManifestEntry = z.object({
     .regex(/^sha512-[A-Za-z0-9+/=]+$/, "integrity must be sha512-<base64>"),
   capabilities: PluginCapabilities,
   env: z.record(z.string(), z.string()).optional(),
+  /** Display name of the marketplace this plugin came from (traceability). */
+  marketplace: z.string().optional(),
 });
 
 export type PluginManifestEntry = z.infer<typeof PluginManifestEntry>;
 
 export const PluginManifest = z.object({
-  schema: z.literal("https://open-neko.github.io/registry/manifest.schema.json"),
+  schema: z.literal("https://open-neko.github.io/plugins/manifest.schema.json"),
   plugins: z.array(PluginManifestEntry),
 });
 

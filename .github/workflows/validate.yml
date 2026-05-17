@@ -1,0 +1,43 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # Schema + structural check; runs on every push to main and every PR.
+  # Cheap, offline, no npm round-trip.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate
+      - run: pnpm -r typecheck
+      - run: pnpm -r test
+
+  # Live checks against npm (provenance, integrity hash, lifecycle
+  # scripts). PR-only: an unreleased version on main may not yet exist
+  # on npm and a push from a maintainer is already-reviewed work.
+  validate-live:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate -- --live

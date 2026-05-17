@@ -1,0 +1,28 @@
+{
+  "$schema": "https://open-neko.github.io/plugins/marketplace.schema.json",
+  "name": "OpenNeko Official",
+  "owner": "open-neko",
+  "homepage": "https://open-neko.github.io/plugins/",
+  "description": "First-party plugins for OpenNeko, published by the OpenNeko maintainers under @open-neko/* on npm. Plugins listed here are written, tested, and supported by the OpenNeko team. Third parties: publish your own marketplace.json — see https://github.com/open-neko/plugins/blob/main/CONTRIBUTING.md.",
+  "plugins": [
+    {
+      "name": "@open-neko/plugin-parallel-search",
+      "title": "Parallel.ai Search MCP",
+      "description": "Web search + page fetch via Parallel.ai's Search MCP over Streamable HTTP. Anonymous tier supported; Bearer-token authenticated tier optional. Two actions: web_search and web_fetch.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/parallel-search",
+      "homepage": "https://docs.parallel.ai/integrations/mcp/search-mcp",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.2.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "requires_network": ["search.parallel.ai"],
+          "kinds": ["web_search", "web_fetch"],
+          "publishedAt": "2026-05-17"
+        }
+      ]
+    }
+  ]
+}

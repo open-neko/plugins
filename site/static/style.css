@@ -1,0 +1,100 @@
+/* OpenNeko plugin registry — minimal, system-font, no JS frameworks. */
+:root {
+  color-scheme: light dark;
+  --bg: #fafaf7;
+  --fg: #111;
+  --muted: #555;
+  --accent: #1e40af;
+  --border: #d4d4d0;
+  --card-bg: #fff;
+  --code-bg: #f1f1ee;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0c;
+    --fg: #f5f5f1;
+    --muted: #aaa;
+    --accent: #93c5fd;
+    --border: #2a2a28;
+    --card-bg: #161614;
+    --code-bg: #1f1f1d;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  padding: 32px 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+header h1 { font-size: 2rem; margin: 0 0 4px; }
+header p { color: var(--muted); margin: 0 0 24px; }
+nav { margin-bottom: 32px; }
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  margin-right: 16px;
+  font-size: 0.95rem;
+}
+nav a:hover { text-decoration: underline; }
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+.card .name {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.card .desc { margin: 0 0 16px; }
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.meta .chip {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+.meta .chip.network { color: var(--accent); }
+.meta .chip.network.empty { color: var(--muted); }
+.install {
+  background: var(--code-bg);
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.install code { background: none; }
+.install a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-left: 16px;
+}
+footer {
+  margin-top: 64px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+footer a { color: var(--accent); text-decoration: none; }

@@ -7,13 +7,18 @@
     "type": "git",
     "url": "git+https://github.com/open-neko/plugins.git"
   },
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && vitest run --root .",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "validate": "node scripts/validate-marketplace.mjs",
+    "site:build": "node scripts/build-site.mjs"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "typescript": "^5.6.3",
     "vitest": "^2.1.8"
   },
