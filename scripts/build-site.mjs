@@ -120,14 +120,14 @@ export async function buildSite() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escape(marketplace.name)} — OpenNeko Plugins</title>
+  <title>OpenNeko — Plugins</title>
   <meta name="description" content="${escape(marketplace.description)}">
   <link rel="icon" href="cat.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>${styleRaw}</style>
-  <meta property="og:title" content="${escape(marketplace.name)} — OpenNeko Plugins">
+  <meta property="og:title" content="OpenNeko — Plugins">
   <meta property="og:description" content="${escape(marketplace.description)}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${SITE_URL}">
