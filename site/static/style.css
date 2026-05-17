@@ -204,7 +204,7 @@ a { color: inherit; text-decoration: none; }
 /* Support rail — quick facts under the hero, mirrors site/support-rail. */
 .support-rail {
   display: grid;
-  grid-template-columns: minmax(220px, 1.05fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 3fr) minmax(160px, 1fr);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
