@@ -167,6 +167,11 @@ export async function buildSite() {
           <p class="support-summary"><code>openneko install &lt;name&gt;</code> writes the manifest entry and pulls the pinned version from npm. On the next worker start, every listed plugin boots in its own microsandbox VM.</p>
         </div>
         <div class="support-item">
+          <p class="support-label">Marketplace URL</p>
+          <p class="support-value">${escape(shortHost(MARKETPLACE_URL))}</p>
+          <p class="support-hint">Trusted by default — the <code>openneko</code> CLI fetches it on every install. Third parties: <code>openneko marketplace add &lt;url&gt;</code>.</p>
+        </div>
+        <div class="support-item">
           <p class="support-label">Plugins listed</p>
           <p class="support-value">${pluginCount}</p>
         </div>
