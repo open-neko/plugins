@@ -91,6 +91,38 @@
           },
           "default": []
         },
+        "requires_env": {
+          "description": "Env vars the plugin needs at runtime. The openneko CLI prompts the operator for required ones during install and stores them in the per-user secrets file. The worker injects values into the plugin's microVM at exec time.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": ["key", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$",
+                "maxLength": 64,
+                "description": "UPPER_SNAKE_CASE env var name the plugin reads."
+              },
+              "required": {
+                "type": "boolean",
+                "default": true
+              },
+              "secret": {
+                "type": "boolean",
+                "default": true,
+                "description": "Hide the value at prompt; the CLI will not echo it back."
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 280
+              }
+            }
+          }
+        },
         "kinds": {
           "type": "array",
           "minItems": 1,

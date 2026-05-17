@@ -23,6 +23,38 @@
           "publishedAt": "2026-05-17"
         }
       ]
+    },
+    {
+      "name": "@open-neko/plugin-slack",
+      "title": "Slack actions",
+      "description": "Post messages, send DMs, react with emoji, and look up users/channels in Slack. Four actions, each separately approvable by operator rules. Authenticated via Slack bot token (xoxb-) stored in the per-user secrets file.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/slack",
+      "homepage": "https://api.slack.com/web",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "requires_network": ["slack.com"],
+          "requires_env": [
+            {
+              "key": "SLACK_BOT_TOKEN",
+              "required": true,
+              "secret": true,
+              "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write, reactions:write, users:read, users:read.email, channels:read, groups:read (depending on which actions you'll allow)."
+            }
+          ],
+          "kinds": [
+            "send_slack_message",
+            "send_slack_dm",
+            "react_slack_message",
+            "lookup_slack_entity"
+          ],
+          "publishedAt": "2026-05-17"
+        }
+      ]
     }
   ]
 }

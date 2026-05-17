@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  EnvVarName,
   HostPattern,
+  PluginEnvRequirement,
   PluginManifest,
   PluginManifestEntry,
 } from "../src/manifest";
@@ -51,6 +53,51 @@ describe("PluginManifestEntry", () => {
   it("defaults capabilities to empty network array", () => {
     const parsed = PluginManifestEntry.parse({ ...base, capabilities: undefined });
     expect(parsed.capabilities.network).toEqual([]);
+  });
+});
+
+describe("EnvVarName", () => {
+  it("accepts UPPER_SNAKE_CASE names", () => {
+    expect(EnvVarName.parse("SLACK_BOT_TOKEN")).toBe("SLACK_BOT_TOKEN");
+    expect(EnvVarName.parse("API_KEY_V2")).toBe("API_KEY_V2");
+    expect(EnvVarName.parse("X")).toBe("X");
+  });
+
+  it("rejects lowercase, leading digits, or non-alpha-underscore", () => {
+    expect(() => EnvVarName.parse("slack_token")).toThrow();
+    expect(() => EnvVarName.parse("1API")).toThrow();
+    expect(() => EnvVarName.parse("API-KEY")).toThrow();
+    expect(() => EnvVarName.parse("API.KEY")).toThrow();
+    expect(() => EnvVarName.parse("")).toThrow();
+  });
+});
+
+describe("PluginEnvRequirement", () => {
+  it("accepts a fully-specified requirement", () => {
+    const parsed = PluginEnvRequirement.parse({
+      key: "SLACK_BOT_TOKEN",
+      required: true,
+      secret: true,
+      description: "xoxb- token from your Slack app",
+    });
+    expect(parsed.key).toBe("SLACK_BOT_TOKEN");
+    expect(parsed.required).toBe(true);
+    expect(parsed.secret).toBe(true);
+  });
+
+  it("defaults required + secret to true when omitted", () => {
+    const parsed = PluginEnvRequirement.parse({
+      key: "SOME_KEY",
+      description: "anything",
+    });
+    expect(parsed.required).toBe(true);
+    expect(parsed.secret).toBe(true);
+  });
+
+  it("rejects a malformed key", () => {
+    expect(() =>
+      PluginEnvRequirement.parse({ key: "bad-key", description: "x" }),
+    ).toThrow();
   });
 });
 

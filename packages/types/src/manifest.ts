@@ -9,6 +9,32 @@ export const HostPattern = z
     "host pattern must be a hostname (subdomains allowed via leading *.)",
   );
 
+export const EnvVarName = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(
+    /^[A-Z][A-Z0-9_]*$/,
+    "env var names must be UPPER_SNAKE_CASE starting with a letter",
+  );
+
+/**
+ * One env var a plugin needs at runtime. Listed in the marketplace
+ * entry; the openneko CLI prompts the operator for any required ones
+ * during `openneko install` and stores them in the per-user secrets
+ * file at ~/.config/openneko/secrets.json. The worker reads that file
+ * and injects the values into the plugin's microVM at exec time.
+ */
+export const PluginEnvRequirement = z.object({
+  key: EnvVarName,
+  required: z.boolean().default(true),
+  /** Hide the value at prompt + never echo it back. */
+  secret: z.boolean().default(true),
+  description: z.string().min(1).max(280),
+});
+
+export type PluginEnvRequirement = z.infer<typeof PluginEnvRequirement>;
+
 export const PluginCapabilities = z
   .object({
     network: z.array(HostPattern).default([]),
@@ -35,6 +61,12 @@ export const PluginManifestEntry = z.object({
     .string()
     .regex(/^sha512-[A-Za-z0-9+/=]+$/, "integrity must be sha512-<base64>"),
   capabilities: PluginCapabilities,
+  /**
+   * Inline env values to set for this plugin. The CLI normally writes
+   * secrets to the gitignored per-user store at ~/.config/openneko/
+   * secrets.json; this field is for tests + non-secret defaults. The
+   * worker merges both, with the per-user store winning.
+   */
   env: z.record(z.string(), z.string()).optional(),
   /** Display name of the marketplace this plugin came from (traceability). */
   marketplace: z.string().optional(),

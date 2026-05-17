@@ -51,6 +51,20 @@ function renderPluginCard(plugin, index) {
   const kindChips = (latest.kinds ?? [])
     .map((k) => `<span class="chip chip-kind">${escape(k)}</span>`)
     .join("");
+  const envRequirements = latest.requires_env ?? [];
+  const envChips = envRequirements
+    .map((r) => {
+      const icon = r.secret === false ? "" : "🔒 ";
+      const opt = r.required === false ? "?" : "";
+      return `<span class="chip chip-env" title="${escape(r.description)}">${icon}${escape(r.key)}${opt}</span>`;
+    })
+    .join("");
+  const envRow = envChips
+    ? `<div class="plugin-env-row">
+            <span class="plugin-env-label">prompts at install for:</span>
+            <div class="plugin-chips">${envChips}</div>
+          </div>`
+    : "";
   const delayClass = index < 3 ? ` reveal reveal-delay-${index + 1}` : "";
   return `
         <article class="plugin-card${delayClass}">
@@ -63,6 +77,7 @@ function renderPluginCard(plugin, index) {
           </header>
           <p class="plugin-desc">${escape(plugin.description)}</p>
           <div class="plugin-chips">${kindChips}${networkChips}</div>
+          ${envRow}
           <div class="plugin-install">
             <code>openneko install ${escape(plugin.name)}</code>
             <a class="plugin-install-link" href="${escape(plugin.source)}">view source ↗</a>

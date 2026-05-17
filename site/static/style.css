@@ -372,6 +372,31 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.6;
 }
 
+.plugin-env-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.plugin-env-label {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.chip-env {
+  background: rgba(242, 195, 95, 0.16);
+  color: #6b4500;
+  border: 1px solid rgba(242, 195, 95, 0.45);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 600;
+  font-size: 0.76rem;
+  cursor: help;
+}
+
 .plugin-chips {
   display: flex;
   flex-wrap: wrap;

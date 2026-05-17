@@ -1,0 +1,46 @@
+{
+  "name": "@open-neko/plugin-slack",
+  "version": "0.1.0",
+  "description": "Slack actions for OpenNeko: post messages, send DMs, react to messages, and look up users/channels. Runs in a microsandbox VM with network egress limited to slack.com.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/slack"
+  },
+  "type": "module",
+  "files": ["dist", "README.md"],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "kinds": [
+      "send_slack_message",
+      "send_slack_dm",
+      "react_slack_message",
+      "lookup_slack_entity"
+    ],
+    "requires_network": ["slack.com"],
+    "requires_env": [
+      {
+        "key": "SLACK_BOT_TOKEN",
+        "required": true,
+        "secret": true,
+        "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
