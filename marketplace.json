@@ -3,7 +3,7 @@
   "name": "OpenNeko Official",
   "owner": "open-neko",
   "homepage": "https://open-neko.github.io/plugins/",
-  "description": "First-party plugins for OpenNeko, published by the OpenNeko maintainers under @open-neko/* on npm. Plugins listed here are written, tested, and supported by the OpenNeko team. Third parties: publish your own marketplace.json — see https://github.com/open-neko/plugins/blob/main/CONTRIBUTING.md.",
+  "description": "First-party plugins for OpenNeko. Published by the maintainers under @open-neko/* on npm. Written, tested, and supported by the OpenNeko team.",
   "plugins": [
     {
       "name": "@open-neko/plugin-parallel-search",

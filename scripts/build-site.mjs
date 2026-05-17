@@ -144,7 +144,7 @@ export async function buildSite() {
     <nav class="site-nav" aria-label="Primary">
       <a href="#plugins" class="nav-link">Plugins</a>
       <a href="#trust" class="nav-link">Trust model</a>
-      <a href="#raw" class="nav-link">Raw data</a>
+      <a href="#developers" class="nav-link">For developers</a>
       <a href="${REPO_URL}" class="nav-link">GitHub</a>
     </nav>
     <a class="button button-primary" href="${NEKO_URL}">Get OpenNeko</a>
@@ -155,9 +155,10 @@ export async function buildSite() {
       <p class="eyebrow reveal">${escape(marketplace.owner)} · ${pluginCount} plugin${pluginCount === 1 ? "" : "s"}</p>
       <h1 class="hero-title reveal reveal-delay-1">${escape(marketplace.name)}</h1>
       <p class="hero-subtitle reveal reveal-delay-2">${escape(marketplace.description)}</p>
+      <p class="hero-note reveal reveal-delay-2"><strong>Third parties:</strong> publish your own <code>marketplace.json</code> at any HTTPS URL — see <a href="${REPO_URL}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">the publish guide</a> for the schema, integrity-hash recipe, and CI checks.</p>
       <div class="hero-actions reveal reveal-delay-3">
         <a class="button button-primary" href="#plugins">Browse plugins</a>
-        <a class="nav-link" href="#raw">View raw data ↓</a>
+        <a class="nav-link" href="#developers">For developers ↓</a>
       </div>
 
       <div class="support-rail reveal reveal-delay-3">
@@ -216,10 +217,10 @@ export async function buildSite() {
       </div>
     </section>
 
-    <section class="page section" id="raw">
+    <section class="page section" id="developers">
       <header class="section-heading">
-        <h2 class="section-title">Raw data</h2>
-        <p class="section-copy">The exact bytes the <code>openneko</code> CLI fetches when an operator runs <code>openneko marketplace add</code> or <code>openneko install</code>. Each block is also served at a stable URL.</p>
+        <h2 class="section-title">For developers</h2>
+        <p class="section-copy">The exact bytes the <code>openneko</code> CLI fetches when an operator runs <code>openneko marketplace add</code> or <code>openneko install</code>. Use the schema if you're publishing your own marketplace.json. Each block is also served at a stable URL so you can <code>curl</code> it.</p>
       </header>
       <div class="embed-section">
         <details class="embed-details" open>

@@ -164,6 +164,35 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.6;
 }
 
+.hero-note {
+  margin: 0.9rem 0 0;
+  max-width: 44rem;
+  color: var(--text-soft);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.hero-note strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.hero-note code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--surface-soft);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+}
+
+.hero-note a {
+  color: var(--accent-deep);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .hero-actions {
   display: flex;
   align-items: center;
