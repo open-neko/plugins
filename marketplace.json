@@ -25,6 +25,46 @@
       ]
     },
     {
+      "name": "@open-neko/plugin-scalekit",
+      "title": "Scalekit SSO",
+      "description": "Enterprise SSO via Scalekit. One integration that fronts Okta, Entra ID, Google Workspace, JumpCloud, and other identity providers. Implements OpenNeko's generic OIDC auth contract — install this plugin and the 'Sign in with Scalekit' button lights up in the web app.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/scalekit",
+      "homepage": "https://docs.scalekit.com/sso/quickstart",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "requires_network": ["*.scalekit.com"],
+          "requires_env": [
+            {
+              "key": "SCALEKIT_ENVIRONMENT_URL",
+              "required": true,
+              "secret": false,
+              "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard."
+            },
+            {
+              "key": "SCALEKIT_CLIENT_ID",
+              "required": true,
+              "secret": false,
+              "description": "OAuth client_id from the Scalekit dashboard."
+            },
+            {
+              "key": "SCALEKIT_CLIENT_SECRET",
+              "required": true,
+              "secret": true,
+              "description": "OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file."
+            }
+          ],
+          "kinds": [],
+          "provides_auth": true,
+          "publishedAt": "2026-05-18"
+        }
+      ]
+    },
+    {
       "name": "@open-neko/plugin-slack",
       "title": "Slack actions",
       "description": "Post messages, send DMs, react with emoji, and look up users/channels in Slack. Four actions, each separately approvable by operator rules. Authenticated via Slack bot token (xoxb-) stored in the per-user secrets file.",

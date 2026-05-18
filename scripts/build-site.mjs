@@ -51,6 +51,9 @@ function renderPluginCard(plugin, index) {
   const kindChips = (latest.kinds ?? [])
     .map((k) => `<span class="chip chip-kind">${escape(k)}</span>`)
     .join("");
+  const authChip = latest.provides_auth
+    ? '<span class="chip chip-kind" title="Implements the OpenNeko SSO contract">SSO provider</span>'
+    : "";
   const envRequirements = latest.requires_env ?? [];
   const envChips = envRequirements
     .map((r) => {
@@ -76,7 +79,7 @@ function renderPluginCard(plugin, index) {
             </div>
           </header>
           <p class="plugin-desc">${escape(plugin.description)}</p>
-          <div class="plugin-chips">${kindChips}${networkChips}</div>
+          <div class="plugin-chips">${authChip}${kindChips}${networkChips}</div>
           ${envRow}
           <div class="plugin-install">
             <code>openneko install ${escape(plugin.name)}</code>

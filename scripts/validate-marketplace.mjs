@@ -71,6 +71,17 @@ export async function validateMarketplace({ root = DEFAULT_ROOT, live = false } 
         failures.push(`${plugin.name}: duplicate version ${v.version}`);
       }
       versionSet.add(v.version);
+      // A version must contribute *something*. Today a plugin contributes
+      // either action kinds (the original surface) or auth (a Sign-in
+      // provider). At least one must be non-empty — a version with neither
+      // is dead weight in the catalog.
+      const kindCount = Array.isArray(v.kinds) ? v.kinds.length : 0;
+      const providesAuth = v.provides_auth === true;
+      if (kindCount === 0 && !providesAuth) {
+        failures.push(
+          `${plugin.name}@${v.version}: must contribute at least one of "kinds" or "provides_auth: true"`,
+        );
+      }
     }
     if (live) {
       for (const v of plugin.versions) {

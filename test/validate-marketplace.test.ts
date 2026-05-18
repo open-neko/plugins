@@ -152,7 +152,7 @@ describe("validateMarketplace", () => {
     expect(result.failures.join("\n")).toMatch(/source/);
   });
 
-  it("rejects a plugin with no action kinds", async () => {
+  it("rejects a plugin with neither action kinds nor provides_auth", async () => {
     fixtureDir = makeFixture(
       validMarketplace({
         plugins: [
@@ -170,7 +170,29 @@ describe("validateMarketplace", () => {
       }),
     );
     const result = await validateMarketplace({ root: fixtureDir });
-    expect(result.failures.join("\n")).toMatch(/kinds/);
+    expect(result.failures.join("\n")).toMatch(/kinds.*provides_auth/);
+  });
+
+  it("accepts an auth-only plugin (no kinds, provides_auth: true)", async () => {
+    fixtureDir = makeFixture(
+      validMarketplace({
+        plugins: [
+          validPlugin({
+            versions: [
+              {
+                version: "0.1.0",
+                integrity: VALID_INTEGRITY,
+                kinds: [],
+                provides_auth: true,
+                publishedAt: "2026-05-17",
+              },
+            ],
+          }),
+        ],
+      }),
+    );
+    const result = await validateMarketplace({ root: fixtureDir });
+    expect(result.failures).toEqual([]);
   });
 
   it("rejects two plugin entries with the same name", async () => {

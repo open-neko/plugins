@@ -71,7 +71,7 @@
     },
     "version": {
       "type": "object",
-      "required": ["version", "integrity", "kinds", "publishedAt"],
+      "required": ["version", "integrity", "publishedAt"],
       "additionalProperties": false,
       "properties": {
         "version": {
@@ -125,11 +125,17 @@
         },
         "kinds": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$"
-          }
+          },
+          "default": [],
+          "description": "Action kinds contributed by this version. Optional — auth-only plugins legitimately publish with no actions."
+        },
+        "provides_auth": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when this version implements the SSO auth contract (begin_auth + complete_auth RPC methods). Lets the OpenNeko core decide whether to surface a 'Sign in with …' button without having to spawn the plugin's VM first."
         },
         "publishedAt": { "type": "string", "format": "date" },
         "yanked": { "type": "boolean", "default": false },
