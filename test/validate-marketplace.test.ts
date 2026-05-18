@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, cpSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 // @ts-expect-error pure-JS module
 import { validateMarketplace } from "../scripts/validate-marketplace.mjs";
 
@@ -25,6 +25,10 @@ function makeFixture(marketplaceJson: Record<string, unknown>): string {
   return dir;
 }
 
+function actionCapability(kinds: Array<{ kind: string; description: string }>) {
+  return { action: { kinds } };
+}
+
 function validPlugin(over: Partial<Record<string, unknown>> = {}) {
   return {
     name: "@open-neko/plugin-good",
@@ -35,8 +39,10 @@ function validPlugin(over: Partial<Record<string, unknown>> = {}) {
       {
         version: "0.1.0",
         integrity: VALID_INTEGRITY,
-        requires_network: [],
-        kinds: ["demo"],
+        permissions: { network: [], env: [] },
+        capabilities: actionCapability([
+          { kind: "demo", description: "demo action" },
+        ]),
         publishedAt: "2026-05-17",
       },
     ],
@@ -83,7 +89,10 @@ describe("validateMarketplace", () => {
               {
                 version: "^0.1.0",
                 integrity: VALID_INTEGRITY,
-                kinds: ["demo"],
+                permissions: { network: [], env: [] },
+                capabilities: actionCapability([
+                  { kind: "demo", description: "d" },
+                ]),
                 publishedAt: "2026-05-17",
               },
             ],
@@ -103,7 +112,10 @@ describe("validateMarketplace", () => {
             versions: [
               {
                 version: "0.1.0",
-                kinds: ["demo"],
+                permissions: { network: [], env: [] },
+                capabilities: actionCapability([
+                  { kind: "demo", description: "d" },
+                ]),
                 publishedAt: "2026-05-17",
               },
             ],
@@ -124,13 +136,19 @@ describe("validateMarketplace", () => {
               {
                 version: "0.1.0",
                 integrity: VALID_INTEGRITY,
-                kinds: ["demo"],
+                permissions: { network: [], env: [] },
+                capabilities: actionCapability([
+                  { kind: "demo", description: "d" },
+                ]),
                 publishedAt: "2026-05-17",
               },
               {
                 version: "0.1.0",
                 integrity: VALID_INTEGRITY,
-                kinds: ["demo"],
+                permissions: { network: [], env: [] },
+                capabilities: actionCapability([
+                  { kind: "demo", description: "d" },
+                ]),
                 publishedAt: "2026-05-18",
               },
             ],
@@ -152,7 +170,7 @@ describe("validateMarketplace", () => {
     expect(result.failures.join("\n")).toMatch(/source/);
   });
 
-  it("rejects a plugin with neither action kinds nor provides_auth", async () => {
+  it("rejects a plugin with no capability declared", async () => {
     fixtureDir = makeFixture(
       validMarketplace({
         plugins: [
@@ -161,7 +179,8 @@ describe("validateMarketplace", () => {
               {
                 version: "0.1.0",
                 integrity: VALID_INTEGRITY,
-                kinds: [],
+                permissions: { network: [], env: [] },
+                capabilities: {},
                 publishedAt: "2026-05-17",
               },
             ],
@@ -170,10 +189,10 @@ describe("validateMarketplace", () => {
       }),
     );
     const result = await validateMarketplace({ root: fixtureDir });
-    expect(result.failures.join("\n")).toMatch(/kinds.*provides_auth/);
+    expect(result.failures.join("\n")).toMatch(/capabilities/);
   });
 
-  it("accepts an auth-only plugin (no kinds, provides_auth: true)", async () => {
+  it("accepts an auth-only plugin", async () => {
     fixtureDir = makeFixture(
       validMarketplace({
         plugins: [
@@ -182,8 +201,8 @@ describe("validateMarketplace", () => {
               {
                 version: "0.1.0",
                 integrity: VALID_INTEGRITY,
-                kinds: [],
-                provides_auth: true,
+                permissions: { network: [], env: [] },
+                capabilities: { auth: { providerLabel: "Test" } },
                 publishedAt: "2026-05-17",
               },
             ],

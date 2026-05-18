@@ -58,10 +58,10 @@ describe("plugin shape", () => {
   it("declares scalekit as an auth provider only (no actions)", () => {
     expect(plugin.name).toBe("@open-neko/plugin-scalekit");
     expect(plugin.version).toBe("0.1.0");
-    expect(plugin.actions ?? []).toEqual([]);
-    expect(plugin.auth?.providerLabel).toBe("Scalekit");
-    expect(typeof plugin.auth?.begin).toBe("function");
-    expect(typeof plugin.auth?.complete).toBe("function");
+    expect(plugin.capabilities.action).toBeUndefined();
+    expect(plugin.capabilities.auth?.providerLabel).toBe("Scalekit");
+    expect(typeof plugin.capabilities.auth?.begin).toBe("function");
+    expect(typeof plugin.capabilities.auth?.complete).toBe("function");
   });
 
   it("register() via dispatcher carries the provider label", async () => {
@@ -73,12 +73,14 @@ describe("plugin shape", () => {
     if (!r.ok) return;
     const out = r.result as {
       protocol: number;
-      actions: unknown[];
-      auth?: { providerLabel?: string };
+      capabilities: {
+        action?: { kinds: unknown[] };
+        auth?: { providerLabel?: string };
+      };
     };
     expect(out.protocol).toBe(RPC_PROTOCOL_VERSION);
-    expect(out.actions).toEqual([]);
-    expect(out.auth?.providerLabel).toBe("Scalekit");
+    expect(out.capabilities.action).toBeUndefined();
+    expect(out.capabilities.auth?.providerLabel).toBe("Scalekit");
   });
 });
 

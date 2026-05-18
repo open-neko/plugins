@@ -70,7 +70,7 @@ describe("plugin shape", () => {
   it("declares web_search and web_fetch actions", () => {
     expect(plugin.name).toBe("@open-neko/plugin-parallel-search");
     expect(plugin.version).toBe("0.2.0");
-    const kinds = plugin.actions?.map((a) => a.kind);
+    const kinds = plugin.capabilities.action?.kinds.map((a) => a.kind);
     expect(kinds).toEqual(["web_search", "web_fetch"]);
   });
 
@@ -83,10 +83,10 @@ describe("plugin shape", () => {
     if (!response.ok) return;
     const result = response.result as {
       protocol: number;
-      actions: Array<{ kind: string }>;
+      capabilities: { action?: { kinds: Array<{ kind: string }> } };
     };
     expect(result.protocol).toBe(RPC_PROTOCOL_VERSION);
-    expect(result.actions.map((a) => a.kind)).toEqual([
+    expect(result.capabilities.action?.kinds.map((a) => a.kind)).toEqual([
       "web_search",
       "web_fetch",
     ]);

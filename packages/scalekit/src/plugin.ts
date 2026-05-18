@@ -146,9 +146,11 @@ function collectGroups(info: ScalekitUserinfo): string[] {
 export default definePlugin({
   name: "@open-neko/plugin-scalekit",
   version: "0.1.0",
-  auth: {
-    providerLabel: "Scalekit",
-    begin: (params) => runBeginAuth(params),
-    complete: (params) => runCompleteAuth(params),
+  capabilities: {
+    auth: {
+      providerLabel: "Scalekit",
+      begin: (params) => runBeginAuth(params),
+      complete: (params) => runCompleteAuth(params),
+    },
   },
 });

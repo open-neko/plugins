@@ -240,30 +240,34 @@ async function handleLookup(
 export default definePlugin({
   name: "@open-neko/plugin-slack",
   version: "0.1.0",
-  actions: [
-    {
-      kind: "send_slack_message",
-      description:
-        "Post a message to a Slack channel. Payload: { channel, text, blocks?, thread_ts? }. channel is a channel id (preferred) or #name. Requires SLACK_BOT_TOKEN with chat:write.",
-      handler: handleSendMessage,
+  capabilities: {
+    action: {
+      kinds: [
+        {
+          kind: "send_slack_message",
+          description:
+            "Post a message to a Slack channel. Payload: { channel, text, blocks?, thread_ts? }. channel is a channel id (preferred) or #name. Requires SLACK_BOT_TOKEN with chat:write.",
+          handler: handleSendMessage,
+        },
+        {
+          kind: "send_slack_dm",
+          description:
+            "DM a user. Payload: { user, text, blocks? }. user is a user id (e.g. U123). Opens an IM channel via conversations.open then posts. Requires im:write + chat:write.",
+          handler: handleSendDm,
+        },
+        {
+          kind: "react_slack_message",
+          description:
+            "React to a message. Payload: { channel, timestamp, name }. name is the emoji shortcode without colons (e.g. 'thumbsup'). Requires reactions:write.",
+          handler: handleReact,
+        },
+        {
+          kind: "lookup_slack_entity",
+          description:
+            "Resolve a user email to id, or a channel name to id. Payload: { kind: 'user_by_email' | 'channel_by_name', value }. Returns id + name. Requires users:read.email and/or channels:read+groups:read.",
+          handler: handleLookup,
+        },
+      ],
     },
-    {
-      kind: "send_slack_dm",
-      description:
-        "DM a user. Payload: { user, text, blocks? }. user is a user id (e.g. U123). Opens an IM channel via conversations.open then posts. Requires im:write + chat:write.",
-      handler: handleSendDm,
-    },
-    {
-      kind: "react_slack_message",
-      description:
-        "React to a message. Payload: { channel, timestamp, name }. name is the emoji shortcode without colons (e.g. 'thumbsup'). Requires reactions:write.",
-      handler: handleReact,
-    },
-    {
-      kind: "lookup_slack_entity",
-      description:
-        "Resolve a user email to id, or a channel name to id. Payload: { kind: 'user_by_email' | 'channel_by_name', value }. Returns id + name. Requires users:read.email and/or channels:read+groups:read.",
-      handler: handleLookup,
-    },
-  ],
+  },
 });

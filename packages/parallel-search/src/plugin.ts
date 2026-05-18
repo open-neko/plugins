@@ -149,22 +149,26 @@ async function handleWebFetch(
 export default definePlugin({
   name: "@open-neko/plugin-parallel-search",
   version: "0.2.0",
-  actions: [
-    {
-      kind: "web_search",
-      description:
-        "Search the web via Parallel.ai's Search MCP. Payload: " +
-        "{ query: string, api_key?: string, mcp_url?: string }. " +
-        "Returns concatenated excerpts as `text` (~25KB cap from upstream).",
-      handler: handleWebSearch,
+  capabilities: {
+    action: {
+      kinds: [
+        {
+          kind: "web_search",
+          description:
+            "Search the web via Parallel.ai's Search MCP. Payload: " +
+            "{ query: string, api_key?: string, mcp_url?: string }. " +
+            "Returns concatenated excerpts as `text` (~25KB cap from upstream).",
+          handler: handleWebSearch,
+        },
+        {
+          kind: "web_fetch",
+          description:
+            "Fetch markdown for a single URL via Parallel.ai's Search MCP. Payload: " +
+            "{ url: string, api_key?: string, mcp_url?: string }. " +
+            "Returns the fetched markdown as `text`.",
+          handler: handleWebFetch,
+        },
+      ],
     },
-    {
-      kind: "web_fetch",
-      description:
-        "Fetch markdown for a single URL via Parallel.ai's Search MCP. Payload: " +
-        "{ url: string, api_key?: string, mcp_url?: string }. " +
-        "Returns the fetched markdown as `text`.",
-      handler: handleWebFetch,
-    },
-  ],
+  },
 });

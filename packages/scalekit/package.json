@@ -12,29 +12,34 @@
   "files": ["dist", "README.md"],
   "openneko": {
     "runner": "./dist/run.js",
-    "kinds": [],
-    "provides_auth": true,
-    "requires_network": ["*.scalekit.com"],
-    "requires_env": [
-      {
-        "key": "SCALEKIT_ENVIRONMENT_URL",
-        "required": true,
-        "secret": false,
-        "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
-      },
-      {
-        "key": "SCALEKIT_CLIENT_ID",
-        "required": true,
-        "secret": false,
-        "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
-      },
-      {
-        "key": "SCALEKIT_CLIENT_SECRET",
-        "required": true,
-        "secret": true,
-        "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+    "permissions": {
+      "network": ["*.scalekit.com"],
+      "env": [
+        {
+          "key": "SCALEKIT_ENVIRONMENT_URL",
+          "required": true,
+          "secret": false,
+          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+        },
+        {
+          "key": "SCALEKIT_CLIENT_ID",
+          "required": true,
+          "secret": false,
+          "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+        },
+        {
+          "key": "SCALEKIT_CLIENT_SECRET",
+          "required": true,
+          "secret": true,
+          "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+        }
+      ]
+    },
+    "capabilities": {
+      "auth": {
+        "providerLabel": "Scalekit"
       }
-    ]
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",

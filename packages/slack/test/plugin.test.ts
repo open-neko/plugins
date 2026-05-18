@@ -52,7 +52,7 @@ describe("plugin shape", () => {
   it("declares all four Slack actions", () => {
     expect(plugin.name).toBe("@open-neko/plugin-slack");
     expect(plugin.version).toBe("0.1.0");
-    expect(plugin.actions?.map((a) => a.kind)).toEqual([
+    expect(plugin.capabilities.action?.kinds.map((a) => a.kind)).toEqual([
       "send_slack_message",
       "send_slack_dm",
       "react_slack_message",
@@ -67,9 +67,12 @@ describe("plugin shape", () => {
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const out = r.result as { protocol: number; actions: Array<{ kind: string }> };
+    const out = r.result as {
+      protocol: number;
+      capabilities: { action?: { kinds: Array<{ kind: string }> } };
+    };
     expect(out.protocol).toBe(RPC_PROTOCOL_VERSION);
-    expect(out.actions).toHaveLength(4);
+    expect(out.capabilities.action?.kinds).toHaveLength(4);
   });
 });
 
