@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://open-neko.github.io/plugins/marketplace.schema.json",
   "title": "OpenNeko plugin marketplace",
-  "description": "Single-file catalog of plugins, modeled on Claude Code's marketplace.json plus the security fields the OpenNeko CLI enforces (integrity, requires_network, kinds). Publish your own marketplace.json at a stable URL and operators can trust it with `openneko marketplace add <url>`.",
+  "description": "Single-file catalog of plugins, modeled on Claude Code's marketplace.json plus the security fields the OpenNeko CLI enforces (integrity, permissions, capabilities). Publish your own marketplace.json at a stable URL and operators can trust it with `openneko marketplace add <url>`.",
   "type": "object",
   "required": ["name", "owner", "description", "plugins"],
   "additionalProperties": true,
@@ -71,7 +71,7 @@
     },
     "version": {
       "type": "object",
-      "required": ["version", "integrity", "kinds", "publishedAt"],
+      "required": ["version", "integrity", "permissions", "capabilities", "publishedAt"],
       "additionalProperties": false,
       "properties": {
         "version": {
@@ -83,57 +83,121 @@
           "type": "string",
           "pattern": "^sha512-[A-Za-z0-9+/=]+$"
         },
-        "requires_network": {
+        "permissions": { "$ref": "#/$defs/permissions" },
+        "capabilities": { "$ref": "#/$defs/capabilities" },
+        "publishedAt": { "type": "string", "format": "date" },
+        "yanked": { "type": "boolean", "default": false },
+        "yanked_reason": { "type": "string" }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "What the plugin needs from the runtime: outbound network hosts and operator-supplied env vars. Same shape lives in the installed manifest entry.",
+      "additionalProperties": false,
+      "properties": {
+        "network": {
           "type": "array",
+          "default": [],
           "items": {
             "type": "string",
             "pattern": "^[a-z0-9*]([a-z0-9-.*])*[a-z0-9*]$"
           },
-          "default": []
+          "description": "Hostnames the sandbox is allowed to reach. Enforced at the VM boundary."
         },
-        "requires_env": {
-          "description": "Env vars the plugin needs at runtime. The openneko CLI prompts the operator for required ones during install and stores them in the per-user secrets file. The worker injects values into the plugin's microVM at exec time.",
+        "env": {
           "type": "array",
           "default": [],
-          "items": {
-            "type": "object",
-            "required": ["key", "description"],
-            "additionalProperties": false,
-            "properties": {
-              "key": {
-                "type": "string",
-                "pattern": "^[A-Z][A-Z0-9_]*$",
-                "maxLength": 64,
-                "description": "UPPER_SNAKE_CASE env var name the plugin reads."
-              },
-              "required": {
-                "type": "boolean",
-                "default": true
-              },
-              "secret": {
-                "type": "boolean",
-                "default": true,
-                "description": "Hide the value at prompt; the CLI will not echo it back."
-              },
-              "description": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 280
-              }
+          "items": { "$ref": "#/$defs/envRequirement" },
+          "description": "Env vars the operator must supply. `openneko install` prompts for required ones and refuses to complete if missing."
+        }
+      }
+    },
+    "envRequirement": {
+      "type": "object",
+      "required": ["key", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64,
+          "description": "UPPER_SNAKE_CASE env var name the plugin reads."
+        },
+        "required": { "type": "boolean", "default": true },
+        "secret": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide the value at prompt; the CLI will not echo it back."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Surfaces this plugin contributes. The keyset declares what the plugin does — `action` and/or `auth`. At least one must be present.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "action": {
+          "type": "object",
+          "description": "The plugin contributes one or more named action handlers.",
+          "required": ["kinds"],
+          "additionalProperties": false,
+          "properties": {
+            "kinds": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/actionDeclaration" }
             }
           }
         },
-        "kinds": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
+        "auth": {
+          "type": "object",
+          "description": "The plugin acts as the SSO provider. Singleton — only one installed plugin may declare this.",
+          "additionalProperties": false,
+          "properties": {
+            "providerLabel": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Short label rendered on the sign-in button (e.g. \"Scalekit\", \"Okta\")."
+            }
           }
+        }
+      }
+    },
+    "actionDeclaration": {
+      "type": "object",
+      "required": ["kind", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Snake_case action identifier."
         },
-        "publishedAt": { "type": "string", "format": "date" },
-        "yanked": { "type": "boolean", "default": false },
-        "yanked_reason": { "type": "string" }
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short description the agent uses to pick this kind."
+        },
+        "default_mode": {
+          "description": "Seeded approval policy when the plugin is freshly installed. auto = run inline with no human gate (read-only kinds). ask = suspend agent turn, render approval card to the user (externally observable kinds). deny = never invokable without explicit opt-in. Operators can override later in /settings/rules. Defaults to ask when omitted — safer to surprise the user with a prompt than a side effect. Accepts either a scalar (applies to all scopes) or a per-scope object {external?, internal?} when the kind needs different defaults depending on the scope it's invoked under.",
+          "oneOf": [
+            { "type": "string", "enum": ["auto", "ask", "deny"] },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "external": { "type": "string", "enum": ["auto", "ask", "deny"] },
+                "internal": { "type": "string", "enum": ["auto", "ask", "deny"] }
+              }
+            }
+          ]
+        }
       }
     }
   }

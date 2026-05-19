@@ -71,6 +71,15 @@ export async function validateMarketplace({ root = DEFAULT_ROOT, live = false } 
         failures.push(`${plugin.name}: duplicate version ${v.version}`);
       }
       versionSet.add(v.version);
+      // The JSON schema enforces capabilities.minProperties >= 1 already;
+      // this guard catches the case where the schema later gets loosened
+      // and gives a clearer error than a raw schema diagnostic.
+      const caps = v.capabilities ?? {};
+      if (!caps.action && !caps.auth) {
+        failures.push(
+          `${plugin.name}@${v.version}: capabilities must declare at least one surface (action, auth)`,
+        );
+      }
     }
     if (live) {
       for (const v of plugin.versions) {
@@ -121,17 +130,17 @@ async function checkLive(packageName, versionEntry) {
     );
   }
   const meta = info.openneko ?? {};
-  if (!Array.isArray(meta.requires_network)) {
+  const npmNetwork = meta.permissions?.network;
+  if (!Array.isArray(npmNetwork)) {
     errors.push(
-      'package.json must declare openneko.requires_network (array of hosts)',
+      'package.json must declare openneko.permissions.network (array of hosts)',
     );
   } else {
-    const declaredHosts = new Set(versionEntry.requires_network ?? []);
-    const npmHosts = new Set(meta.requires_network);
-    for (const h of npmHosts) {
+    const declaredHosts = new Set(versionEntry.permissions?.network ?? []);
+    for (const h of new Set(npmNetwork)) {
       if (!declaredHosts.has(h)) {
         errors.push(
-          `package.json declares network host "${h}" not present in marketplace entry`,
+          `package.json declares network host "${h}" not present in marketplace entry's permissions.network`,
         );
       }
     }

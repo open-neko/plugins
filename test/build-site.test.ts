@@ -63,18 +63,13 @@ describe("build-site", () => {
     expect(html).toContain("prompts at install for:");
     expect(html).toContain("SLACK_BOT_TOKEN");
     // parallel-search has no requires_env, so its card must not have the row.
-    // Slice the parallel-search card (between its name and the next plugin's name).
-    const slackPos = html.indexOf("@open-neko/plugin-slack");
+    // Slice from its name to the next `</article>` so we only inspect
+    // its own card — robust to other plugins being added before or after.
     const parallelPos = html.indexOf("@open-neko/plugin-parallel-search");
-    expect(slackPos).toBeGreaterThan(0);
     expect(parallelPos).toBeGreaterThan(0);
-    // parallel card is whichever comes first to the other one's start.
-    const earlier = Math.min(slackPos, parallelPos);
-    const later = Math.max(slackPos, parallelPos);
-    const parallelCard =
-      parallelPos === earlier
-        ? html.slice(parallelPos, later)
-        : html.slice(parallelPos);
+    const parallelCardEnd = html.indexOf("</article>", parallelPos);
+    expect(parallelCardEnd).toBeGreaterThan(parallelPos);
+    const parallelCard = html.slice(parallelPos, parallelCardEnd);
     expect(parallelCard).not.toContain("plugin-env-row");
   });
 });

@@ -18,9 +18,72 @@
         {
           "version": "0.2.0",
           "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
-          "requires_network": ["search.parallel.ai"],
-          "kinds": ["web_search", "web_fetch"],
+          "permissions": {
+            "network": ["search.parallel.ai"],
+            "env": []
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "web_search",
+                  "description": "Search the web via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "web_fetch",
+                  "description": "Fetch a single page via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
           "publishedAt": "2026-05-17"
+        }
+      ]
+    },
+    {
+      "name": "@open-neko/plugin-scalekit",
+      "title": "Scalekit SSO",
+      "description": "Enterprise SSO via Scalekit. One integration that fronts Okta, Entra ID, Google Workspace, JumpCloud, and other identity providers. Implements OpenNeko's generic OIDC auth contract — install this plugin and the 'Sign in with Scalekit' button lights up in the web app.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/scalekit",
+      "homepage": "https://docs.scalekit.com/sso/quickstart",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "permissions": {
+            "network": ["*.scalekit.com"],
+            "env": [
+              {
+                "key": "SCALEKIT_ENVIRONMENT_URL",
+                "required": true,
+                "secret": false,
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_ID",
+                "required": true,
+                "secret": false,
+                "description": "OAuth client_id from the Scalekit dashboard."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file."
+              }
+            ]
+          },
+          "capabilities": {
+            "auth": {
+              "providerLabel": "Scalekit"
+            }
+          },
+          "publishedAt": "2026-05-18"
         }
       ]
     },
@@ -37,21 +100,43 @@
         {
           "version": "0.1.0",
           "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
-          "requires_network": ["slack.com"],
-          "requires_env": [
-            {
-              "key": "SLACK_BOT_TOKEN",
-              "required": true,
-              "secret": true,
-              "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write, reactions:write, users:read, users:read.email, channels:read, groups:read (depending on which actions you'll allow)."
+          "permissions": {
+            "network": ["slack.com"],
+            "env": [
+              {
+                "key": "SLACK_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write, reactions:write, users:read, users:read.email, channels:read, groups:read (depending on which actions you'll allow)."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_slack_message",
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "ask"
+                },
+                {
+                  "kind": "send_slack_dm",
+                  "description": "Send a direct message to a Slack user.",
+                  "default_mode": "ask"
+                },
+                {
+                  "kind": "react_slack_message",
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "ask"
+                },
+                {
+                  "kind": "lookup_slack_entity",
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
+                }
+              ]
             }
-          ],
-          "kinds": [
-            "send_slack_message",
-            "send_slack_dm",
-            "react_slack_message",
-            "lookup_slack_entity"
-          ],
+          },
           "publishedAt": "2026-05-17"
         }
       ]

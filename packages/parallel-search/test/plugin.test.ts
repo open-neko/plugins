@@ -70,7 +70,7 @@ describe("plugin shape", () => {
   it("declares web_search and web_fetch actions", () => {
     expect(plugin.name).toBe("@open-neko/plugin-parallel-search");
     expect(plugin.version).toBe("0.2.0");
-    const kinds = plugin.actions?.map((a) => a.kind);
+    const kinds = plugin.capabilities.action?.kinds.map((a) => a.kind);
     expect(kinds).toEqual(["web_search", "web_fetch"]);
   });
 
@@ -83,10 +83,10 @@ describe("plugin shape", () => {
     if (!response.ok) return;
     const result = response.result as {
       protocol: number;
-      actions: Array<{ kind: string }>;
+      capabilities: { action?: { kinds: Array<{ kind: string }> } };
     };
     expect(result.protocol).toBe(RPC_PROTOCOL_VERSION);
-    expect(result.actions.map((a) => a.kind)).toEqual([
+    expect(result.capabilities.action?.kinds.map((a) => a.kind)).toEqual([
       "web_search",
       "web_fetch",
     ]);
@@ -94,7 +94,7 @@ describe("plugin shape", () => {
 });
 
 describe("runWebSearch", () => {
-  it("calls the MCP web_search tool with { query } and returns the joined text", async () => {
+  it("calls the MCP web_search tool with objective + search_queries and returns the joined text", async () => {
     const fake = makeFakeClientFactory(textResult("hit-a\nhit-b"));
     const out = await runWebSearch(
       { query: "openneko" },
@@ -102,7 +102,10 @@ describe("runWebSearch", () => {
     );
     expect(out.text).toBe("hit-a\nhit-b");
     expect(fake.calls).toEqual([
-      { name: "web_search", args: { query: "openneko" } },
+      {
+        name: "web_search",
+        args: { objective: "openneko", search_queries: ["openneko"] },
+      },
     ]);
     expect(fake.closes).toBe(1);
   });

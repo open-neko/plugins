@@ -12,8 +12,26 @@
   "files": ["dist", "README.md"],
   "openneko": {
     "runner": "./dist/run.js",
-    "kinds": ["web_search", "web_fetch"],
-    "requires_network": ["search.parallel.ai"]
+    "permissions": {
+      "network": ["search.parallel.ai"],
+      "env": []
+    },
+    "capabilities": {
+      "action": {
+        "kinds": [
+          {
+            "kind": "web_search",
+            "description": "Search the web via Parallel.ai's Search MCP.",
+            "default_mode": "auto"
+          },
+          {
+            "kind": "web_fetch",
+            "description": "Fetch a single page via Parallel.ai's Search MCP.",
+            "default_mode": "auto"
+          }
+        ]
+      }
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",

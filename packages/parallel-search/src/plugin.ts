@@ -94,7 +94,15 @@ export async function runWebSearch(
   const url = resolveUrl(payload.mcp_url);
   const apiKey = resolveApiKey(payload.api_key);
   return withClient(url, apiKey, options, async (client) => {
-    const result = await client.callTool("web_search", { query: payload.query });
+    // Parallel.ai's web_search tool expects an `objective` (the natural-
+    // language goal of the search) and `search_queries` (string[] of
+    // search terms to issue). The simplest mapping for callers who only
+    // give us a query is to use it as both — the objective AND the
+    // single search query.
+    const result = await client.callTool("web_search", {
+      objective: payload.query,
+      search_queries: [payload.query],
+    });
     return { text: unwrap(result, "web_search") };
   });
 }
@@ -149,22 +157,28 @@ async function handleWebFetch(
 export default definePlugin({
   name: "@open-neko/plugin-parallel-search",
   version: "0.2.0",
-  actions: [
-    {
-      kind: "web_search",
-      description:
-        "Search the web via Parallel.ai's Search MCP. Payload: " +
-        "{ query: string, api_key?: string, mcp_url?: string }. " +
-        "Returns concatenated excerpts as `text` (~25KB cap from upstream).",
-      handler: handleWebSearch,
+  capabilities: {
+    action: {
+      kinds: [
+        {
+          kind: "web_search",
+          description:
+            "Search the web via Parallel.ai's Search MCP. Payload: " +
+            "{ query: string, api_key?: string, mcp_url?: string }. " +
+            "Returns concatenated excerpts as `text` (~25KB cap from upstream).",
+          default_mode: "auto",
+          handler: handleWebSearch,
+        },
+        {
+          kind: "web_fetch",
+          description:
+            "Fetch markdown for a single URL via Parallel.ai's Search MCP. Payload: " +
+            "{ url: string, api_key?: string, mcp_url?: string }. " +
+            "Returns the fetched markdown as `text`.",
+          default_mode: "auto",
+          handler: handleWebFetch,
+        },
+      ],
     },
-    {
-      kind: "web_fetch",
-      description:
-        "Fetch markdown for a single URL via Parallel.ai's Search MCP. Payload: " +
-        "{ url: string, api_key?: string, mcp_url?: string }. " +
-        "Returns the fetched markdown as `text`.",
-      handler: handleWebFetch,
-    },
-  ],
+  },
 });

@@ -1,0 +1,59 @@
+{
+  "name": "@open-neko/plugin-scalekit",
+  "version": "0.1.0",
+  "description": "Scalekit SSO provider for OpenNeko. Implements OpenNeko's generic OIDC auth contract over Scalekit's hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, and other enterprise IdPs behind one integration. Runs in a microsandbox VM with network egress limited to *.scalekit.com.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/scalekit"
+  },
+  "type": "module",
+  "files": ["dist", "README.md"],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "permissions": {
+      "network": ["*.scalekit.com"],
+      "env": [
+        {
+          "key": "SCALEKIT_ENVIRONMENT_URL",
+          "required": true,
+          "secret": false,
+          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+        },
+        {
+          "key": "SCALEKIT_CLIENT_ID",
+          "required": true,
+          "secret": false,
+          "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+        },
+        {
+          "key": "SCALEKIT_CLIENT_SECRET",
+          "required": true,
+          "secret": true,
+          "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+        }
+      ]
+    },
+    "capabilities": {
+      "auth": {
+        "providerLabel": "Scalekit"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

@@ -41,17 +41,26 @@ function pickLatest(versions) {
 
 function renderPluginCard(plugin, index) {
   const latest = pickLatest(plugin.versions);
-  const hosts = latest.requires_network ?? [];
+  const permissions = latest.permissions ?? { network: [], env: [] };
+  const capabilities = latest.capabilities ?? {};
+  const hosts = permissions.network ?? [];
   const networkChips =
     hosts.length === 0
       ? '<span class="chip chip-network empty">no network</span>'
       : hosts
           .map((h) => `<span class="chip chip-network">${escape(h)}</span>`)
           .join("");
-  const kindChips = (latest.kinds ?? [])
-    .map((k) => `<span class="chip chip-kind">${escape(k)}</span>`)
+  const actionKinds = capabilities.action?.kinds ?? [];
+  const kindChips = actionKinds
+    .map(
+      (k) =>
+        `<span class="chip chip-kind" title="${escape(k.description ?? "")}">${escape(k.kind)}</span>`,
+    )
     .join("");
-  const envRequirements = latest.requires_env ?? [];
+  const authChip = capabilities.auth
+    ? `<span class="chip chip-kind" title="Implements the OpenNeko SSO contract">SSO provider${capabilities.auth.providerLabel ? `: ${escape(capabilities.auth.providerLabel)}` : ""}</span>`
+    : "";
+  const envRequirements = permissions.env ?? [];
   const envChips = envRequirements
     .map((r) => {
       const icon = r.secret === false ? "" : "🔒 ";
@@ -76,7 +85,7 @@ function renderPluginCard(plugin, index) {
             </div>
           </header>
           <p class="plugin-desc">${escape(plugin.description)}</p>
-          <div class="plugin-chips">${kindChips}${networkChips}</div>
+          <div class="plugin-chips">${authChip}${kindChips}${networkChips}</div>
           ${envRow}
           <div class="plugin-install">
             <code>openneko install ${escape(plugin.name)}</code>

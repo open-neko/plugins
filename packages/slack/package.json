@@ -12,21 +12,27 @@
   "files": ["dist", "README.md"],
   "openneko": {
     "runner": "./dist/run.js",
-    "kinds": [
-      "send_slack_message",
-      "send_slack_dm",
-      "react_slack_message",
-      "lookup_slack_entity"
-    ],
-    "requires_network": ["slack.com"],
-    "requires_env": [
-      {
-        "key": "SLACK_BOT_TOKEN",
-        "required": true,
-        "secret": true,
-        "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+    "permissions": {
+      "network": ["slack.com"],
+      "env": [
+        {
+          "key": "SLACK_BOT_TOKEN",
+          "required": true,
+          "secret": true,
+          "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+        }
+      ]
+    },
+    "capabilities": {
+      "action": {
+        "kinds": [
+          { "kind": "send_slack_message", "description": "Post a message to a Slack channel.", "default_mode": "ask" },
+          { "kind": "send_slack_dm", "description": "Send a direct message to a Slack user.", "default_mode": "ask" },
+          { "kind": "react_slack_message", "description": "Add an emoji reaction to a Slack message.", "default_mode": "ask" },
+          { "kind": "lookup_slack_entity", "description": "Look up a Slack user or channel by name or ID.", "default_mode": "auto" }
+        ]
       }
-    ]
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
