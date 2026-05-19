@@ -185,9 +185,18 @@
           "description": "Short description the agent uses to pick this kind."
         },
         "default_mode": {
-          "type": "string",
-          "enum": ["auto", "ask", "deny"],
-          "description": "Seeded approval policy when the plugin is freshly installed. auto = run inline with no human gate (read-only kinds). ask = suspend agent turn, render approval card to the user (externally observable kinds). deny = never invokable without explicit opt-in. Operators can override later in /settings/rules. Defaults to ask when omitted — safer to surprise the user with a prompt than a side effect."
+          "description": "Seeded approval policy when the plugin is freshly installed. auto = run inline with no human gate (read-only kinds). ask = suspend agent turn, render approval card to the user (externally observable kinds). deny = never invokable without explicit opt-in. Operators can override later in /settings/rules. Defaults to ask when omitted — safer to surprise the user with a prompt than a side effect. Accepts either a scalar (applies to all scopes) or a per-scope object {external?, internal?} when the kind needs different defaults depending on the scope it's invoked under.",
+          "oneOf": [
+            { "type": "string", "enum": ["auto", "ask", "deny"] },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "external": { "type": "string", "enum": ["auto", "ask", "deny"] },
+                "internal": { "type": "string", "enum": ["auto", "ask", "deny"] }
+              }
+            }
+          ]
         }
       }
     }
