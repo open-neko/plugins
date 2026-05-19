@@ -94,7 +94,15 @@ export async function runWebSearch(
   const url = resolveUrl(payload.mcp_url);
   const apiKey = resolveApiKey(payload.api_key);
   return withClient(url, apiKey, options, async (client) => {
-    const result = await client.callTool("web_search", { query: payload.query });
+    // Parallel.ai's web_search tool expects an `objective` (the natural-
+    // language goal of the search) and `search_queries` (string[] of
+    // search terms to issue). The simplest mapping for callers who only
+    // give us a query is to use it as both — the objective AND the
+    // single search query.
+    const result = await client.callTool("web_search", {
+      objective: payload.query,
+      search_queries: [payload.query],
+    });
     return { text: unwrap(result, "web_search") };
   });
 }
