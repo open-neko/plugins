@@ -27,11 +27,13 @@
               "kinds": [
                 {
                   "kind": "web_search",
-                  "description": "Search the web via Parallel.ai's Search MCP."
+                  "description": "Search the web via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
                 },
                 {
                   "kind": "web_fetch",
-                  "description": "Fetch a single page via Parallel.ai's Search MCP."
+                  "description": "Fetch a single page via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
                 }
               ]
             }
@@ -114,19 +116,23 @@
               "kinds": [
                 {
                   "kind": "send_slack_message",
-                  "description": "Post a message to a Slack channel."
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "ask"
                 },
                 {
                   "kind": "send_slack_dm",
-                  "description": "Send a direct message to a Slack user."
+                  "description": "Send a direct message to a Slack user.",
+                  "default_mode": "ask"
                 },
                 {
                   "kind": "react_slack_message",
-                  "description": "Add an emoji reaction to a Slack message."
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "ask"
                 },
                 {
                   "kind": "lookup_slack_entity",
-                  "description": "Look up a Slack user or channel by name or ID."
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
                 }
               ]
             }

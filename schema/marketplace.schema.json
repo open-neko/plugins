@@ -183,6 +183,11 @@
           "type": "string",
           "minLength": 1,
           "description": "Short description the agent uses to pick this kind."
+        },
+        "default_mode": {
+          "type": "string",
+          "enum": ["auto", "ask", "deny"],
+          "description": "Seeded approval policy when the plugin is freshly installed. auto = run inline with no human gate (read-only kinds). ask = suspend agent turn, render approval card to the user (externally observable kinds). deny = never invokable without explicit opt-in. Operators can override later in /settings/rules. Defaults to ask when omitted — safer to surprise the user with a prompt than a side effect."
         }
       }
     }

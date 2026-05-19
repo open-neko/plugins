@@ -26,10 +26,10 @@
     "capabilities": {
       "action": {
         "kinds": [
-          { "kind": "send_slack_message", "description": "Post a message to a Slack channel." },
-          { "kind": "send_slack_dm", "description": "Send a direct message to a Slack user." },
-          { "kind": "react_slack_message", "description": "Add an emoji reaction to a Slack message." },
-          { "kind": "lookup_slack_entity", "description": "Look up a Slack user or channel by name or ID." }
+          { "kind": "send_slack_message", "description": "Post a message to a Slack channel.", "default_mode": "ask" },
+          { "kind": "send_slack_dm", "description": "Send a direct message to a Slack user.", "default_mode": "ask" },
+          { "kind": "react_slack_message", "description": "Add an emoji reaction to a Slack message.", "default_mode": "ask" },
+          { "kind": "lookup_slack_entity", "description": "Look up a Slack user or channel by name or ID.", "default_mode": "auto" }
         ]
       }
     }

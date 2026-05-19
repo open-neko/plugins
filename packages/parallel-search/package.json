@@ -21,11 +21,13 @@
         "kinds": [
           {
             "kind": "web_search",
-            "description": "Search the web via Parallel.ai's Search MCP."
+            "description": "Search the web via Parallel.ai's Search MCP.",
+            "default_mode": "auto"
           },
           {
             "kind": "web_fetch",
-            "description": "Fetch a single page via Parallel.ai's Search MCP."
+            "description": "Fetch a single page via Parallel.ai's Search MCP.",
+            "default_mode": "auto"
           }
         ]
       }
