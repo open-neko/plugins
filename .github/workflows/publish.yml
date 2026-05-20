@@ -1,0 +1,60 @@
+name: publish
+
+# Publish every @open-neko/* plugin whose version on npm doesn't already
+# match the version in package.json. Triggered by:
+#   - any tag push matching v*  (e.g. release-please cuts v1.0.0)
+#   - manual dispatch for re-runs after fixing a publish failure
+#
+# `pnpm -r publish` walks packages in topological order so plugin-types
+# publishes before parallel-search/slack/scalekit (which depend on it
+# via workspace:*), converts the workspace:* range to the matching
+# version on the fly, and skips packages whose version is already on
+# the registry — so re-runs are safe.
+#
+# NPM_TOKEN must be an *automation* token (npmjs.com → Account → Access
+# Tokens → Generate New → Automation), 2FA-bypass-capable. id-token
+# write enables npm provenance attestation.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm -r build
+
+      - name: Verify each package is publishable
+        run: |
+          set -euo pipefail
+          for pkg in packages/*/; do
+            name=$(node -p "require('./$pkg/package.json').name")
+            version=$(node -p "require('./$pkg/package.json').version")
+            private=$(node -p "require('./$pkg/package.json').private || false")
+            echo "[publish] $name@$version private=$private"
+          done
+
+      - name: pnpm publish
+        run: pnpm -r publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
