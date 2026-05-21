@@ -17,7 +17,8 @@
       "versions": [
         {
           "version": "0.2.0",
-          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "integrity": "sha512-gX6PcjZvyl2ggW1HLy0v9KANPHoBi96DhsBVzDmY4v2nDiQHjufDacazwaHi+OInT8+wz+Hf+gqSZETLDse79A==",
+          "provenanceWaived": true,
           "permissions": {
             "network": ["search.parallel.ai"],
             "env": []
@@ -54,7 +55,8 @@
       "versions": [
         {
           "version": "0.1.0",
-          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "integrity": "sha512-XTDCF4qaMptWHrD4d0ojd+gs5fb7q3GHe0Qhi4dBzGwerZilQDBGorUVGy4TRiFVTo/s7Rbx6lzD8LbXNV5RMA==",
+          "provenanceWaived": true,
           "permissions": {
             "network": ["*.scalekit.com"],
             "env": [
@@ -100,6 +102,7 @@
         {
           "version": "0.1.0",
           "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "draft": true,
           "permissions": {
             "network": [
               "accounts.google.com",
@@ -174,6 +177,7 @@
         {
           "version": "0.1.0",
           "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "draft": true,
           "permissions": {
             "network": ["*.myshopify.com"],
             "env": [
@@ -234,7 +238,8 @@
       "versions": [
         {
           "version": "0.1.0",
-          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "integrity": "sha512-+H6gDUp8vNfs5pVvffnEByN5ZDt9c5HiYGF1uQ2Hq5b6NZYNn7DHlQtMMAXXv1BOKuiHnCPBmYyL5+ltrMa8rQ==",
+          "provenanceWaived": true,
           "permissions": {
             "network": ["slack.com"],
             "env": [

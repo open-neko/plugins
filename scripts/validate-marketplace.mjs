@@ -84,6 +84,15 @@ export async function validateMarketplace({ root = DEFAULT_ROOT, live = false } 
     if (live) {
       for (const v of plugin.versions) {
         if (v.yanked) continue;
+        if (v.draft) {
+          // Draft versions aren't on npm yet — every live check would
+          // 404. Surface as informational (stderr warn) so the CI log
+          // reflects the deferred state without failing the gate.
+          warn(
+            `${plugin.name}@${v.version}: marked draft — skipping live checks. Flip draft:false + pin real integrity after publish.`,
+          );
+          continue;
+        }
         const liveErrors = await checkLive(plugin.name, v);
         for (const e of liveErrors) failures.push(`${plugin.name}@${v.version}: ${e}`);
       }
@@ -91,6 +100,12 @@ export async function validateMarketplace({ root = DEFAULT_ROOT, live = false } 
   }
 
   return { failures, live, pluginCount: marketplace.plugins.length };
+}
+
+function warn(message) {
+  // Stderr so test runners can capture; the validator's success/fail
+  // exit code is unaffected.
+  process.stderr.write(`marketplace: WARN ${message}\n`);
 }
 
 async function checkLive(packageName, versionEntry) {
@@ -125,9 +140,17 @@ async function checkLive(packageName, versionEntry) {
     }
   }
   if (!hasProvenanceAttestation(info)) {
-    errors.push(
-      "no npm provenance attestation on this version (publish with --provenance)",
-    );
+    if (versionEntry.provenanceWaived) {
+      // Legacy publish: explicitly grandfathered. Surface as a warning
+      // so operators reading the log know this version is opted out.
+      warn(
+        `${packageName}@${versionEntry.version}: provenanceWaived=true — no attestation on npm; integrity still enforced.`,
+      );
+    } else {
+      errors.push(
+        "no npm provenance attestation on this version (publish with --provenance, or set provenanceWaived:true for grandfathered legacy entries)",
+      );
+    }
   }
   const meta = info.openneko ?? {};
   const npmNetwork = meta.permissions?.network;

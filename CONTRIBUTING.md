@@ -111,3 +111,54 @@ Live (PRs only — pulls from npm):
 - The published version has npm provenance attestation
 - The published `package.json` has no forbidden lifecycle scripts
 - The published `package.json` declares the same `requires_network` hosts as the marketplace entry
+
+## Two escape hatches: `draft` and `provenanceWaived`
+
+Real life is messier than the strict CI gate. Two per-version flags let
+the marketplace honestly represent the in-flight state without
+permanently weakening the floor.
+
+### `draft: true` — first publish hasn't fired yet
+
+Use when you're adding a brand-new package whose first npm publish
+hasn't happened. Common chicken-and-egg case: the publish workflow
+fires off a `v*` tag push, but the marketplace.json entry has to land
+first so the tag has something to publish from. Without the flag, the
+PR fails `validate-live` (npm 404s on the version that doesn't exist
+yet).
+
+```json
+{
+  "version": "0.1.0",
+  "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+  "draft": true,
+  "permissions": { "...": "..." },
+  "capabilities": { "...": "..." },
+  "publishedAt": "2026-05-21"
+}
+```
+
+The validator skips every live check for a draft entry and emits a
+warning. Flip `draft: false` and pin the real integrity hash in a
+follow-up PR once the publish has landed on npm.
+
+### `provenanceWaived: true` — legacy publish without `--provenance`
+
+Use for already-published versions that were pushed before the publish
+workflow started using `--provenance`. The validator still enforces
+integrity matches the npm tarball; it just skips the provenance
+attestation check and emits a warning. Don't use on new versions —
+bump and re-publish with provenance instead.
+
+```json
+{
+  "version": "0.1.0",
+  "integrity": "sha512-<real-hash-from-npm>",
+  "provenanceWaived": true,
+  "...": "..."
+}
+```
+
+Both flags are intentionally noisy on the CI log: warnings name the
+entry so a reviewer can ask "is this still the right state?" each
+time the validator runs.
