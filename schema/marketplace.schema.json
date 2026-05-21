@@ -138,7 +138,7 @@
     },
     "capabilities": {
       "type": "object",
-      "description": "Surfaces this plugin contributes. The keyset declares what the plugin does — `action` and/or `auth`. At least one must be present.",
+      "description": "Surfaces this plugin contributes. The keyset declares what the plugin does — `action`, `auth`, and/or `connect`. At least one must be present.",
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -164,6 +164,31 @@
               "type": "string",
               "minLength": 1,
               "description": "Short label rendered on the sign-in button (e.g. \"Scalekit\", \"Okta\")."
+            }
+          }
+        },
+        "connect": {
+          "type": "object",
+          "description": "The plugin offers a per-operator OAuth connector. Non-singleton — any number of installed plugins may declare this, and each operator connects independently. Credentials land in the per-operator section of the secrets store.",
+          "required": ["providerLabel", "scopes"],
+          "additionalProperties": false,
+          "properties": {
+            "providerLabel": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Display label shown on the Connect button + status row (e.g. \"Google Workspace\", \"GitHub\")."
+            },
+            "scopes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "description": "OAuth scopes the connector will request at consent time."
+            },
+            "flow": {
+              "type": "string",
+              "enum": ["oauth2-pkce"],
+              "default": "oauth2-pkce",
+              "description": "Flow type the worker should drive. v1 supports oauth2-pkce only."
             }
           }
         }
