@@ -162,6 +162,67 @@
       ]
     },
     {
+      "name": "@open-neko/plugin-shopify",
+      "title": "Shopify Admin connector",
+      "description": "Per-deployment Shopify Admin API connector — list orders, fetch order detail, update internal order notes. Bound to one *.myshopify.com store via a deployment-wide Admin API access token. Three actions: list_shopify_orders, get_shopify_order, update_shopify_order_note.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/shopify",
+      "homepage": "https://shopify.dev/docs/api/admin-rest",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "permissions": {
+            "network": ["*.myshopify.com"],
+            "env": [
+              {
+                "key": "SHOPIFY_STORE_DOMAIN",
+                "required": true,
+                "secret": false,
+                "description": "Your store's permanent myshopify.com subdomain (e.g. acme.myshopify.com). Use the canonical Shopify subdomain, not the custom storefront domain."
+              },
+              {
+                "key": "SHOPIFY_ACCESS_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Shopify Admin API access token (shpat_...). Needs read_orders + write_orders scopes."
+              },
+              {
+                "key": "SHOPIFY_API_VERSION",
+                "required": false,
+                "secret": false,
+                "description": "Admin API version to pin (defaults to 2026-01). Shopify rotates quarterly."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "list_shopify_orders",
+                  "description": "List recent orders, optionally filtered by status / date.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "get_shopify_order",
+                  "description": "Fetch full detail for one order.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "update_shopify_order_note",
+                  "description": "Set or append the internal note on an order.",
+                  "default_mode": "ask"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-05-21"
+        }
+      ]
+    },
+    {
       "name": "@open-neko/plugin-slack",
       "title": "Slack actions",
       "description": "Post messages, send DMs, react with emoji, and look up users/channels in Slack. Four actions, each separately approvable by operator rules. Authenticated via Slack bot token (xoxb-) stored in the per-user secrets file.",

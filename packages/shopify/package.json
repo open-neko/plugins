@@ -1,0 +1,76 @@
+{
+  "name": "@open-neko/plugin-shopify",
+  "version": "0.1.0",
+  "description": "Shopify Admin API connector for OpenNeko — list orders, fetch order detail, and update internal order notes against an operator's store. Three sandboxed actions: list_shopify_orders, get_shopify_order, update_shopify_order_note. Network egress limited to the operator's *.myshopify.com host.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/shopify"
+  },
+  "type": "module",
+  "files": ["dist", "README.md", "skill"],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "skill": "./skill",
+    "permissions": {
+      "network": ["*.myshopify.com"],
+      "env": [
+        {
+          "key": "SHOPIFY_STORE_DOMAIN",
+          "required": true,
+          "secret": false,
+          "description": "Your store's permanent myshopify.com subdomain — e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
+        },
+        {
+          "key": "SHOPIFY_ACCESS_TOKEN",
+          "required": true,
+          "secret": true,
+          "description": "Shopify Admin API access token (starts with shpat_). Create at admin → Settings → Apps and sales channels → Develop apps → Create an app → Configuration → Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install — copy it immediately."
+        },
+        {
+          "key": "SHOPIFY_API_VERSION",
+          "required": false,
+          "secret": false,
+          "description": "Shopify Admin API version to pin (defaults to 2026-01). Shopify rotates quarterly; pin a stable version to avoid surprise breakage."
+        }
+      ]
+    },
+    "capabilities": {
+      "action": {
+        "kinds": [
+          {
+            "kind": "list_shopify_orders",
+            "description": "List recent orders, optionally filtered by financial_status, fulfillment_status, or a date range.",
+            "default_mode": "auto"
+          },
+          {
+            "kind": "get_shopify_order",
+            "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
+            "default_mode": "auto"
+          },
+          {
+            "kind": "update_shopify_order_note",
+            "description": "Set or append the internal note on an order (operator-visible in Shopify admin only; not customer-facing).",
+            "default_mode": "ask"
+          }
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
