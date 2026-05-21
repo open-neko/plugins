@@ -1,0 +1,89 @@
+{
+  "name": "@open-neko/connector-google-workspace",
+  "version": "0.1.0",
+  "description": "Google Workspace connector for OpenNeko — per-operator OAuth via PKCE against the operator's own Google Cloud OAuth client. Provides Gmail, Calendar, Drive, Docs, and Sheets actions backed by each operator's authorised account. Runs in a microsandbox VM with network egress limited to accounts.google.com and *.googleapis.com.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/google-workspace"
+  },
+  "type": "module",
+  "files": ["dist", "README.md", "skill"],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "skill": "./skill",
+    "permissions": {
+      "network": [
+        "accounts.google.com",
+        "oauth2.googleapis.com",
+        "gmail.googleapis.com",
+        "www.googleapis.com",
+        "sheets.googleapis.com",
+        "docs.googleapis.com"
+      ],
+      "env": [
+        {
+          "key": "GOOGLE_CLIENT_ID",
+          "required": true,
+          "secret": false,
+          "description": "OAuth 2.0 Client ID from your Google Cloud Console project. Deployment-wide — every operator who connects uses the same client. Create at https://console.cloud.google.com/apis/credentials → Create credentials → OAuth client ID → Web application. Set Authorized redirect URI to https://<your-deployment>/api/integrations/connect/%40open-neko%2Fconnector-google-workspace/callback."
+        },
+        {
+          "key": "GOOGLE_CLIENT_SECRET",
+          "required": true,
+          "secret": true,
+          "description": "OAuth 2.0 Client Secret paired with the client ID above. Stored in the per-user secrets file, never echoed."
+        }
+      ]
+    },
+    "capabilities": {
+      "connect": {
+        "providerLabel": "Google Workspace",
+        "scopes": [
+          "openid",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/gmail.send",
+          "https://www.googleapis.com/auth/calendar.events.readonly",
+          "https://www.googleapis.com/auth/spreadsheets",
+          "https://www.googleapis.com/auth/documents"
+        ],
+        "flow": "oauth2-pkce"
+      },
+      "action": {
+        "kinds": [
+          {
+            "kind": "send_gmail",
+            "description": "Send an email from the connected operator's Gmail account.",
+            "default_mode": "ask"
+          },
+          {
+            "kind": "list_calendar_events",
+            "description": "List upcoming events on the connected operator's primary calendar.",
+            "default_mode": "auto"
+          },
+          {
+            "kind": "append_sheet_row",
+            "description": "Append a row to a Google Sheet the connected operator can edit.",
+            "default_mode": "ask"
+          }
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

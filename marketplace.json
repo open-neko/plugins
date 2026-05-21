@@ -88,6 +88,80 @@
       ]
     },
     {
+      "name": "@open-neko/connector-google-workspace",
+      "title": "Google Workspace connector",
+      "description": "Per-operator Google Workspace connector — PKCE OAuth2 against your own Cloud Console OAuth client. Each operator authorises independently; OpenNeko persists their refresh token in the per-operator section of the secrets file and rotates the access token on demand. Three actions: send_gmail, list_calendar_events, append_sheet_row.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/google-workspace",
+      "homepage": "https://developers.google.com/identity/protocols/oauth2",
+      "maintainers": [
+        { "name": "open-neko", "url": "https://github.com/open-neko" }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
+          "permissions": {
+            "network": [
+              "accounts.google.com",
+              "oauth2.googleapis.com",
+              "gmail.googleapis.com",
+              "www.googleapis.com",
+              "sheets.googleapis.com",
+              "docs.googleapis.com"
+            ],
+            "env": [
+              {
+                "key": "GOOGLE_CLIENT_ID",
+                "required": true,
+                "secret": false,
+                "description": "OAuth 2.0 Client ID from your Google Cloud Console project. Deployment-wide — every operator who connects uses this same client."
+              },
+              {
+                "key": "GOOGLE_CLIENT_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "OAuth 2.0 Client Secret paired with the client ID above. Stored in the per-user secrets file."
+              }
+            ]
+          },
+          "capabilities": {
+            "connect": {
+              "providerLabel": "Google Workspace",
+              "scopes": [
+                "openid",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/calendar.events.readonly",
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/documents"
+              ],
+              "flow": "oauth2-pkce"
+            },
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_gmail",
+                  "description": "Send an email from the connected operator's Gmail account.",
+                  "default_mode": "ask"
+                },
+                {
+                  "kind": "list_calendar_events",
+                  "description": "List upcoming events on the connected operator's primary calendar.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "append_sheet_row",
+                  "description": "Append a row to a Google Sheet the connected operator can edit.",
+                  "default_mode": "ask"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-05-21"
+        }
+      ]
+    },
+    {
       "name": "@open-neko/plugin-slack",
       "title": "Slack actions",
       "description": "Post messages, send DMs, react with emoji, and look up users/channels in Slack. Four actions, each separately approvable by operator rules. Authenticated via Slack bot token (xoxb-) stored in the per-user secrets file.",
