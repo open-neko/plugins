@@ -9,9 +9,10 @@
     "directory": "packages/slack"
   },
   "type": "module",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "skill"],
   "openneko": {
     "runner": "./dist/run.js",
+    "skill": "./skill",
     "permissions": {
       "network": ["slack.com"],
       "env": [

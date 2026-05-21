@@ -9,9 +9,10 @@
     "directory": "packages/parallel-search"
   },
   "type": "module",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "skill"],
   "openneko": {
     "runner": "./dist/run.js",
+    "skill": "./skill",
     "permissions": {
       "network": ["search.parallel.ai"],
       "env": []
