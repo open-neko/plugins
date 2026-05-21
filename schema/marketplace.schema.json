@@ -81,13 +81,24 @@
         },
         "integrity": {
           "type": "string",
-          "pattern": "^sha512-[A-Za-z0-9+/=]+$"
+          "pattern": "^sha512-[A-Za-z0-9+/=]+$",
+          "description": "Pinned npm dist.integrity hash. Use the all-`a` placeholder pattern ONLY in combination with `draft: true` while the package is still pre-publish."
         },
         "permissions": { "$ref": "#/$defs/permissions" },
         "capabilities": { "$ref": "#/$defs/capabilities" },
         "publishedAt": { "type": "string", "format": "date" },
         "yanked": { "type": "boolean", "default": false },
-        "yanked_reason": { "type": "string" }
+        "yanked_reason": { "type": "string" },
+        "draft": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set to true when the version isn't on npm yet (chicken-and-egg case for a brand-new package whose first publish hasn't fired). `validate-live` skips every live check for draft entries — they're treated as informational. Flip to false and pin the real integrity hash once the publish workflow has succeeded."
+        },
+        "provenanceWaived": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set to true for legacy versions that were published before the publish workflow started using --provenance. `validate-live` still enforces integrity but skips the provenance check. Don't use on new versions — bump and re-publish with --provenance instead."
+        }
       }
     },
     "permissions": {
