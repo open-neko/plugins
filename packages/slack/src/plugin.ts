@@ -140,69 +140,218 @@ export async function runReact(
   };
 }
 
+/**
+ * Two payload shapes are accepted:
+ *
+ * 1. Natural / agent-friendly (preferred): { type: "user"|"channel", query }
+ *    `query` can be a name, email, Slack id (U…/C…), or #channel-name. The
+ *    plugin auto-routes to the right Slack API based on the shape of the
+ *    value: email → `users.lookupByEmail`; id → `users.info`/`conversations.info`;
+ *    name → paged `users.list`/`conversations.list` with a tolerant match.
+ *
+ * 2. Precise legacy: { kind: "user_by_email"|"channel_by_name", value }
+ *    Backwards-compatible with v0.1.0. Always hits the precise endpoint
+ *    even if `value` looks like an id.
+ *
+ * Either shape is fine. The natural shape lets the agent emit
+ * `{ type: "user", query: "amit" }` without first knowing the email.
+ */
 export type LookupKind = "user_by_email" | "channel_by_name";
 
 export interface LookupSlackEntityPayload {
-  kind: LookupKind;
-  value: string;
+  // Natural shape:
+  type?: "user" | "channel";
+  query?: string;
+  // Legacy precise shape (still supported):
+  kind?: LookupKind;
+  value?: string;
+}
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const USER_ID_RE = /^[UW][A-Z0-9]+$/;
+const CHANNEL_ID_RE = /^[CDG][A-Z0-9]+$/;
+
+function normalizeLookupInput(payload: LookupSlackEntityPayload): {
+  scope: "user" | "channel";
+  query: string;
+  precise?: LookupKind;
+} {
+  // Accept any combination of {type|kind} + {query|value}. Models reach for
+  // both shapes interchangeably — meet them where they are.
+  const scopeRaw =
+    (payload as { type?: string; kind?: string }).type ??
+    (payload as { kind?: string }).kind;
+  const queryRaw =
+    (payload as { query?: string; value?: string }).query ??
+    (payload as { value?: string }).value;
+  if (!scopeRaw || typeof queryRaw !== "string" || queryRaw.length === 0) {
+    throw new SlackPluginError(
+      "payload must include a scope ('user' or 'channel') and a query (name, email, id, or #channel). " +
+        "Accepted shapes: { type, query } | { kind, value } | { kind: 'user_by_email'|'channel_by_name', value }",
+    );
+  }
+  if (scopeRaw === "user_by_email") {
+    return { scope: "user", query: queryRaw, precise: "user_by_email" };
+  }
+  if (scopeRaw === "channel_by_name") {
+    return { scope: "channel", query: queryRaw, precise: "channel_by_name" };
+  }
+  if (scopeRaw === "user" || scopeRaw === "channel") {
+    return { scope: scopeRaw, query: queryRaw };
+  }
+  throw new SlackPluginError(`unknown lookup scope "${scopeRaw}"`);
+}
+
+function nameMatchesUser(
+  user: { name?: string; real_name?: string; profile?: { display_name?: string; real_name?: string; real_name_normalized?: string } },
+  needle: string,
+): boolean {
+  const n = needle.toLowerCase();
+  return [
+    user.name,
+    user.real_name,
+    user.profile?.display_name,
+    user.profile?.real_name,
+    user.profile?.real_name_normalized,
+  ].some((v) => typeof v === "string" && v.toLowerCase() === n) ||
+    [
+      user.name,
+      user.real_name,
+      user.profile?.display_name,
+      user.profile?.real_name,
+    ].some((v) => typeof v === "string" && v.toLowerCase().split(/\s+/).includes(n));
+}
+
+async function lookupUser(
+  client: SlackClient,
+  query: string,
+  precise?: LookupKind,
+): Promise<PluginActionOutcome> {
+  // Precise mode forces the email path.
+  if (precise === "user_by_email" || (precise === undefined && EMAIL_RE.test(query))) {
+    const envelope = await client.get("users.lookupByEmail", { email: query });
+    const user = envelope.user as { id?: string; name?: string } | undefined;
+    if (!user?.id) {
+      throw new SlackPluginError(
+        `Slack users.lookupByEmail returned no user.id for ${query}`,
+      );
+    }
+    return {
+      commandOrOperation: `slack.users.lookupByEmail:${query}`,
+      externalRef: user.id,
+      result: { kind: "user_by_email", id: user.id, name: user.name ?? null },
+    };
+  }
+  if (USER_ID_RE.test(query)) {
+    const envelope = await client.get("users.info", { user: query });
+    const user = envelope.user as { id?: string; name?: string } | undefined;
+    if (!user?.id) {
+      throw new SlackPluginError(`Slack users.info returned no user for ${query}`);
+    }
+    return {
+      commandOrOperation: `slack.users.info:${query}`,
+      externalRef: user.id,
+      result: { kind: "user", id: user.id, name: user.name ?? null },
+    };
+  }
+  // Name fallback: paginate users.list (up to 10 pages × 1000 = 10k users).
+  let cursor: string | undefined;
+  for (let page = 0; page < 10; page++) {
+    const params: Record<string, string> = { limit: "1000" };
+    if (cursor) params.cursor = cursor;
+    const envelope = await client.get("users.list", params);
+    const members = (envelope.members ?? []) as Array<{
+      id?: string;
+      name?: string;
+      real_name?: string;
+      deleted?: boolean;
+      is_bot?: boolean;
+      profile?: { display_name?: string; real_name?: string; real_name_normalized?: string };
+    }>;
+    const match = members.find(
+      (u) => !u.deleted && !u.is_bot && u.id && nameMatchesUser(u, query),
+    );
+    if (match?.id) {
+      return {
+        commandOrOperation: `slack.users.list:${query}`,
+        externalRef: match.id,
+        result: {
+          kind: "user",
+          id: match.id,
+          name: match.name ?? null,
+          real_name: match.real_name ?? null,
+        },
+      };
+    }
+    const nextCursor = (envelope.response_metadata as { next_cursor?: string } | undefined)
+      ?.next_cursor;
+    if (!nextCursor) break;
+    cursor = nextCursor;
+  }
+  throw new SlackPluginError(`Slack user "${query}" not found by name or email`);
+}
+
+async function lookupChannel(
+  client: SlackClient,
+  query: string,
+  precise?: LookupKind,
+): Promise<PluginActionOutcome> {
+  const target = query.replace(/^#/, "");
+  if (precise === undefined && CHANNEL_ID_RE.test(target)) {
+    const envelope = await client.get("conversations.info", { channel: target });
+    const channel = envelope.channel as { id?: string; name?: string } | undefined;
+    if (!channel?.id) {
+      throw new SlackPluginError(
+        `Slack conversations.info returned no channel for ${target}`,
+      );
+    }
+    return {
+      commandOrOperation: `slack.conversations.info:${target}`,
+      externalRef: channel.id,
+      result: { kind: "channel", id: channel.id, name: channel.name ?? null },
+    };
+  }
+  // Name fallback (this is also the legacy channel_by_name path).
+  let cursor: string | undefined;
+  for (let page = 0; page < 10; page++) {
+    const params: Record<string, string> = {
+      types: "public_channel,private_channel",
+      limit: "1000",
+    };
+    if (cursor) params.cursor = cursor;
+    const envelope = await client.get("conversations.list", params);
+    const channels = (envelope.channels ?? []) as Array<{
+      id?: string;
+      name?: string;
+    }>;
+    const match = channels.find((c) => c.name === target);
+    if (match?.id) {
+      return {
+        commandOrOperation: `slack.conversations.list:${target}`,
+        externalRef: match.id,
+        result: {
+          kind: precise === "channel_by_name" ? "channel_by_name" : "channel",
+          id: match.id,
+          name: target,
+        },
+      };
+    }
+    const nextCursor = (envelope.response_metadata as { next_cursor?: string } | undefined)
+      ?.next_cursor;
+    if (!nextCursor) break;
+    cursor = nextCursor;
+  }
+  throw new SlackPluginError(`Slack channel "${target}" not found`);
 }
 
 export async function runLookup(
   payload: LookupSlackEntityPayload,
   options: InvokeOptions = {},
 ): Promise<PluginActionOutcome> {
-  if (!payload.kind || !payload.value) {
-    throw new SlackPluginError(
-      "payload.kind ('user_by_email' or 'channel_by_name') and payload.value are required",
-    );
-  }
+  const { scope, query, precise } = normalizeLookupInput(payload);
   const client = clientOrDefault(options);
-  if (payload.kind === "user_by_email") {
-    const envelope = await client.get("users.lookupByEmail", {
-      email: payload.value,
-    });
-    const user = envelope.user as { id?: string; name?: string } | undefined;
-    if (!user?.id) {
-      throw new SlackPluginError(
-        `Slack users.lookupByEmail returned no user.id for ${payload.value}`,
-      );
-    }
-    return {
-      commandOrOperation: `slack.users.lookupByEmail:${payload.value}`,
-      externalRef: user.id,
-      result: { kind: "user_by_email", id: user.id, name: user.name ?? null },
-    };
-  }
-  if (payload.kind === "channel_by_name") {
-    const target = payload.value.replace(/^#/, "");
-    let cursor: string | undefined;
-    for (let page = 0; page < 10; page++) {
-      const params: Record<string, string> = {
-        types: "public_channel,private_channel",
-        limit: "1000",
-      };
-      if (cursor) params.cursor = cursor;
-      const envelope = await client.get("conversations.list", params);
-      const channels = (envelope.channels ?? []) as Array<{
-        id?: string;
-        name?: string;
-      }>;
-      const match = channels.find((c) => c.name === target);
-      if (match?.id) {
-        return {
-          commandOrOperation: `slack.conversations.list:${target}`,
-          externalRef: match.id,
-          result: { kind: "channel_by_name", id: match.id, name: target },
-        };
-      }
-      const nextCursor = (envelope.response_metadata as { next_cursor?: string } | undefined)
-        ?.next_cursor;
-      if (!nextCursor) break;
-      cursor = nextCursor;
-    }
-    throw new SlackPluginError(`Slack channel "${target}" not found`);
-  }
-  throw new SlackPluginError(`unknown lookup kind: ${payload.kind}`);
+  if (scope === "user") return lookupUser(client, query, precise);
+  return lookupChannel(client, query, precise);
 }
 
 async function handleSendMessage(
@@ -267,7 +416,7 @@ export default definePlugin({
         {
           kind: "lookup_slack_entity",
           description:
-            "Resolve a user email to id, or a channel name to id. Payload: { kind: 'user_by_email' | 'channel_by_name', value }. Returns id + name. Requires users:read.email and/or channels:read+groups:read.",
+            "Resolve a Slack user or channel to its id. Payload: { type: 'user' | 'channel', query } where `query` can be a name, email, Slack id (U…/C…), or #channel-name. Returns id + name. Also accepts the legacy precise form { kind: 'user_by_email' | 'channel_by_name', value }. Requires users:read (+ users:read.email for emails, channels:read+groups:read for channels).",
           default_mode: "auto",
           handler: handleLookup,
         },
