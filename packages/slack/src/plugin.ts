@@ -80,19 +80,26 @@ export async function runSendDm(
   options: InvokeOptions = {},
 ): Promise<PluginActionOutcome> {
   if (!payload.user || typeof payload.user !== "string") {
-    throw new SlackPluginError("payload.user (user id, e.g. U123) is required");
+    throw new SlackPluginError(
+      "payload.user (Slack user id, email, or display name) is required",
+    );
   }
   if (!payload.text || typeof payload.text !== "string") {
     throw new SlackPluginError("payload.text is required");
   }
   const client = clientOrDefault(options);
-  const opened = await client.postJson("conversations.open", {
-    users: payload.user,
-  });
+  // Slack's conversations.open requires a user id (U…/W…). Models often pass
+  // the original name they got from the operator and forget to substitute
+  // the lookup_slack_entity result. Resolve here so the action works either
+  // way — passing a name/email is just shorthand for "look it up and DM".
+  const userId = USER_ID_RE.test(payload.user)
+    ? payload.user
+    : await findUserId(client, payload.user);
+  const opened = await client.postJson("conversations.open", { users: userId });
   const channelId = (opened.channel as { id?: string } | undefined)?.id;
   if (!channelId) {
     throw new SlackPluginError(
-      `Slack conversations.open returned no channel.id for user ${payload.user}`,
+      `Slack conversations.open returned no channel.id for user ${userId}`,
     );
   }
   const sent = await client.postJson("chat.postMessage", {
@@ -102,9 +109,9 @@ export async function runSendDm(
   });
   const ts = sent.ts as string | undefined;
   return {
-    commandOrOperation: `slack.chat.postMessage:dm:${payload.user}`,
+    commandOrOperation: `slack.chat.postMessage:dm:${userId}`,
     externalRef: ts ?? null,
-    result: { user: payload.user, channel: channelId, ts: ts ?? null },
+    result: { user: userId, channel: channelId, ts: ts ?? null },
   };
 }
 
@@ -222,13 +229,22 @@ function nameMatchesUser(
     ].some((v) => typeof v === "string" && v.toLowerCase().split(/\s+/).includes(n));
 }
 
-async function lookupUser(
+type FoundUser = {
+  id: string;
+  name: string | null;
+  real_name: string | null;
+  via: "users.info" | "users.lookupByEmail" | "users.list";
+};
+
+// Resolve a query (id, email, or display name) to a Slack user id. The
+// minimal version, used both by lookup_slack_entity and as an inline
+// fallback in send_slack_dm when the agent forgets to use the looked-up id.
+async function findUser(
   client: SlackClient,
   query: string,
-  precise?: LookupKind,
-): Promise<PluginActionOutcome> {
-  // Precise mode forces the email path.
-  if (precise === "user_by_email" || (precise === undefined && EMAIL_RE.test(query))) {
+  forceEmailPath: boolean = false,
+): Promise<FoundUser> {
+  if (forceEmailPath || EMAIL_RE.test(query)) {
     const envelope = await client.get("users.lookupByEmail", { email: query });
     const user = envelope.user as { id?: string; name?: string } | undefined;
     if (!user?.id) {
@@ -236,11 +252,7 @@ async function lookupUser(
         `Slack users.lookupByEmail returned no user.id for ${query}`,
       );
     }
-    return {
-      commandOrOperation: `slack.users.lookupByEmail:${query}`,
-      externalRef: user.id,
-      result: { kind: "user_by_email", id: user.id, name: user.name ?? null },
-    };
+    return { id: user.id, name: user.name ?? null, real_name: null, via: "users.lookupByEmail" };
   }
   if (USER_ID_RE.test(query)) {
     const envelope = await client.get("users.info", { user: query });
@@ -248,11 +260,7 @@ async function lookupUser(
     if (!user?.id) {
       throw new SlackPluginError(`Slack users.info returned no user for ${query}`);
     }
-    return {
-      commandOrOperation: `slack.users.info:${query}`,
-      externalRef: user.id,
-      result: { kind: "user", id: user.id, name: user.name ?? null },
-    };
+    return { id: user.id, name: user.name ?? null, real_name: null, via: "users.info" };
   }
   // Name fallback: paginate users.list (up to 10 pages × 1000 = 10k users).
   let cursor: string | undefined;
@@ -273,14 +281,10 @@ async function lookupUser(
     );
     if (match?.id) {
       return {
-        commandOrOperation: `slack.users.list:${query}`,
-        externalRef: match.id,
-        result: {
-          kind: "user",
-          id: match.id,
-          name: match.name ?? null,
-          real_name: match.real_name ?? null,
-        },
+        id: match.id,
+        name: match.name ?? null,
+        real_name: match.real_name ?? null,
+        via: "users.list",
       };
     }
     const nextCursor = (envelope.response_metadata as { next_cursor?: string } | undefined)
@@ -289,6 +293,29 @@ async function lookupUser(
     cursor = nextCursor;
   }
   throw new SlackPluginError(`Slack user "${query}" not found by name or email`);
+}
+
+async function findUserId(client: SlackClient, query: string): Promise<string> {
+  return (await findUser(client, query)).id;
+}
+
+async function lookupUser(
+  client: SlackClient,
+  query: string,
+  precise?: LookupKind,
+): Promise<PluginActionOutcome> {
+  const user = await findUser(client, query, precise === "user_by_email");
+  const kind = precise === "user_by_email" ? "user_by_email" : "user";
+  return {
+    commandOrOperation: `slack.${user.via}:${query}`,
+    externalRef: user.id,
+    result: {
+      kind,
+      id: user.id,
+      name: user.name,
+      ...(user.real_name ? { real_name: user.real_name } : {}),
+    },
+  };
 }
 
 async function lookupChannel(
@@ -402,7 +429,7 @@ export default definePlugin({
         {
           kind: "send_slack_dm",
           description:
-            "DM a user. Payload: { user, text, blocks? }. user is a user id (e.g. U123). Opens an IM channel via conversations.open then posts. Requires im:write + chat:write.",
+            "DM a user. Payload: { user, text, blocks? }. `user` can be a Slack user id (U…), an email, or a display name — the plugin resolves it. Opens an IM channel via conversations.open then posts. Requires im:write + chat:write (+ users:read / users:read.email for non-id resolution).",
           default_mode: "ask",
           handler: handleSendDm,
         },
