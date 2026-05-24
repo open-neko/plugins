@@ -12,7 +12,10 @@
       "source": "https://github.com/open-neko/plugins/tree/main/packages/parallel-search",
       "homepage": "https://docs.parallel.ai/integrations/mcp/search-mcp",
       "maintainers": [
-        { "name": "open-neko", "url": "https://github.com/open-neko" }
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
       ],
       "versions": [
         {
@@ -20,7 +23,9 @@
           "integrity": "sha512-gX6PcjZvyl2ggW1HLy0v9KANPHoBi96DhsBVzDmY4v2nDiQHjufDacazwaHi+OInT8+wz+Hf+gqSZETLDse79A==",
           "provenanceWaived": true,
           "permissions": {
-            "network": ["search.parallel.ai"],
+            "network": [
+              "search.parallel.ai"
+            ],
             "env": []
           },
           "capabilities": {
@@ -40,6 +45,33 @@
             }
           },
           "publishedAt": "2026-05-17"
+        },
+        {
+          "version": "0.3.0",
+          "integrity": "sha512-NMAgy8RvNKhrmHFBEc6BGdbzVlsUkCALK3XYvZ8k7QqxUBYrgy5ogpIlJJMlmVckDDr42dZ+GflsKMTVC8qpBw==",
+          "permissions": {
+            "network": [
+              "search.parallel.ai"
+            ],
+            "env": []
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "web_search",
+                  "description": "Search the web via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "web_fetch",
+                  "description": "Fetch a single page via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-05-24"
         }
       ]
     },
@@ -50,7 +82,10 @@
       "source": "https://github.com/open-neko/plugins/tree/main/packages/scalekit",
       "homepage": "https://docs.scalekit.com/sso/quickstart",
       "maintainers": [
-        { "name": "open-neko", "url": "https://github.com/open-neko" }
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
       ],
       "versions": [
         {
@@ -58,7 +93,9 @@
           "integrity": "sha512-XTDCF4qaMptWHrD4d0ojd+gs5fb7q3GHe0Qhi4dBzGwerZilQDBGorUVGy4TRiFVTo/s7Rbx6lzD8LbXNV5RMA==",
           "provenanceWaived": true,
           "permissions": {
-            "network": ["*.scalekit.com"],
+            "network": [
+              "*.scalekit.com"
+            ],
             "env": [
               {
                 "key": "SCALEKIT_ENVIRONMENT_URL",
@@ -86,6 +123,41 @@
             }
           },
           "publishedAt": "2026-05-18"
+        },
+        {
+          "version": "0.2.0",
+          "integrity": "sha512-uMaoqLnHW//RI0mm+f1Dnr+89FKE/R0MtR/9FIGFi1ZmOxpEBbEWcrBjgSln+0cq6salv8O7dlBwYqsqF+Tbsg==",
+          "permissions": {
+            "network": [
+              "*.scalekit.com"
+            ],
+            "env": [
+              {
+                "key": "SCALEKIT_ENVIRONMENT_URL",
+                "required": true,
+                "secret": false,
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_ID",
+                "required": true,
+                "secret": false,
+                "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+              }
+            ]
+          },
+          "capabilities": {
+            "auth": {
+              "providerLabel": "Scalekit"
+            }
+          },
+          "publishedAt": "2026-05-24"
         }
       ]
     },
@@ -96,13 +168,15 @@
       "source": "https://github.com/open-neko/plugins/tree/main/packages/google-workspace",
       "homepage": "https://developers.google.com/identity/protocols/oauth2",
       "maintainers": [
-        { "name": "open-neko", "url": "https://github.com/open-neko" }
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
       ],
       "versions": [
         {
-          "version": "0.1.0",
-          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
-          "draft": true,
+          "version": "0.2.0",
+          "integrity": "sha512-VzsTtkvvk75QRZ8tt1EdCMX6+ltjqgXaI2nVjo05aSKeL6UEouAkauDPBTD84cim1cbc2IV4/B2y/2yAji1vMg==",
           "permissions": {
             "network": [
               "accounts.google.com",
@@ -117,13 +191,13 @@
                 "key": "GOOGLE_CLIENT_ID",
                 "required": true,
                 "secret": false,
-                "description": "OAuth 2.0 Client ID from your Google Cloud Console project. Deployment-wide — every operator who connects uses this same client."
+                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide — all operators share one client). Create at https://console.cloud.google.com/apis/credentials → Create credentials → OAuth client ID → Web application; set the redirect URI to your deployment's connect callback."
               },
               {
                 "key": "GOOGLE_CLIENT_SECRET",
                 "required": true,
                 "secret": true,
-                "description": "OAuth 2.0 Client Secret paired with the client ID above. Stored in the per-user secrets file."
+                "description": "OAuth 2.0 Client Secret paired with the client ID above. Stored in the per-user secrets file, never echoed."
               }
             ]
           },
@@ -144,23 +218,23 @@
               "kinds": [
                 {
                   "kind": "send_gmail",
-                  "description": "Send an email from the connected operator's Gmail account.",
+                  "description": "Send an email from the connected user's Gmail account.",
                   "default_mode": "ask"
                 },
                 {
                   "kind": "list_calendar_events",
-                  "description": "List upcoming events on the connected operator's primary calendar.",
+                  "description": "List upcoming events on the connected user's primary calendar.",
                   "default_mode": "auto"
                 },
                 {
                   "kind": "append_sheet_row",
-                  "description": "Append a row to a Google Sheet the connected operator can edit.",
+                  "description": "Append a row to a Google Sheet the connected user can edit.",
                   "default_mode": "ask"
                 }
               ]
             }
           },
-          "publishedAt": "2026-05-21"
+          "publishedAt": "2026-05-24"
         }
       ]
     },
@@ -171,33 +245,37 @@
       "source": "https://github.com/open-neko/plugins/tree/main/packages/shopify",
       "homepage": "https://shopify.dev/docs/api/admin-rest",
       "maintainers": [
-        { "name": "open-neko", "url": "https://github.com/open-neko" }
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
       ],
       "versions": [
         {
-          "version": "0.1.0",
-          "integrity": "sha512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa==",
-          "draft": true,
+          "version": "0.2.0",
+          "integrity": "sha512-JnzuEr8ag+U7/yL1eyTk/VwwK84zoP9GTRxPF6LTGukNTk1CJOloeE3XZmK+U8+5lCZ2dZrdv0yMbFDTDBp7gA==",
           "permissions": {
-            "network": ["*.myshopify.com"],
+            "network": [
+              "*.myshopify.com"
+            ],
             "env": [
               {
                 "key": "SHOPIFY_STORE_DOMAIN",
                 "required": true,
                 "secret": false,
-                "description": "Your store's permanent myshopify.com subdomain (e.g. acme.myshopify.com). Use the canonical Shopify subdomain, not the custom storefront domain."
+                "description": "Your store's permanent myshopify.com subdomain — e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
               },
               {
                 "key": "SHOPIFY_ACCESS_TOKEN",
                 "required": true,
                 "secret": true,
-                "description": "Shopify Admin API access token (shpat_...). Needs read_orders + write_orders scopes."
+                "description": "Shopify Admin API access token (starts with shpat_). Create at admin → Settings → Apps and sales channels → Develop apps → Create an app → Configuration → Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install — copy it immediately."
               },
               {
                 "key": "SHOPIFY_API_VERSION",
                 "required": false,
                 "secret": false,
-                "description": "Admin API version to pin (defaults to 2026-01). Shopify rotates quarterly."
+                "description": "Shopify Admin API version to pin (defaults to 2026-01). Shopify rotates quarterly; pin a stable version to avoid surprise breakage."
               }
             ]
           },
@@ -206,23 +284,23 @@
               "kinds": [
                 {
                   "kind": "list_shopify_orders",
-                  "description": "List recent orders, optionally filtered by status / date.",
+                  "description": "List recent orders, optionally filtered by financialStatus, fulfillmentStatus, or a date range (createdAtMin/createdAtMax).",
                   "default_mode": "auto"
                 },
                 {
                   "kind": "get_shopify_order",
-                  "description": "Fetch full detail for one order.",
+                  "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
                   "default_mode": "auto"
                 },
                 {
                   "kind": "update_shopify_order_note",
-                  "description": "Set or append the internal note on an order.",
+                  "description": "Set or append the internal note on an order (user-visible in Shopify admin only; not customer-facing).",
                   "default_mode": "ask"
                 }
               ]
             }
           },
-          "publishedAt": "2026-05-21"
+          "publishedAt": "2026-05-24"
         }
       ]
     },
@@ -233,7 +311,10 @@
       "source": "https://github.com/open-neko/plugins/tree/main/packages/slack",
       "homepage": "https://api.slack.com/web",
       "maintainers": [
-        { "name": "open-neko", "url": "https://github.com/open-neko" }
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
       ],
       "versions": [
         {
@@ -241,7 +322,9 @@
           "integrity": "sha512-+H6gDUp8vNfs5pVvffnEByN5ZDt9c5HiYGF1uQ2Hq5b6NZYNn7DHlQtMMAXXv1BOKuiHnCPBmYyL5+ltrMa8rQ==",
           "provenanceWaived": true,
           "permissions": {
-            "network": ["slack.com"],
+            "network": [
+              "slack.com"
+            ],
             "env": [
               {
                 "key": "SLACK_BOT_TOKEN",
@@ -278,6 +361,50 @@
             }
           },
           "publishedAt": "2026-05-17"
+        },
+        {
+          "version": "0.2.0",
+          "integrity": "sha512-rg/Md77UMQCKGiCLYHOF1ecTPAtU35VIkLF7sRDZNtYAj5YjKPzi19DZ+a05ezPWn2BCMtujrJT7nYm4bQvW8w==",
+          "permissions": {
+            "network": [
+              "slack.com"
+            ],
+            "env": [
+              {
+                "key": "SLACK_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_slack_message",
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "send_slack_dm",
+                  "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "react_slack_message",
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "lookup_slack_entity",
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-05-24"
         }
       ]
     }
