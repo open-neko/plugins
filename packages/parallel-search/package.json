@@ -23,12 +23,14 @@
           {
             "kind": "web_search",
             "description": "Search the web via Parallel.ai's Search MCP.",
-            "default_mode": "auto"
+            "default_mode": "auto",
+            "example": { "query": "competitor pricing changes 2026" }
           },
           {
             "kind": "web_fetch",
             "description": "Fetch a single page via Parallel.ai's Search MCP.",
-            "default_mode": "auto"
+            "default_mode": "auto",
+            "example": { "url": "https://example.com/pricing" }
           }
         ]
       }

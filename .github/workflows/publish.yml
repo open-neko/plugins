@@ -2,7 +2,9 @@ name: publish
 
 # Publish every @open-neko/* plugin whose version on npm doesn't already
 # match the version in package.json. Triggered by:
-#   - any tag push matching v*  (e.g. release-please cuts v1.0.0)
+#   - a GitHub Release being published (release-please cuts one per package
+#     on merge of its release PR — the App token it uses lets that release
+#     event trigger this workflow; GITHUB_TOKEN-created releases would not)
 #   - manual dispatch for re-runs after fixing a publish failure
 #
 # Uses npm Trusted Publishers (OIDC) — no NPM_TOKEN secret needed. Each
@@ -14,11 +16,19 @@ name: publish
 # publishes before parallel-search/slack/scalekit (which depend on it
 # via workspace:*), converts the workspace:* range to the matching
 # version on the fly, and skips packages whose version is already on
-# the registry — so re-runs are safe.
+# the registry — so re-runs (and the N releases from one merge) are safe.
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
   workflow_dispatch:
+
+# Serialize publishes: a single release-please merge can create several
+# GitHub Releases at once (one per bumped package), each firing this
+# workflow. Running them one at a time avoids two jobs racing to first-
+# publish the same package.
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
 
 permissions:
   contents: read

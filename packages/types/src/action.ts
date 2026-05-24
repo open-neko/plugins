@@ -106,6 +106,14 @@ export const PluginActionDeclaration = z.object({
   kind: ActionKindName,
   description: z.string().min(1),
   default_mode: ActionDefaultMode.optional(),
+  /**
+   * Example payload, surfaced verbatim to the agent so it emits a
+   * correctly-shaped payload on the first try. Small models otherwise
+   * invent generic shapes the handler rejects (e.g. a bare string where a
+   * `{ scope, query }` object is required). Strongly recommended for every
+   * kind whose payload is more than trivial.
+   */
+  example: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type PluginActionDeclaration = z.infer<typeof PluginActionDeclaration>;
