@@ -41,18 +41,21 @@
         "kinds": [
           {
             "kind": "list_shopify_orders",
-            "description": "List recent orders, optionally filtered by financial_status, fulfillment_status, or a date range.",
-            "default_mode": "auto"
+            "description": "List recent orders, optionally filtered by financialStatus, fulfillmentStatus, or a date range (createdAtMin/createdAtMax).",
+            "default_mode": "auto",
+            "example": { "financialStatus": "paid", "createdAtMin": "2026-05-01T00:00:00Z", "limit": 20 }
           },
           {
             "kind": "get_shopify_order",
             "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
-            "default_mode": "auto"
+            "default_mode": "auto",
+            "example": { "orderId": 1234567890 }
           },
           {
             "kind": "update_shopify_order_note",
-            "description": "Set or append the internal note on an order (operator-visible in Shopify admin only; not customer-facing).",
-            "default_mode": "ask"
+            "description": "Set or append the internal note on an order (user-visible in Shopify admin only; not customer-facing).",
+            "default_mode": "ask",
+            "example": { "orderId": 1234567890, "note": "Flagged for review by ops.", "append": true }
           }
         ]
       }
