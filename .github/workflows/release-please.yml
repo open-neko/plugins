@@ -1,0 +1,52 @@
+name: release-please
+
+# Opens (and auto-merges) a per-package release PR for any plugin whose
+# conventional commits since its last release warrant a bump. On merge,
+# release-please tags + creates a GitHub Release per package; `publish.yml`
+# fires on `release: published` and pushes the bumped package(s) to npm.
+#
+# Separate versions: each plugin (packages/*) is versioned independently
+# via release-please manifest mode (separate-pull-requests: true). A commit
+# touching packages/slack/** bumps only @open-neko/plugin-slack.
+on:
+  push:
+    branches: [main]
+
+# No write scopes here — the GitHub App token below carries the only write
+# permissions this workflow needs (contents + PRs), mirroring the OpenNeko
+# repo's release-please setup. The App token (unlike GITHUB_TOKEN) lets the
+# GitHub Release it creates trigger publish.yml's `release: published`.
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # Short-lived installation token from a GitHub App scoped to
+      # contents:write + pull-requests:write. Requires the same App that
+      # OpenNeko uses to be installed on this repo, with RELEASE_PLEASE_APP_ID
+      # + RELEASE_PLEASE_APP_PRIVATE_KEY available as secrets.
+      - id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # Auto-merge each release PR once its checks pass, so cutting a release
+      # doesn't require a human click every time.
+      - name: Enable auto-merge on release PR(s)
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo '${{ steps.release.outputs.prs }}' | jq -r '.[].number' | while read -r pr; do
+            gh pr merge --auto --squash "$pr" --repo "$GITHUB_REPOSITORY"
+          done

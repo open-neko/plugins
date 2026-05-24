@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "draft": false,
+  "prerelease": false,
+  "bootstrap-sha": "ade79293313a483fd5276b2d592977b5308c2768",
+  "packages": {
+    "packages/types": { "release-type": "node", "component": "plugin-types" },
+    "packages/slack": { "release-type": "node", "component": "plugin-slack" },
+    "packages/shopify": { "release-type": "node", "component": "plugin-shopify" },
+    "packages/parallel-search": { "release-type": "node", "component": "plugin-parallel-search" },
+    "packages/scalekit": { "release-type": "node", "component": "plugin-scalekit" },
+    "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace" }
+  }
+}
