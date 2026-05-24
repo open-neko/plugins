@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-shopify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shopify Admin API connector for OpenNeko — list orders, fetch order detail, and update internal order notes against an operator's store. Three sandboxed actions: list_shopify_orders, get_shopify_order, update_shopify_order_note. Network egress limited to the operator's *.myshopify.com host.",
   "license": "Apache-2.0",
   "repository": {
@@ -9,12 +9,18 @@
     "directory": "packages/shopify"
   },
   "type": "module",
-  "files": ["dist", "README.md", "skill"],
+  "files": [
+    "dist",
+    "README.md",
+    "skill"
+  ],
   "openneko": {
     "runner": "./dist/run.js",
     "skill": "./skill",
     "permissions": {
-      "network": ["*.myshopify.com"],
+      "network": [
+        "*.myshopify.com"
+      ],
       "env": [
         {
           "key": "SHOPIFY_STORE_DOMAIN",
@@ -43,19 +49,29 @@
             "kind": "list_shopify_orders",
             "description": "List recent orders, optionally filtered by financialStatus, fulfillmentStatus, or a date range (createdAtMin/createdAtMax).",
             "default_mode": "auto",
-            "example": { "financialStatus": "paid", "createdAtMin": "2026-05-01T00:00:00Z", "limit": 20 }
+            "example": {
+              "financialStatus": "paid",
+              "createdAtMin": "2026-05-01T00:00:00Z",
+              "limit": 20
+            }
           },
           {
             "kind": "get_shopify_order",
             "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
             "default_mode": "auto",
-            "example": { "orderId": 1234567890 }
+            "example": {
+              "orderId": 1234567890
+            }
           },
           {
             "kind": "update_shopify_order_note",
             "description": "Set or append the internal note on an order (user-visible in Shopify admin only; not customer-facing).",
             "default_mode": "ask",
-            "example": { "orderId": 1234567890, "note": "Flagged for review by ops.", "append": true }
+            "example": {
+              "orderId": 1234567890,
+              "note": "Flagged for review by ops.",
+              "append": true
+            }
           }
         ]
       }
