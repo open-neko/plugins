@@ -50,13 +50,15 @@ jobs:
       # conflict with the packageManager pin.
       - uses: pnpm/action-setup@v4
 
-      # No `registry-url`: it writes `_authToken=${NODE_AUTH_TOKEN}` into
-      # .npmrc, and an empty token there overrides OIDC trusted publishing.
-      # pnpm defaults to the npmjs.org registry and mints a short-lived token
-      # via OIDC (id-token: write + the npm Trusted Publisher per package).
+      # registry-url writes `_authToken=${NODE_AUTH_TOKEN}` into .npmrc; the
+      # publish step supplies NODE_AUTH_TOKEN from the NPM_TOKEN secret.
+      # (pnpm publish doesn't perform npm's OIDC trusted-publishing exchange,
+      # so a token is required; --provenance still attaches a signed
+      # attestation via the GitHub OIDC id-token below.)
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+          registry-url: "https://registry.npmjs.org"
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -74,11 +76,12 @@ jobs:
             echo "[publish] $name@$version (private=$private, npm=$published)"
           done
 
-      # pnpm publish --provenance triggers npm CLI's OIDC flow. With a
-      # Trusted Publisher configured on npmjs.com, no token is needed.
-      # --no-git-checks because we're on a fresh CI checkout, not a
-      # contributor's working tree.
-      - name: pnpm publish (OIDC via Trusted Publishers)
+      # Authenticates with the NPM_TOKEN secret (an npm Automation/granular
+      # token); --provenance attaches a signed provenance attestation via the
+      # GitHub OIDC token. --no-git-checks because we're on a fresh CI
+      # checkout, not a contributor's working tree.
+      - name: pnpm publish
         run: pnpm -r publish --no-git-checks --access public --provenance
         env:
           NPM_CONFIG_PROVENANCE: "true"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
