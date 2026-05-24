@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-types",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Public types and RPC schema for OpenNeko plugins. Imported by every plugin and by the OpenNeko worker's plugin loader.",
   "license": "Apache-2.0",
   "repository": {
@@ -25,7 +25,10 @@
       "import": "./dist/manifest.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
