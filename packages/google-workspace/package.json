@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/connector-google-workspace",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Google Workspace connector for OpenNeko — per-operator OAuth via PKCE against the operator's own Google Cloud OAuth client. Provides Gmail, Calendar, Drive, Docs, and Sheets actions backed by each operator's authorised account. Runs in a microsandbox VM with network egress limited to accounts.google.com and *.googleapis.com.",
   "license": "Apache-2.0",
   "repository": {
@@ -9,7 +9,11 @@
     "directory": "packages/google-workspace"
   },
   "type": "module",
-  "files": ["dist", "README.md", "skill"],
+  "files": [
+    "dist",
+    "README.md",
+    "skill"
+  ],
   "openneko": {
     "runner": "./dist/run.js",
     "skill": "./skill",
@@ -56,19 +60,34 @@
             "kind": "send_gmail",
             "description": "Send an email from the connected user's Gmail account.",
             "default_mode": "ask",
-            "example": { "to": "amit@example.com", "subject": "Weekly revenue summary", "body": "Hi Amit,\n\nQ3 revenue is in — see the dashboard for details.\n\n— OpenNeko" }
+            "example": {
+              "to": "amit@example.com",
+              "subject": "Weekly revenue summary",
+              "body": "Hi Amit,\n\nQ3 revenue is in — see the dashboard for details.\n\n— OpenNeko"
+            }
           },
           {
             "kind": "list_calendar_events",
             "description": "List upcoming events on the connected user's primary calendar.",
             "default_mode": "auto",
-            "example": { "maxResults": 10, "timeMin": "2026-05-24T00:00:00Z" }
+            "example": {
+              "maxResults": 10,
+              "timeMin": "2026-05-24T00:00:00Z"
+            }
           },
           {
             "kind": "append_sheet_row",
             "description": "Append a row to a Google Sheet the connected user can edit.",
             "default_mode": "ask",
-            "example": { "spreadsheetId": "1AbCdEfGhIjKlMnOpQrStUvWxYz", "range": "Sheet1!A1", "values": ["2026-05-24", "Revenue", "12000"] }
+            "example": {
+              "spreadsheetId": "1AbCdEfGhIjKlMnOpQrStUvWxYz",
+              "range": "Sheet1!A1",
+              "values": [
+                "2026-05-24",
+                "Revenue",
+                "12000"
+              ]
+            }
           }
         ]
       }
