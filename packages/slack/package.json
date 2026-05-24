@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-slack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Slack actions for OpenNeko: post messages, send DMs, react to messages, and look up users/channels. Runs in a microsandbox VM with network egress limited to slack.com.",
   "license": "Apache-2.0",
   "repository": {
@@ -9,12 +9,18 @@
     "directory": "packages/slack"
   },
   "type": "module",
-  "files": ["dist", "README.md", "skill"],
+  "files": [
+    "dist",
+    "README.md",
+    "skill"
+  ],
   "openneko": {
     "runner": "./dist/run.js",
     "skill": "./skill",
     "permissions": {
-      "network": ["slack.com"],
+      "network": [
+        "slack.com"
+      ],
       "env": [
         {
           "key": "SLACK_BOT_TOKEN",
@@ -27,10 +33,43 @@
     "capabilities": {
       "action": {
         "kinds": [
-          { "kind": "send_slack_message", "description": "Post a message to a Slack channel.", "default_mode": "auto", "example": { "channel": "#growth", "text": "Heads up — Q3 revenue just landed." } },
-          { "kind": "send_slack_dm", "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.", "default_mode": "auto", "example": { "user": "amit", "text": "Stock for SKU-325 dipped below its reorder point." } },
-          { "kind": "react_slack_message", "description": "Add an emoji reaction to a Slack message.", "default_mode": "auto", "example": { "channel": "C0123ABCD", "timestamp": "1700000000.000100", "name": "eyes" } },
-          { "kind": "lookup_slack_entity", "description": "Look up a Slack user or channel by name or ID.", "default_mode": "auto", "example": { "type": "user", "query": "amit" } }
+          {
+            "kind": "send_slack_message",
+            "description": "Post a message to a Slack channel.",
+            "default_mode": "auto",
+            "example": {
+              "channel": "#growth",
+              "text": "Heads up — Q3 revenue just landed."
+            }
+          },
+          {
+            "kind": "send_slack_dm",
+            "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.",
+            "default_mode": "auto",
+            "example": {
+              "user": "amit",
+              "text": "Stock for SKU-325 dipped below its reorder point."
+            }
+          },
+          {
+            "kind": "react_slack_message",
+            "description": "Add an emoji reaction to a Slack message.",
+            "default_mode": "auto",
+            "example": {
+              "channel": "C0123ABCD",
+              "timestamp": "1700000000.000100",
+              "name": "eyes"
+            }
+          },
+          {
+            "kind": "lookup_slack_entity",
+            "description": "Look up a Slack user or channel by name or ID.",
+            "default_mode": "auto",
+            "example": {
+              "type": "user",
+              "query": "amit"
+            }
+          }
         ]
       }
     }
