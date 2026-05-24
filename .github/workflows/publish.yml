@@ -43,14 +43,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # pnpm 10 performs npm's OIDC trusted-publishing token exchange; 9.x
+      # does not — it fell back to the empty _authToken that setup-node's
+      # registry-url injected, producing a 404 on publish.
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.14.1
+          version: 10
 
+      # No `registry-url`: it writes `_authToken=${NODE_AUTH_TOKEN}` into
+      # .npmrc, and an empty token there overrides OIDC trusted publishing.
+      # pnpm defaults to the npmjs.org registry and mints a short-lived token
+      # via OIDC (id-token: write + the npm Trusted Publisher per package).
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
