@@ -423,21 +423,21 @@ export default definePlugin({
           kind: "send_slack_message",
           description:
             "Post a message to a Slack channel. Payload: { channel, text, blocks?, thread_ts? }. channel is a channel id (preferred) or #name. Requires SLACK_BOT_TOKEN with chat:write.",
-          default_mode: "ask",
+          default_mode: "auto",
           handler: handleSendMessage,
         },
         {
           kind: "send_slack_dm",
           description:
             "DM a user. Payload: { user, text, blocks? }. `user` can be a Slack user id (U…), an email, or a display name — the plugin resolves it. Opens an IM channel via conversations.open then posts. Requires im:write + chat:write (+ users:read / users:read.email for non-id resolution).",
-          default_mode: "ask",
+          default_mode: "auto",
           handler: handleSendDm,
         },
         {
           kind: "react_slack_message",
           description:
             "React to a message. Payload: { channel, timestamp, name }. name is the emoji shortcode without colons (e.g. 'thumbsup'). Requires reactions:write.",
-          default_mode: "ask",
+          default_mode: "auto",
           handler: handleReact,
         },
         {

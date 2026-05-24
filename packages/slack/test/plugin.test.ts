@@ -259,7 +259,7 @@ describe("runLookup", () => {
         { kind: "garbage" as unknown as "user_by_email", value: "x" },
         { createClient: () => ({} as SlackClient) },
       ),
-    ).rejects.toThrow(/unknown lookup kind/);
+    ).rejects.toThrow(/unknown lookup scope/);
   });
 });
 
