@@ -43,12 +43,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # pnpm 10 performs npm's OIDC trusted-publishing token exchange; 9.x
-      # does not — it fell back to the empty _authToken that setup-node's
-      # registry-url injected, producing a 404 on publish.
+      # pnpm 10 (pinned via packageManager in package.json) performs npm's
+      # OIDC trusted-publishing token exchange; 9.x does not — it fell back to
+      # the empty _authToken that setup-node's registry-url injected,
+      # producing a 404 on publish. No `version:` here so this doesn't
+      # conflict with the packageManager pin.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       # No `registry-url`: it writes `_authToken=${NODE_AUTH_TOKEN}` into
       # .npmrc, and an empty token there overrides OIDC trusted publishing.
