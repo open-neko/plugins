@@ -7,16 +7,17 @@ name: publish
 #     event trigger this workflow; GITHUB_TOKEN-created releases would not)
 #   - manual dispatch for re-runs after fixing a publish failure
 #
-# Uses npm Trusted Publishers (OIDC) — no NPM_TOKEN secret needed. Each
-# package must be configured as a Trusted Publisher on npmjs.com first
-# (one-time per package or once at the @open-neko scope). See README/
-# CONTRIBUTING for the setup link.
+# Auth is npm Trusted Publishing (OIDC) — no NPM_TOKEN secret. Each package
+# is configured as a Trusted Publisher on npmjs.com pointing at this repo +
+# workflow file; the id-token below lets `npm publish` exchange the GitHub
+# OIDC token for a short-lived npm credential at publish time. Provenance is
+# attached automatically.
 #
-# `pnpm -r publish` walks packages in topological order so plugin-types
-# publishes before parallel-search/slack/scalekit (which depend on it
-# via workspace:*), converts the workspace:* range to the matching
-# version on the fly, and skips packages whose version is already on
-# the registry — so re-runs (and the N releases from one merge) are safe.
+# Why npm (not pnpm) does the publish: `pnpm publish` does NOT perform npm's
+# OIDC trusted-publishing token exchange — only the npm CLI (>= 11.5.1) does.
+# But npm doesn't understand pnpm's `workspace:*` dependency protocol, so we
+# use `pnpm pack` to produce a tarball with workspace ranges rewritten to the
+# concrete versions, then hand that tarball to `npm publish`.
 on:
   release:
     types: [published]
@@ -32,9 +33,8 @@ concurrency:
 
 permissions:
   contents: read
-  # id-token: write enables OIDC token exchange with npmjs.com. Combined
-  # with a Trusted Publisher configured on npm for each package, this
-  # lets the workflow publish without a long-lived token in repo secrets.
+  # id-token: write enables the OIDC token exchange with npmjs.com that
+  # Trusted Publishing relies on (no long-lived token in repo secrets).
   id-token: write
 
 jobs:
@@ -43,45 +43,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # pnpm 10 (pinned via packageManager in package.json) performs npm's
-      # OIDC trusted-publishing token exchange; 9.x does not — it fell back to
-      # the empty _authToken that setup-node's registry-url injected,
-      # producing a 404 on publish. No `version:` here so this doesn't
-      # conflict with the packageManager pin.
+      # pnpm builds the workspace and packs each tarball (converting
+      # workspace:* ranges). Version pinned via packageManager in package.json.
       - uses: pnpm/action-setup@v4
 
-      # registry-url writes `_authToken=${NODE_AUTH_TOKEN}` into .npmrc; the
-      # publish step supplies NODE_AUTH_TOKEN from the NPM_TOKEN secret.
-      # (pnpm publish doesn't perform npm's OIDC trusted-publishing exchange,
-      # so a token is required; --provenance still attaches a signed
-      # attestation via the GitHub OIDC id-token below.)
+      # No registry-url: that would write `_authToken=` into .npmrc, which
+      # takes precedence over OIDC and breaks Trusted Publishing. The default
+      # registry (registry.npmjs.org) is what OIDC authenticates against.
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
           cache: pnpm
+
+      # Node 22 ships npm 10.x, which predates OIDC trusted publishing.
+      # npm >= 11.5.1 performs the token exchange; pin to a known-good line.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@^11.5.1
 
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm -r build
 
-      - name: Inventory packages before publish
+      # For each public package whose version isn't already on the registry:
+      # pack with pnpm (rewrites workspace:* -> concrete versions), then
+      # publish the tarball with the npm CLI so OIDC trusted publishing kicks
+      # in. Skipping already-published versions makes re-runs and the N
+      # releases from one merge idempotent.
+      - name: Publish changed packages (npm OIDC trusted publishing)
         run: |
           set -euo pipefail
           for pkg in packages/*/; do
+            private=$(node -p "require('./$pkg/package.json').private || false")
+            [ "$private" = "true" ] && continue
             name=$(node -p "require('./$pkg/package.json').name")
             version=$(node -p "require('./$pkg/package.json').version")
-            private=$(node -p "require('./$pkg/package.json').private || false")
-            published=$(npm view "$name@$version" version 2>/dev/null || echo "not-on-registry")
-            echo "[publish] $name@$version (private=$private, npm=$published)"
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "[skip] $name@$version already on npm"
+              continue
+            fi
+            echo "[publish] $name@$version"
+            tarball="$(cd "$pkg" && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -n1)"
+            npm publish "$tarball" --provenance --access public
           done
-
-      # Authenticates with the NPM_TOKEN secret (an npm Automation/granular
-      # token); --provenance attaches a signed provenance attestation via the
-      # GitHub OIDC token. --no-git-checks because we're on a fresh CI
-      # checkout, not a contributor's working tree.
-      - name: pnpm publish
-        run: pnpm -r publish --no-git-checks --access public --provenance
-        env:
-          NPM_CONFIG_PROVENANCE: "true"
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
