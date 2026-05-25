@@ -1,4 +1,4 @@
-import type { IntentEvent } from "@open-neko/plugin-types";
+import type { ChannelRecipient, IntentEvent } from "@open-neko/plugin-types";
 
 /** Decodes the `verb:rest` callback_data convention shared with other quick-reply channels. */
 const intentFromButtonData = (data: string): IntentEvent | null => {
@@ -20,6 +20,24 @@ type Obj = Record<string, unknown>;
 const asObj = (v: unknown): Obj | null =>
   typeof v === "object" && v !== null ? (v as Obj) : null;
 const asStr = (v: unknown): string | null => (typeof v === "string" ? v : null);
+
+/** The sender's chat as a delivery recipient — lets the worker auto-bind on first contact. */
+export const recipientFromTelegramUpdate = (raw: unknown): ChannelRecipient | undefined => {
+  const update = asObj(raw);
+  if (!update) return undefined;
+  const cq = asObj(update.callback_query);
+  const message =
+    asObj(update.message) ??
+    asObj(update.edited_message) ??
+    asObj(update.channel_post) ??
+    (cq ? asObj(cq.message) : null);
+  const chat = message ? asObj(message.chat) : null;
+  const chatId = chat?.id;
+  if (typeof chatId === "number" || typeof chatId === "string") {
+    return { kind: "telegram", chatId };
+  }
+  return undefined;
+};
 
 const intentFromUpdate = (update: Obj): IntentEvent | null => {
   const cq = asObj(update.callback_query);

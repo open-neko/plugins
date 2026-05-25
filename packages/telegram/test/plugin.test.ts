@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { dispatchPluginRpc, RPC_PROTOCOL_VERSION } from "@open-neko/plugin-types";
-import plugin, { TELEGRAM_PROFILE } from "../src/plugin";
+import plugin, { TELEGRAM_PROFILE, pollInbound } from "../src/plugin";
+import type { TelegramClient } from "../src/telegram-client";
 
 const call = (method: string, params: unknown) =>
   dispatchPluginRpc(plugin, { method, paramsJson: JSON.stringify(params ?? {}) });
@@ -73,5 +74,41 @@ describe("channel-telegram plugin RPC", () => {
 
     const missing = await call("verify_inbound", { headers: {}, body: "{}" });
     expect(missing.ok && (missing.result as { ok: boolean }).ok).toBe(false);
+  });
+
+  it("parse_inbound surfaces the sender recipient (for auto-bind)", async () => {
+    const res = await call("parse_inbound", {
+      raw: { message: { text: "hi", chat: { id: 8102762294 } } },
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const result = res.result as { intents: unknown[]; recipient?: unknown };
+    expect(result.recipient).toEqual({ kind: "telegram", chatId: 8102762294 });
+  });
+
+  it("poll_inbound dry-runs to an empty batch without a token", async () => {
+    const res = await call("poll_inbound", {});
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect((res.result as { updates: unknown[] }).updates).toEqual([]);
+  });
+
+  it("pollInbound fetches getUpdates, splits the batch, and advances the cursor", async () => {
+    process.env.TELEGRAM_BOT_TOKEN = "t";
+    const calls: Array<{ method: string; body: Record<string, unknown> }> = [];
+    const fakeClient = {
+      call: async (method: string, body: Record<string, unknown>) => {
+        calls.push({ method, body });
+        return [
+          { update_id: 10, message: { text: "hi", chat: { id: 9 } } },
+          { update_id: 11, callback_query: { data: "approve:x", message: { chat: { id: 9 } } } },
+        ];
+      },
+    } as unknown as TelegramClient;
+    const res = await pollInbound({ cursor: "10" }, { createClient: () => fakeClient });
+    expect(calls[0]?.method).toBe("getUpdates");
+    expect(calls[0]?.body).toMatchObject({ timeout: 0, offset: 10 });
+    expect(res.updates).toHaveLength(2);
+    expect(res.cursor).toBe("12");
   });
 });
