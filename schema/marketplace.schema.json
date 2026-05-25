@@ -202,7 +202,49 @@
               "description": "Flow type the worker should drive. v1 supports oauth2-pkce only."
             }
           }
+        },
+        "channel": {
+          "type": "object",
+          "description": "The plugin is a frontend (channel) — Slack, Telegram, voice, etc. Non-singleton; the worker projects modality-free InteractionEvents into the substrate inside the plugin VM and normalizes inbound payloads back into agent intents.",
+          "required": ["providerLabel", "profile", "directions"],
+          "additionalProperties": false,
+          "properties": {
+            "providerLabel": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Display label for the channel (e.g. \"Telegram\", \"Slack\")."
+            },
+            "directions": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "enum": ["inbound", "outbound"] },
+              "description": "Which directions the channel supports."
+            },
+            "ingress": {
+              "type": "string",
+              "enum": ["webhook", "socket", "none"],
+              "default": "none",
+              "description": "How inbound arrives: an HTTP webhook, a persistent socket, or none (outbound-only)."
+            },
+            "profile": { "$ref": "#/$defs/capabilityProfile" }
+          }
         }
+      }
+    },
+    "capabilityProfile": {
+      "type": "object",
+      "description": "What the substrate can carry — the only thing a projection may branch on. Additive: new fields default such that existing channels are unaffected, so unknown properties are tolerated.",
+      "required": ["modalities", "richMedia", "interaction", "constraints", "fidelity"],
+      "properties": {
+        "modalities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "enum": ["text", "visual", "voice", "haptic", "neural"] }
+        },
+        "richMedia": { "type": "object" },
+        "interaction": { "type": "object" },
+        "constraints": { "type": "object" },
+        "fidelity": { "type": "string", "enum": ["headline", "summary", "full"] }
       }
     },
     "actionDeclaration": {

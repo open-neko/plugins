@@ -75,9 +75,9 @@ export async function validateMarketplace({ root = DEFAULT_ROOT, live = false } 
       // this guard catches the case where the schema later gets loosened
       // and gives a clearer error than a raw schema diagnostic.
       const caps = v.capabilities ?? {};
-      if (!caps.action && !caps.auth) {
+      if (!caps.action && !caps.auth && !caps.connect && !caps.channel) {
         failures.push(
-          `${plugin.name}@${v.version}: capabilities must declare at least one surface (action, auth)`,
+          `${plugin.name}@${v.version}: capabilities must declare at least one surface (action, auth, connect, channel)`,
         );
       }
     }

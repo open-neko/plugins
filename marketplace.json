@@ -6,6 +6,79 @@
   "description": "First-party plugins for OpenNeko. Published by the maintainers under @open-neko/* on npm. Written, tested, and supported by the OpenNeko team.",
   "plugins": [
     {
+      "name": "@open-neko/channel-telegram",
+      "title": "Telegram channel",
+      "description": "Bidirectional Telegram channel: delivers the agent's Briefing, findings, and approvals to a chat (HTML + inline Approve/Reject buttons) and turns replies and button taps back into agent intents. Authenticated via a bot token from @BotFather, stored in the per-user secrets file.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/telegram",
+      "homepage": "https://core.telegram.org/bots/api",
+      "maintainers": [
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
+      ],
+      "versions": [
+        {
+          "version": "0.2.0",
+          "integrity": "sha512-6DCDiVh+CMU6wCuyp3N2RMIhpehs/C0vC2nP08XzFzo/8uK1GLO0YpN4wXYp3RUMcrYBiOvCLyx4+gbuNE/yEw==",
+          "provenanceWaived": true,
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH...). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token set via setWebhook; verify_inbound checks Telegram's X-Telegram-Bot-Api-Secret-Token header against it. Not needed for getUpdates long-poll."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-05-25"
+        }
+      ]
+    },
+    {
       "name": "@open-neko/plugin-parallel-search",
       "title": "Parallel.ai Search MCP",
       "description": "Web search + page fetch via Parallel.ai's Search MCP over Streamable HTTP. Anonymous tier supported; Bearer-token authenticated tier optional. Two actions: web_search and web_fetch.",
