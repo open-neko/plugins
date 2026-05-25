@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseTelegramInbound } from "../src/inbound";
+import { parseTelegramInbound, recipientFromTelegramUpdate } from "../src/inbound";
 
 describe("parseTelegramInbound", () => {
   it("maps a callback_query button tap to an approve decision", () => {
@@ -60,5 +60,26 @@ describe("parseTelegramInbound", () => {
     expect(parseTelegramInbound({ update_id: 5 })).toEqual([]);
     expect(parseTelegramInbound(null)).toEqual([]);
     expect(parseTelegramInbound({ callback_query: { data: "weird-no-colon" } })).toEqual([]);
+  });
+});
+
+describe("recipientFromTelegramUpdate", () => {
+  it("extracts the sender chat from a message", () => {
+    expect(
+      recipientFromTelegramUpdate({ message: { text: "hi", chat: { id: 8102762294 } } }),
+    ).toEqual({ kind: "telegram", chatId: 8102762294 });
+  });
+
+  it("extracts the chat from a callback_query's message", () => {
+    expect(
+      recipientFromTelegramUpdate({
+        callback_query: { data: "approve:x", message: { chat: { id: 42 } } },
+      }),
+    ).toEqual({ kind: "telegram", chatId: 42 });
+  });
+
+  it("returns undefined when there's no chat to bind to", () => {
+    expect(recipientFromTelegramUpdate({ update_id: 5 })).toBeUndefined();
+    expect(recipientFromTelegramUpdate(null)).toBeUndefined();
   });
 });

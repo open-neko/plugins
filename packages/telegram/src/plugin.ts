@@ -7,10 +7,12 @@ import {
   type InteractionEvent,
   type ParseInboundParams,
   type ParseInboundResult,
+  type PollInboundParams,
+  type PollInboundResult,
   type VerifyInboundParams,
   type VerifyInboundResult,
 } from "@open-neko/plugin-types";
-import { parseTelegramInbound } from "./inbound.js";
+import { parseTelegramInbound, recipientFromTelegramUpdate } from "./inbound.js";
 import { projectTelegram } from "./projection.js";
 import { createTelegramClient, type TelegramClient } from "./telegram-client.js";
 
@@ -74,7 +76,8 @@ export async function deliver(
 }
 
 export function parseInbound(params: ParseInboundParams): ParseInboundResult {
-  return { intents: parseTelegramInbound(params.raw) };
+  const recipient = recipientFromTelegramUpdate(params.raw);
+  return { intents: parseTelegramInbound(params.raw), ...(recipient ? { recipient } : {}) };
 }
 
 export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult {
@@ -90,6 +93,35 @@ export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult 
   return { ok: timingSafeEqual(a, b) };
 }
 
+/**
+ * Pull transport: fetch the next batch of Telegram updates via getUpdates and
+ * return them split into individual updates (each fed back through parseInbound).
+ * `timeout: 0` returns immediately — the worker owns the loop cadence, and a
+ * long-poll would race the client's request timeout. Dry-run (no token) returns
+ * an empty batch.
+ */
+export async function pollInbound(
+  params: PollInboundParams,
+  options: DeliverOptions = {},
+): Promise<PollInboundResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return { updates: [] };
+  const make = options.createClient ?? ((t: string) => createTelegramClient({ token: t }));
+  const client = make(token);
+  const offset = params.cursor ? Number(params.cursor) : undefined;
+  const updates = await client.call<Array<{ update_id?: number }>>("getUpdates", {
+    timeout: 0,
+    ...(offset !== undefined && Number.isFinite(offset) ? { offset } : {}),
+  });
+  const list = Array.isArray(updates) ? updates : [];
+  let maxId = -1;
+  for (const u of list) {
+    if (typeof u.update_id === "number" && u.update_id > maxId) maxId = u.update_id;
+  }
+  const cursor = maxId >= 0 ? String(maxId + 1) : params.cursor;
+  return { updates: list, ...(cursor ? { cursor } : {}) };
+}
+
 export default definePlugin({
   name: "@open-neko/channel-telegram",
   version: "0.1.0",
@@ -102,6 +134,7 @@ export default definePlugin({
       deliver,
       parseInbound,
       verifyInbound,
+      pollInbound,
     },
   },
 });
