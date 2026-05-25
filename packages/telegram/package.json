@@ -1,0 +1,86 @@
+{
+  "name": "@open-neko/channel-telegram",
+  "version": "0.1.0",
+  "description": "Telegram channel for OpenNeko: delivers the agent's Briefing, findings, and approvals to a Telegram chat, and turns replies + inline-button taps back into agent intents. Bidirectional. Runs in a microsandbox VM with network egress limited to api.telegram.org.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/telegram"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "permissions": {
+      "network": [
+        "api.telegram.org"
+      ],
+      "env": [
+        {
+          "key": "TELEGRAM_BOT_TOKEN",
+          "required": true,
+          "secret": true,
+          "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+        },
+        {
+          "key": "TELEGRAM_WEBHOOK_SECRET",
+          "required": false,
+          "secret": true,
+          "description": "Optional secret_token you set when registering a webhook via setWebhook. When present, verify_inbound requires Telegram's X-Telegram-Bot-Api-Secret-Token header to match it (constant-time). Not needed for long-polling (getUpdates)."
+        }
+      ]
+    },
+    "capabilities": {
+      "channel": {
+        "providerLabel": "Telegram",
+        "directions": [
+          "outbound",
+          "inbound"
+        ],
+        "ingress": "webhook",
+        "profile": {
+          "modalities": [
+            "text"
+          ],
+          "richMedia": {
+            "markdown": true,
+            "cards": false,
+            "charts": false,
+            "images": true,
+            "interactiveControls": true
+          },
+          "interaction": {
+            "turnTaking": "async",
+            "canApproveInline": true,
+            "quickReplies": true
+          },
+          "constraints": {
+            "maxOutboundChars": 4096,
+            "latencyClass": "interactive",
+            "attentionModel": "push"
+          },
+          "fidelity": "summary"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

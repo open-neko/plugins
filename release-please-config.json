@@ -14,6 +14,7 @@
     "packages/shopify": { "release-type": "node", "component": "plugin-shopify" },
     "packages/parallel-search": { "release-type": "node", "component": "plugin-parallel-search" },
     "packages/scalekit": { "release-type": "node", "component": "plugin-scalekit" },
-    "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace" }
+    "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace" },
+    "packages/telegram": { "release-type": "node", "component": "channel-telegram" }
   }
 }

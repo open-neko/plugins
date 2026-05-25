@@ -1,0 +1,64 @@
+import { describe, it, expect } from "vitest";
+import { parseTelegramInbound } from "../src/inbound";
+
+describe("parseTelegramInbound", () => {
+  it("maps a callback_query button tap to an approve decision", () => {
+    const update = {
+      update_id: 1,
+      callback_query: { id: "cq1", data: "approve:dr-123", message: { chat: { id: 42 } } },
+    };
+    expect(parseTelegramInbound(update)).toEqual([
+      { kind: "decision", decisionRef: "dr-123", choice: "approve" },
+    ]);
+  });
+
+  it("maps a reject tap", () => {
+    expect(parseTelegramInbound({ callback_query: { data: "reject:dr-9" } })).toEqual([
+      { kind: "decision", decisionRef: "dr-9", choice: "reject" },
+    ]);
+  });
+
+  it("maps a select tap", () => {
+    expect(parseTelegramInbound({ callback_query: { data: "select:dr-9:gold" } })).toEqual([
+      { kind: "select", ref: "dr-9", optionId: "gold" },
+    ]);
+  });
+
+  it("maps a text message to an utterance carrying the chat id as threadRef", () => {
+    expect(parseTelegramInbound({ message: { text: "how are sales?", chat: { id: 4242 } } })).toEqual([
+      { kind: "utterance", text: "how are sales?", threadRef: "4242" },
+    ]);
+  });
+
+  it("maps a slash command (with args) to an invoke", () => {
+    expect(parseTelegramInbound({ message: { text: "/brief today please", chat: { id: 1 } } })).toEqual([
+      { kind: "invoke", command: "brief", args: { text: "today please" } },
+    ]);
+  });
+
+  it("maps a bare slash command to invoke without args", () => {
+    expect(parseTelegramInbound({ message: { text: "/brief", chat: { id: 1 } } })).toEqual([
+      { kind: "invoke", command: "brief" },
+    ]);
+  });
+
+  it("handles a getUpdates envelope ({ result: Update[] })", () => {
+    const env = {
+      ok: true,
+      result: [
+        { callback_query: { data: "approve:x" } },
+        { message: { text: "hi", chat: { id: 7 } } },
+      ],
+    };
+    expect(parseTelegramInbound(env)).toEqual([
+      { kind: "decision", decisionRef: "x", choice: "approve" },
+      { kind: "utterance", text: "hi", threadRef: "7" },
+    ]);
+  });
+
+  it("ignores updates it can't map", () => {
+    expect(parseTelegramInbound({ update_id: 5 })).toEqual([]);
+    expect(parseTelegramInbound(null)).toEqual([]);
+    expect(parseTelegramInbound({ callback_query: { data: "weird-no-colon" } })).toEqual([]);
+  });
+});
