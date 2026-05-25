@@ -19,6 +19,63 @@
       ],
       "versions": [
         {
+          "version": "0.3.0",
+          "integrity": "sha512-dKx2Ro0X0KdjZkMxTR/tFJt3bIyUl+byq8CUfC/iwNgcs0A6/R6Vxzv1EWniKxEay+h91vE1MLCtXtOr75+XGg==",
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH...). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token set via setWebhook; verify_inbound checks Telegram's X-Telegram-Bot-Api-Secret-Token header against it. Not needed for getUpdates long-poll."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-05-25"
+        },
+        {
           "version": "0.2.0",
           "integrity": "sha512-6DCDiVh+CMU6wCuyp3N2RMIhpehs/C0vC2nP08XzFzo/8uK1GLO0YpN4wXYp3RUMcrYBiOvCLyx4+gbuNE/yEw==",
           "provenanceWaived": true,
