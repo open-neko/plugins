@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.2.0...channel-telegram-v0.3.0) (2026-05-25)
+
+
+### Features
+
+* Telegram channel marketplace listing + poll_inbound/auto-bind contract ([#22](https://github.com/open-neko/plugins/issues/22)) ([da09ca1](https://github.com/open-neko/plugins/commit/da09ca1779b7edfe6b91743a07afa7f8a0d05f1d))
+
 ## [0.2.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.1.0...channel-telegram-v0.2.0) (2026-05-25)
 
 
