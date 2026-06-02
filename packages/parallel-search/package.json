@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-parallel-search",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Web search action for OpenNeko via Parallel.ai's search API. Runs in a microsandbox VM with network egress limited to api.parallel.ai.",
   "license": "Apache-2.0",
   "repository": {
