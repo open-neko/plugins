@@ -294,7 +294,7 @@ export async function runAppendSheetRow(
 
 export default definePlugin({
   name: "@open-neko/connector-google-workspace",
-  version: "0.2.0", // x-release-please-version
+  version: "0.2.1", // x-release-please-version
   capabilities: {
     connect: {
       providerLabel: "Google Workspace",

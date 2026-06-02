@@ -4,6 +4,6 @@
   "packages/shopify": "0.2.0",
   "packages/parallel-search": "0.3.0",
   "packages/scalekit": "0.2.0",
-  "packages/google-workspace": "0.2.0",
+  "packages/google-workspace": "0.2.1",
   "packages/telegram": "0.3.0"
 }

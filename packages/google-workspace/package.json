@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/connector-google-workspace",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Google Workspace connector for OpenNeko — per-operator OAuth via PKCE against the operator's own Google Cloud OAuth client. Provides Gmail, Calendar, Drive, Docs, and Sheets actions backed by each operator's authorised account. Runs in a microsandbox VM with network egress limited to accounts.google.com and *.googleapis.com.",
   "license": "Apache-2.0",
   "repository": {
