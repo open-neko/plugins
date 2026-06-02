@@ -37,6 +37,22 @@ export interface TelegramClient {
   call<T = unknown>(method: string, body: Record<string, unknown>): Promise<T>;
 }
 
+// undici reports transport failures as an opaque "fetch failed"; the real OS
+// code (ENOTFOUND, ECONNREFUSED, ENETUNREACH, …) hangs off `.cause`/`.errors`.
+function fetchErrorDetail(err: unknown): string {
+  const base = err instanceof Error ? err.message : String(err);
+  const codes = new Set<string>();
+  const visit = (e: unknown): void => {
+    if (!e || typeof e !== "object") return;
+    const o = e as { code?: unknown; cause?: unknown; errors?: unknown };
+    if (typeof o.code === "string") codes.add(o.code);
+    if (Array.isArray(o.errors)) for (const sub of o.errors) visit(sub);
+    if (o.cause) visit(o.cause);
+  };
+  visit(err);
+  return codes.size > 0 ? `${base} (${[...codes].join(", ")})` : base;
+}
+
 export function createTelegramClient(options: TelegramClientOptions): TelegramClient {
   const fetchImpl = options.fetchImpl ?? fetch;
   const base = options.base ?? TELEGRAM_API_BASE;
@@ -63,7 +79,7 @@ export function createTelegramClient(options: TelegramClientOptions): TelegramCl
           );
         }
         throw new TelegramApiError(
-          `Telegram ${method} network error: ${err instanceof Error ? err.message : String(err)}`,
+          `Telegram ${method} network error: ${fetchErrorDetail(err)}`,
           null,
           err,
         );
