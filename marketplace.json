@@ -19,6 +19,63 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "integrity": "sha512-fhQgHLdnVkOCfCNDnnAyUmDMNrIZhFzerllcqZGBLJp+Vmrn9lLLxa18wyMXrSD2GEdmZLcI0TlRXYq7A3WDKA==",
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH...). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token set via setWebhook; verify_inbound checks Telegram's X-Telegram-Bot-Api-Secret-Token header against it. Not needed for getUpdates long-poll."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
+        {
           "version": "0.3.0",
           "integrity": "sha512-dKx2Ro0X0KdjZkMxTR/tFJt3bIyUl+byq8CUfC/iwNgcs0A6/R6Vxzv1EWniKxEay+h91vE1MLCtXtOr75+XGg==",
           "permissions": {
@@ -149,6 +206,33 @@
       ],
       "versions": [
         {
+          "version": "0.3.1",
+          "integrity": "sha512-n5yLgTAVBqoGyhZjn9KJB1Z2m6kf8lurgnpQ2Z4Qk2FpiHSae29QPwv1xy/HFgmSqnhjXxFyU/l3l+lReWnaGA==",
+          "permissions": {
+            "network": [
+              "search.parallel.ai"
+            ],
+            "env": []
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "web_search",
+                  "description": "Search the web via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "web_fetch",
+                  "description": "Fetch a single page via Parallel.ai's Search MCP.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
+        {
           "version": "0.2.0",
           "integrity": "sha512-gX6PcjZvyl2ggW1HLy0v9KANPHoBi96DhsBVzDmY4v2nDiQHjufDacazwaHi+OInT8+wz+Hf+gqSZETLDse79A==",
           "provenanceWaived": true,
@@ -218,6 +302,41 @@
         }
       ],
       "versions": [
+        {
+          "version": "0.2.1",
+          "integrity": "sha512-COH/05vyBYCyNNHJ+GjBKTHFRvJf6cXkCYTpqrbtUJ4jXFM0AFWSl1YPW/zXROf+2IC1xCH+NChDKQTTdxNR5Q==",
+          "permissions": {
+            "network": [
+              "*.scalekit.com"
+            ],
+            "env": [
+              {
+                "key": "SCALEKIT_ENVIRONMENT_URL",
+                "required": true,
+                "secret": false,
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_ID",
+                "required": true,
+                "secret": false,
+                "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+              },
+              {
+                "key": "SCALEKIT_CLIENT_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+              }
+            ]
+          },
+          "capabilities": {
+            "auth": {
+              "providerLabel": "Scalekit"
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
         {
           "version": "0.1.0",
           "integrity": "sha512-XTDCF4qaMptWHrD4d0ojd+gs5fb7q3GHe0Qhi4dBzGwerZilQDBGorUVGy4TRiFVTo/s7Rbx6lzD8LbXNV5RMA==",
@@ -305,6 +424,68 @@
       ],
       "versions": [
         {
+          "version": "0.2.1",
+          "integrity": "sha512-RD07xb8mmk27Vl0ebIpvTWtmPi+oOBWibfiO2fbolsQX66fMDJLdW3jeZ0sdDTJWL47BUmO2vsZPXzZNElPIKw==",
+          "permissions": {
+            "network": [
+              "accounts.google.com",
+              "oauth2.googleapis.com",
+              "gmail.googleapis.com",
+              "www.googleapis.com",
+              "sheets.googleapis.com",
+              "docs.googleapis.com"
+            ],
+            "env": [
+              {
+                "key": "GOOGLE_CLIENT_ID",
+                "required": true,
+                "secret": false,
+                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide — all operators share one client). Create at https://console.cloud.google.com/apis/credentials → Create credentials → OAuth client ID → Web application; set the redirect URI to your deployment's connect callback."
+              },
+              {
+                "key": "GOOGLE_CLIENT_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "OAuth 2.0 Client Secret paired with the client ID above. Stored in the per-user secrets file, never echoed."
+              }
+            ]
+          },
+          "capabilities": {
+            "connect": {
+              "providerLabel": "Google Workspace",
+              "scopes": [
+                "openid",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/calendar.events.readonly",
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/documents"
+              ],
+              "flow": "oauth2-pkce"
+            },
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_gmail",
+                  "description": "Send an email from the connected user's Gmail account.",
+                  "default_mode": "ask"
+                },
+                {
+                  "kind": "list_calendar_events",
+                  "description": "List upcoming events on the connected user's primary calendar.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "append_sheet_row",
+                  "description": "Append a row to a Google Sheet the connected user can edit.",
+                  "default_mode": "ask"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
+        {
           "version": "0.2.0",
           "integrity": "sha512-VzsTtkvvk75QRZ8tt1EdCMX6+ltjqgXaI2nVjo05aSKeL6UEouAkauDPBTD84cim1cbc2IV4/B2y/2yAji1vMg==",
           "permissions": {
@@ -382,6 +563,57 @@
       ],
       "versions": [
         {
+          "version": "0.2.1",
+          "integrity": "sha512-P/dC8a8UMMIYBASc2QRzhN+vDbB9y1IqTuhW7A4a/zPujpImSeV0quFNDo5i8EP8eKbDk7b9HDgNZZFBgzXpaQ==",
+          "permissions": {
+            "network": [
+              "*.myshopify.com"
+            ],
+            "env": [
+              {
+                "key": "SHOPIFY_STORE_DOMAIN",
+                "required": true,
+                "secret": false,
+                "description": "Your store's permanent myshopify.com subdomain — e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
+              },
+              {
+                "key": "SHOPIFY_ACCESS_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Shopify Admin API access token (starts with shpat_). Create at admin → Settings → Apps and sales channels → Develop apps → Create an app → Configuration → Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install — copy it immediately."
+              },
+              {
+                "key": "SHOPIFY_API_VERSION",
+                "required": false,
+                "secret": false,
+                "description": "Shopify Admin API version to pin (defaults to 2026-01). Shopify rotates quarterly; pin a stable version to avoid surprise breakage."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "list_shopify_orders",
+                  "description": "List recent orders, optionally filtered by financialStatus, fulfillmentStatus, or a date range (createdAtMin/createdAtMax).",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "get_shopify_order",
+                  "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "update_shopify_order_note",
+                  "description": "Set or append the internal note on an order (user-visible in Shopify admin only; not customer-facing).",
+                  "default_mode": "ask"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
+        {
           "version": "0.2.0",
           "integrity": "sha512-JnzuEr8ag+U7/yL1eyTk/VwwK84zoP9GTRxPF6LTGukNTk1CJOloeE3XZmK+U8+5lCZ2dZrdv0yMbFDTDBp7gA==",
           "permissions": {
@@ -447,6 +679,50 @@
         }
       ],
       "versions": [
+        {
+          "version": "0.2.1",
+          "integrity": "sha512-4M9fp8UcSJWJahiHAJnfUHPB2IUo56sq3bR6rM4mLNphPqNZB2q3Z59Qp+fSpfOO7YtBR5YeSQSyV6paddrZxw==",
+          "permissions": {
+            "network": [
+              "slack.com"
+            ],
+            "env": [
+              {
+                "key": "SLACK_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_slack_message",
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "send_slack_dm",
+                  "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "react_slack_message",
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "lookup_slack_entity",
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-06-02"
+        },
         {
           "version": "0.1.0",
           "integrity": "sha512-+H6gDUp8vNfs5pVvffnEByN5ZDt9c5HiYGF1uQ2Hq5b6NZYNn7DHlQtMMAXXv1BOKuiHnCPBmYyL5+ltrMa8rQ==",
