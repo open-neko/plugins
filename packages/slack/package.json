@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-slack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Slack actions for OpenNeko: post messages, send DMs, react to messages, and look up users/channels. Runs in a microsandbox VM with network egress limited to slack.com.",
   "license": "Apache-2.0",
   "repository": {

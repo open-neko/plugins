@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.0...channel-telegram-v0.3.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* sync plugin declared version with package.json ([37831de](https://github.com/open-neko/plugins/commit/37831dea0aa3aea26f71f68483e78f18ef9baee6))
+
 ## [0.3.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.2.0...channel-telegram-v0.3.0) (2026-05-25)
 
 

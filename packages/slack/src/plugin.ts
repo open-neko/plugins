@@ -415,7 +415,7 @@ async function handleLookup(
 
 export default definePlugin({
   name: "@open-neko/plugin-slack",
-  version: "0.2.0", // x-release-please-version
+  version: "0.2.1", // x-release-please-version
   capabilities: {
     action: {
       kinds: [

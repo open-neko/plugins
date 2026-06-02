@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-scalekit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Scalekit SSO provider for OpenNeko. Implements OpenNeko's generic OIDC auth contract over Scalekit's hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, and other enterprise IdPs behind one integration. Runs in a microsandbox VM with network egress limited to *.scalekit.com.",
   "license": "Apache-2.0",
   "repository": {
