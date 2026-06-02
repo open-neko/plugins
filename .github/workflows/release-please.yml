@@ -1,13 +1,17 @@
 name: release-please
 
-# Opens (and auto-merges) a per-package release PR for any plugin whose
-# conventional commits since its last release warrant a bump. On merge,
-# release-please tags + creates a GitHub Release per package; `publish.yml`
-# fires on `release: published` and pushes the bumped package(s) to npm.
+# Opens (and auto-merges) a release PR for any plugin whose conventional
+# commits since its last release warrant a bump. On merge, release-please
+# tags + creates a GitHub Release per package; `publish.yml` fires on
+# `release: published` and pushes the bumped package(s) to npm.
 #
-# Separate versions: each plugin (packages/*) is versioned independently
-# via release-please manifest mode (separate-pull-requests: true). A commit
-# touching packages/slack/** bumps only @open-neko/plugin-slack.
+# Independent versions, one PR: each plugin (packages/*) is still versioned
+# independently in manifest mode — a commit touching packages/slack/** bumps
+# only @open-neko/plugin-slack. But all pending bumps share ONE release PR
+# (separate-pull-requests: false). Separate per-package PRs each edit the
+# shared .release-please-manifest.json, so two open at once conflict on
+# adjacent lines and can't auto-merge in parallel — aggregating avoids that
+# while keeping per-package tags/releases/publishes.
 on:
   push:
     branches: [main]
@@ -40,13 +44,24 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      # Auto-merge each release PR once its checks pass, so cutting a release
-      # doesn't require a human click every time.
+      # Enable auto-merge on the release PR(s) so cutting a release doesn't
+      # need a human click. Resilient: a just-created PR can report an unknown
+      # mergeable state for a few seconds, so retry; never let one PR's
+      # transient failure abort the others (or the workflow).
       - name: Enable auto-merge on release PR(s)
         if: steps.release.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo '${{ steps.release.outputs.prs }}' | jq -r '.[].number' | while read -r pr; do
-            gh pr merge --auto --squash "$pr" --repo "$GITHUB_REPOSITORY"
+          rc=0
+          for pr in $(echo '${{ steps.release.outputs.prs }}' | jq -r '.[].number'); do
+            ok=0
+            for attempt in 1 2 3 4 5 6; do
+              if gh pr merge --auto --squash "$pr" --repo "$GITHUB_REPOSITORY"; then
+                echo "auto-merge enabled for #$pr"; ok=1; break
+              fi
+              echo "#$pr not ready (attempt $attempt); retrying in 10s"; sleep 10
+            done
+            [ "$ok" = 1 ] || { echo "::warning::could not enable auto-merge for #$pr"; rc=1; }
           done
+          exit $rc
