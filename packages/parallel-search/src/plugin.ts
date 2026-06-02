@@ -156,7 +156,7 @@ async function handleWebFetch(
 
 export default definePlugin({
   name: "@open-neko/plugin-parallel-search",
-  version: "0.2.0",
+  version: "0.3.0", // x-release-please-version
   capabilities: {
     action: {
       kinds: [

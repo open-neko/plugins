@@ -10,11 +10,11 @@
   "bootstrap-sha": "ade79293313a483fd5276b2d592977b5308c2768",
   "packages": {
     "packages/types": { "release-type": "node", "component": "plugin-types" },
-    "packages/slack": { "release-type": "node", "component": "plugin-slack" },
-    "packages/shopify": { "release-type": "node", "component": "plugin-shopify" },
-    "packages/parallel-search": { "release-type": "node", "component": "plugin-parallel-search" },
-    "packages/scalekit": { "release-type": "node", "component": "plugin-scalekit" },
-    "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace" },
-    "packages/telegram": { "release-type": "node", "component": "channel-telegram" }
+    "packages/slack": { "release-type": "node", "component": "plugin-slack", "extra-files": ["src/plugin.ts"] },
+    "packages/shopify": { "release-type": "node", "component": "plugin-shopify", "extra-files": ["src/plugin.ts"] },
+    "packages/parallel-search": { "release-type": "node", "component": "plugin-parallel-search", "extra-files": ["src/plugin.ts"] },
+    "packages/scalekit": { "release-type": "node", "component": "plugin-scalekit", "extra-files": ["src/plugin.ts"] },
+    "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace", "extra-files": ["src/plugin.ts"] },
+    "packages/telegram": { "release-type": "node", "component": "channel-telegram", "extra-files": ["src/plugin.ts"] }
   }
 }

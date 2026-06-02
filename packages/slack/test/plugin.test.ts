@@ -51,7 +51,6 @@ function fakeClient(
 describe("plugin shape", () => {
   it("declares all four Slack actions", () => {
     expect(plugin.name).toBe("@open-neko/plugin-slack");
-    expect(plugin.version).toBe("0.1.0");
     expect(plugin.capabilities.action?.kinds.map((a) => a.kind)).toEqual([
       "send_slack_message",
       "send_slack_dm",

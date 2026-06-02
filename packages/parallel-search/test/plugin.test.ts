@@ -69,7 +69,6 @@ function textResult(text: string): McpToolResult {
 describe("plugin shape", () => {
   it("declares web_search and web_fetch actions", () => {
     expect(plugin.name).toBe("@open-neko/plugin-parallel-search");
-    expect(plugin.version).toBe("0.2.0");
     const kinds = plugin.capabilities.action?.kinds.map((a) => a.kind);
     expect(kinds).toEqual(["web_search", "web_fetch"]);
   });

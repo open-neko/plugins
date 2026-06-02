@@ -23,6 +23,10 @@ jobs:
       - run: pnpm -r build
       - run: pnpm -r typecheck
       - run: pnpm -r test
+      # Guards that every plugin's definePlugin version == its package.json
+      # version (release-please bumps package.json; the host rejects a plugin
+      # whose register() version differs from the manifest pin).
+      - run: pnpm exec vitest run test/declared-version.test.ts
 
   # Live checks against npm (provenance, integrity hash, lifecycle
   # scripts). PR-only: an unreleased version on main may not yet exist

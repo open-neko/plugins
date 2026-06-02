@@ -57,7 +57,6 @@ function fakeClient(opts: {
 describe("plugin shape", () => {
   it("declares scalekit as an auth provider only (no actions)", () => {
     expect(plugin.name).toBe("@open-neko/plugin-scalekit");
-    expect(plugin.version).toBe("0.1.0");
     expect(plugin.capabilities.action).toBeUndefined();
     expect(plugin.capabilities.auth?.providerLabel).toBe("Scalekit");
     expect(typeof plugin.capabilities.auth?.begin).toBe("function");
