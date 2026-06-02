@@ -33,4 +33,42 @@ describe("createTelegramClient", () => {
     });
     await expect(client.call("sendMessage", {})).rejects.toBeInstanceOf(TelegramApiError);
   });
+
+  it("surfaces the underlying OS code from an opaque fetch failure", async () => {
+    const failed = Object.assign(new TypeError("fetch failed"), {
+      cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" }),
+    });
+    const fetchImpl = vi.fn(async () => {
+      throw failed;
+    });
+    const client = createTelegramClient({
+      token: "T",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(client.call("getUpdates", {})).rejects.toThrow(
+      /network error: fetch failed \(ECONNREFUSED\)/,
+    );
+  });
+
+  it("collects every code from a Happy-Eyeballs aggregate failure", async () => {
+    const failed = Object.assign(new TypeError("fetch failed"), {
+      cause: new AggregateError(
+        [
+          Object.assign(new Error("v6"), { code: "ENETUNREACH" }),
+          Object.assign(new Error("v4"), { code: "ECONNREFUSED" }),
+        ],
+        "all attempts failed",
+      ),
+    });
+    const fetchImpl = vi.fn(async () => {
+      throw failed;
+    });
+    const client = createTelegramClient({
+      token: "T",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(client.call("getUpdates", {})).rejects.toThrow(
+      /fetch failed \(ENETUNREACH, ECONNREFUSED\)/,
+    );
+  });
 });
