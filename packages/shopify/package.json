@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-shopify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shopify Admin API connector for OpenNeko — list orders, fetch order detail, and update internal order notes against an operator's store. Three sandboxed actions: list_shopify_orders, get_shopify_order, update_shopify_order_note. Network egress limited to the operator's *.myshopify.com host.",
   "license": "Apache-2.0",
   "repository": {
