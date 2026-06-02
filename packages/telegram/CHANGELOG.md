@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.1...channel-telegram-v0.3.2) (2026-06-02)
+
+
+### Bug Fixes
+
+* **telegram:** surface fetch error codes and prefer IPv4 in the VM ([#32](https://github.com/open-neko/plugins/issues/32)) ([612c166](https://github.com/open-neko/plugins/commit/612c1664e4bf6b7aca76c63f224be8cb0e36379a))
+
 ## [0.3.1](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.0...channel-telegram-v0.3.1) (2026-06-02)
 
 
