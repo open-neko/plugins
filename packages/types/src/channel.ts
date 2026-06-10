@@ -103,6 +103,8 @@ export const ChannelSender = z.object({
   displayName: z.string().optional(),
   /** Workspace/team scope (Slack team_id, WhatsApp business number). */
   workspaceId: z.string().optional(),
+  /** Email when the substrate provides one — enables CH3 SSO auto-link. */
+  email: z.string().optional(),
 });
 export type ChannelSender = z.infer<typeof ChannelSender>;
 
