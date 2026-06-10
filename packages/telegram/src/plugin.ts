@@ -12,7 +12,11 @@ import {
   type VerifyInboundParams,
   type VerifyInboundResult,
 } from "@open-neko/plugin-types";
-import { parseTelegramInbound, recipientFromTelegramUpdate } from "./inbound.js";
+import {
+  parseTelegramInbound,
+  recipientFromTelegramUpdate,
+  senderFromTelegramUpdate,
+} from "./inbound.js";
 import { projectTelegram } from "./projection.js";
 import { createTelegramClient, type TelegramClient } from "./telegram-client.js";
 
@@ -77,7 +81,12 @@ export async function deliver(
 
 export function parseInbound(params: ParseInboundParams): ParseInboundResult {
   const recipient = recipientFromTelegramUpdate(params.raw);
-  return { intents: parseTelegramInbound(params.raw), ...(recipient ? { recipient } : {}) };
+  const sender = senderFromTelegramUpdate(params.raw);
+  return {
+    intents: parseTelegramInbound(params.raw),
+    ...(recipient ? { recipient } : {}),
+    ...(sender ? { sender } : {}),
+  };
 }
 
 export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult {
