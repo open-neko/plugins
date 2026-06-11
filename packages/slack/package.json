@@ -1,7 +1,7 @@
 {
   "name": "@open-neko/plugin-slack",
   "version": "0.2.1",
-  "description": "Slack actions for OpenNeko: post messages, send DMs, react to messages, and look up users/channels. Runs in a microsandbox VM with network egress limited to slack.com.",
+  "description": "Slack for OpenNeko: a bidirectional channel (Block Kit briefings, findings and inline Approve/Reject; messages and button taps come back as agent intents) plus actions to post messages, send DMs, react, and look up users/channels. Runs in a sandbox VM with network egress limited to slack.com.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -27,6 +27,12 @@
           "required": true,
           "secret": true,
           "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+        },
+        {
+          "key": "SLACK_SIGNING_SECRET",
+          "required": false,
+          "secret": true,
+          "description": "Slack app signing secret - verifies inbound webhook requests (X-Slack-Signature over v0:<ts>:<body>). Required only when the channel surface receives webhooks; pure outbound/action use can omit it."
         }
       ]
     },
@@ -39,7 +45,7 @@
             "default_mode": "auto",
             "example": {
               "channel": "#growth",
-              "text": "Heads up — Q3 revenue just landed."
+              "text": "Heads up \u2014 Q3 revenue just landed."
             }
           },
           {
@@ -71,6 +77,37 @@
             }
           }
         ]
+      },
+      "channel": {
+        "providerLabel": "Slack",
+        "directions": [
+          "outbound",
+          "inbound"
+        ],
+        "ingress": "webhook",
+        "profile": {
+          "modalities": [
+            "text",
+            "visual"
+          ],
+          "richMedia": {
+            "markdown": true,
+            "cards": true,
+            "charts": false,
+            "images": true,
+            "interactiveControls": true
+          },
+          "interaction": {
+            "turnTaking": "async",
+            "canApproveInline": true,
+            "quickReplies": true
+          },
+          "constraints": {
+            "latencyClass": "interactive",
+            "attentionModel": "push"
+          },
+          "fidelity": "summary"
+        }
       }
     }
   },

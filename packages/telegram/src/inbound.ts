@@ -1,4 +1,8 @@
-import type { ChannelRecipient, IntentEvent } from "@open-neko/plugin-types";
+import type {
+  ChannelRecipient,
+  ChannelSender,
+  IntentEvent,
+} from "@open-neko/plugin-types";
 
 /** Decodes the `verb:rest` callback_data convention shared with other quick-reply channels. */
 const intentFromButtonData = (data: string): IntentEvent | null => {
@@ -37,6 +41,31 @@ export const recipientFromTelegramUpdate = (raw: unknown): ChannelRecipient | un
     return { kind: "telegram", chatId };
   }
   return undefined;
+};
+
+/**
+ * CH1: the sending user (`from`) of the update — message, edited message,
+ * or callback query. Channel posts have no `from`; those return undefined.
+ */
+export const senderFromTelegramUpdate = (raw: unknown): ChannelSender | undefined => {
+  const update = asObj(raw);
+  if (!update) return undefined;
+  const cq = asObj(update.callback_query);
+  const from =
+    (cq ? asObj(cq.from) : null) ??
+    asObj(asObj(update.message)?.from) ??
+    asObj(asObj(update.edited_message)?.from);
+  const id = from?.id;
+  if (typeof id !== "number" && typeof id !== "string") return undefined;
+  const first = asStr(from?.first_name);
+  const last = asStr(from?.last_name);
+  const username = asStr(from?.username);
+  const displayName =
+    [first, last].filter(Boolean).join(" ") || username || undefined;
+  return {
+    id: String(id),
+    ...(displayName ? { displayName } : {}),
+  };
 };
 
 const intentFromUpdate = (update: Obj): IntentEvent | null => {

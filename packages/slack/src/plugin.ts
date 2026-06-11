@@ -1,8 +1,23 @@
 import {
   definePlugin,
+  type CapabilityProfile,
+  type DeliverParams,
+  type DeliverResult,
+  type InteractionEvent,
+  type ParseInboundParams,
+  type ParseInboundResult,
   type PluginActionOutcome,
   type PluginActionRequest,
+  type VerifyInboundParams,
+  type VerifyInboundResult,
 } from "@open-neko/plugin-types";
+import {
+  parseSlackInbound,
+  recipientFromSlackPayload,
+  senderFromSlackPayload,
+} from "./inbound.js";
+import { projectSlack } from "./projection.js";
+import { verifySlackSignature } from "./verify.js";
 import {
   createSlackClient,
   SlackApiError,
@@ -413,10 +428,82 @@ async function handleLookup(
   );
 }
 
+/**
+ * CH4 — what the Slack substrate carries. Identical to the manifest's
+ * capabilities.channel.profile and to @neko/interaction's SLACK_PROFILE:
+ * Block Kit cards + buttons, no charts.
+ */
+export const SLACK_PROFILE: CapabilityProfile = {
+  modalities: ["text", "visual"],
+  richMedia: { markdown: true, cards: true, charts: false, images: true, interactiveControls: true },
+  interaction: { turnTaking: "async", canApproveInline: true, quickReplies: true },
+  constraints: { latencyClass: "interactive", attentionModel: "push" },
+  fidelity: "summary",
+};
+
+const resolveChannel = (recipient: DeliverParams["recipient"]): string => {
+  const channel = (recipient as { channel?: unknown }).channel;
+  if (typeof channel === "string" && channel) return channel;
+  throw new SlackPluginError(
+    "recipient.channel is required (the Slack channel or DM id to deliver to)",
+  );
+};
+
+export async function deliver(
+  params: DeliverParams,
+  options: InvokeOptions = {},
+): Promise<DeliverResult> {
+  const events = params.events as InteractionEvent[];
+  const { blocks, text } = projectSlack(events, params.profile);
+  if (blocks.length === 0) return { delivered: false };
+  const channel = resolveChannel(params.recipient);
+
+  if (!process.env.SLACK_BOT_TOKEN) {
+    process.stderr.write(
+      `[channel-slack dry-run] channel=${channel} ${JSON.stringify({ blocks, text })}\n`,
+    );
+    return { delivered: false, ref: `dry-run:${blocks.length}` };
+  }
+
+  const client = clientOrDefault(options);
+  const envelope = await client.postJson("chat.postMessage", {
+    channel,
+    blocks,
+    text,
+  });
+  const ts = (envelope as { ts?: unknown }).ts;
+  return { delivered: true, ...(typeof ts === "string" ? { ref: ts } : {}) };
+}
+
+export function parseInbound(params: ParseInboundParams): ParseInboundResult {
+  const recipient = recipientFromSlackPayload(params.raw);
+  const sender = senderFromSlackPayload(params.raw);
+  return {
+    intents: parseSlackInbound(params.raw),
+    ...(recipient ? { recipient } : {}),
+    ...(sender ? { sender } : {}),
+  };
+}
+
+export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult {
+  const secret = process.env.SLACK_SIGNING_SECRET;
+  if (!secret) return { ok: false };
+  return { ok: verifySlackSignature(secret, params.headers, params.body) };
+}
+
 export default definePlugin({
   name: "@open-neko/plugin-slack",
   version: "0.2.1", // x-release-please-version
   capabilities: {
+    channel: {
+      providerLabel: "Slack",
+      profile: SLACK_PROFILE,
+      directions: ["outbound", "inbound"],
+      ingress: "webhook",
+      deliver,
+      parseInbound,
+      verifyInbound,
+    },
     action: {
       kinds: [
         {
