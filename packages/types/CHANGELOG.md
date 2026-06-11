@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.4.0...plugin-types-v0.5.0) (2026-06-11)
+
+
+### Features
+
+* **slack,whatsapp,types:** Slack + WhatsApp channels (CH4, CH5) ([b33c1e9](https://github.com/open-neko/plugins/commit/b33c1e9af606b57de136555e37158a6b32268c86))
+* **telegram,types:** capture the inbound sender (CH1) ([2f818a7](https://github.com/open-neko/plugins/commit/2f818a7a7cec0f82ade8a7d41f2f70e4ee0a457a))
+
 ## [0.4.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.3.0...plugin-types-v0.4.0) (2026-05-25)
 
 

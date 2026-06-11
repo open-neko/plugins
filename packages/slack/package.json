@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-slack",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Slack for OpenNeko: a bidirectional channel (Block Kit briefings, findings and inline Approve/Reject; messages and button taps come back as agent intents) plus actions to post messages, send DMs, react, and look up users/channels. Runs in a sandbox VM with network egress limited to slack.com.",
   "license": "Apache-2.0",
   "repository": {
@@ -45,7 +45,7 @@
             "default_mode": "auto",
             "example": {
               "channel": "#growth",
-              "text": "Heads up \u2014 Q3 revenue just landed."
+              "text": "Heads up — Q3 revenue just landed."
             }
           },
           {

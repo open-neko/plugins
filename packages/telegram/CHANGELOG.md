@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.2...channel-telegram-v0.4.0) (2026-06-11)
+
+
+### Features
+
+* **telegram,types:** capture the inbound sender (CH1) ([2f818a7](https://github.com/open-neko/plugins/commit/2f818a7a7cec0f82ade8a7d41f2f70e4ee0a457a))
+
 ## [0.3.2](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.1...channel-telegram-v0.3.2) (2026-06-02)
 
 
