@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-slack-v0.2.1...plugin-slack-v0.3.0) (2026-06-11)
+
+
+### Features
+
+* **slack,whatsapp,types:** Slack + WhatsApp channels (CH4, CH5) ([b33c1e9](https://github.com/open-neko/plugins/commit/b33c1e9af606b57de136555e37158a6b32268c86))
+
 ## [0.2.1](https://github.com/open-neko/plugins/compare/plugin-slack-v0.2.0...plugin-slack-v0.2.1) (2026-06-02)
 
 

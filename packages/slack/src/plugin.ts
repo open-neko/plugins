@@ -493,7 +493,7 @@ export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult 
 
 export default definePlugin({
   name: "@open-neko/plugin-slack",
-  version: "0.2.1", // x-release-please-version
+  version: "0.3.0", // x-release-please-version
   capabilities: {
     channel: {
       providerLabel: "Slack",
