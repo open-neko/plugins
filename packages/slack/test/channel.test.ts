@@ -63,29 +63,114 @@ describe("parseInbound", () => {
     expect(result.recipient).toEqual({ kind: "slack", channel: "C9" });
   });
 
-  it("normalizes an Events API message and skips bot echoes", () => {
+  it("normalizes a DM (channel_type=im) and skips bot echoes", () => {
     const human = parseInbound({
       raw: {
         type: "event_callback",
         team_id: "T1",
-        event: { type: "message", text: "hi neko", user: "U7", channel: "C9" },
+        event: { type: "message", channel_type: "im", text: "hi neko", user: "U7", channel: "D9" },
       },
       headers: {},
       body: "",
     } as never);
     expect(human.intents).toEqual([{ kind: "utterance", text: "hi neko", threadRef: undefined }]);
     expect(human.sender).toEqual({ id: "U7", workspaceId: "T1" });
+    expect(human.recipient).toEqual({ kind: "slack", channel: "D9" });
 
     const bot = parseInbound({
       raw: {
         type: "event_callback",
-        event: { type: "message", text: "echo", bot_id: "B1", channel: "C9" },
+        event: { type: "message", channel_type: "im", text: "echo", bot_id: "B1", channel: "D9" },
       },
       headers: {},
       body: "",
     } as never);
     expect(bot.intents).toEqual([]);
     expect(bot.sender).toBeUndefined();
+  });
+
+  it("ignores a channel message that does not @-mention the bot", () => {
+    const out = parseInbound({
+      raw: {
+        type: "event_callback",
+        team_id: "T1",
+        event: {
+          type: "message",
+          channel_type: "channel",
+          text: "watercooler chatter",
+          user: "U7",
+          channel: "C9",
+        },
+      },
+      headers: {},
+      body: "",
+    } as never);
+    expect(out.intents).toEqual([]);
+  });
+
+  it("normalizes an @-mention into a threaded utterance", () => {
+    const out = parseInbound({
+      raw: {
+        type: "event_callback",
+        team_id: "T1",
+        event: {
+          type: "app_mention",
+          text: "<@U0BOT> what's revenue?",
+          user: "U7",
+          channel: "C9",
+          ts: "171.5",
+        },
+      },
+      headers: {},
+      body: "",
+    } as never);
+    expect(out.intents).toEqual([
+      { kind: "utterance", text: "what's revenue?", threadRef: "171.5" },
+    ]);
+    expect(out.recipient).toEqual({ kind: "slack", channel: "C9", thread_ts: "171.5" });
+  });
+
+  it("maps a slash command to an invoke with an ephemeral recipient", () => {
+    const out = parseInbound({
+      raw: {
+        command: "/openneko",
+        text: "rules-list customer policies",
+        channel_id: "C9",
+        user_id: "U7",
+        user_name: "ada",
+        team_id: "T1",
+      },
+      headers: {},
+      body: "",
+    } as never);
+    expect(out.intents).toEqual([
+      { kind: "invoke", command: "rules-list", args: { text: "customer policies" } },
+    ]);
+    expect(out.recipient).toEqual({ kind: "slack", channel: "C9", user: "U7", ephemeral: true });
+    expect(out.sender).toEqual({ id: "U7", displayName: "ada", workspaceId: "T1" });
+  });
+
+  it("turns a choice button tap into the option label as a threaded reply", () => {
+    const out = parseInbound({
+      raw: {
+        type: "block_actions",
+        team: { id: "T1" },
+        user: { id: "U7", name: "ada" },
+        container: { channel_id: "C9", message_ts: "171.2" },
+        message: { ts: "171.2" },
+        actions: [
+          {
+            action_id: "select:opt-1",
+            value: "ar-9:opt-1",
+            text: { type: "plain_text", text: "Option B" },
+          },
+        ],
+      },
+      headers: {},
+      body: "",
+    } as never);
+    expect(out.intents).toEqual([{ kind: "utterance", text: "Option B", threadRef: "171.2" }]);
+    expect(out.recipient).toEqual({ kind: "slack", channel: "C9", thread_ts: "171.2" });
   });
 });
 

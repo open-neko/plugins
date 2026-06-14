@@ -1,6 +1,6 @@
 # @open-neko/plugin-slack
 
-Slack actions for [OpenNeko](https://github.com/open-neko/neko): post messages, send DMs, react to messages, and look up users/channels. Runs inside a microsandbox microVM whose outbound network is limited to `slack.com`.
+Slack for [OpenNeko](https://github.com/open-neko/neko): a bidirectional **channel** (DM the agent, @-mention it in a channel, run `/openneko` slash commands — it replies like the web `/work` UI) **plus actions** (post messages, send DMs, react, look up users/channels). The action handlers run inside a microsandbox microVM whose outbound network is limited to `slack.com`; inbound is carried by the worker over Slack Socket Mode.
 
 ## Install
 
@@ -35,6 +35,41 @@ Create a Slack app at <https://api.slack.com/apps>. Required bot-token scopes (u
 | `groups:read` | `lookup_slack_entity` (`channel_by_name`, private channels) |
 
 Install the app to your workspace and copy the `xoxb-...` bot token.
+
+## Conversational mode: DMs, @-mentions & slash commands
+
+Beyond actions, the plugin is a **channel** — the agent answers Slack the same way
+it answers the web `/work` UI, with per-conversation memory. Inbound arrives over
+**Socket Mode**, so no public URL is required (works on laptops and private hosts).
+
+- **1:1 DM** — message the bot; it replies in the DM and remembers the thread.
+- **@-mention in a channel** — mention the bot; it replies in a thread. Plain
+  channel chatter is ignored — the bot only hears DMs and explicit mentions.
+- **Slash commands** — one umbrella command `/openneko`; the first word is the
+  sub-command (`/openneko rules-list …`). Replies are ephemeral (invoker-only).
+
+### Slack app setup (one-time)
+
+1. **OAuth & Permissions** → add bot scopes `im:history` and `app_mentions:read`
+   (the action scopes above already cover replies; `chat:write` handles ephemerals).
+2. **Socket Mode** → enable. **Basic Information → App-Level Tokens** → generate a
+   token with `connections:write` (starts `xapp-`).
+3. **Event Subscriptions** → enable; subscribe to bot events `message.im` and
+   `app_mention`. (Add `message.channels` only if you want the bot to read every
+   message in channels it's in — off by default.)
+4. **Slash Commands** → create `/openneko` (the Request URL is ignored under Socket
+   Mode — any placeholder works).
+
+### Store the tokens
+
+```sh
+openneko secrets set @open-neko/plugin-slack SLACK_BOT_TOKEN   # xoxb-…
+openneko secrets set @open-neko/plugin-slack SLACK_APP_TOKEN   # xapp-… enables inbound
+```
+
+Without `SLACK_APP_TOKEN` the plugin stays outbound/action-only and inbound is
+disabled (the worker logs this once). `SLACK_SIGNING_SECRET` is only for the legacy
+webhook ingress — Socket Mode doesn't use it.
 
 ## Actions
 
@@ -80,7 +115,9 @@ Install the app to your workspace and copy the `xoxb-...` bot token.
 network:
   - slack.com
 env:
-  - SLACK_BOT_TOKEN  # required, secret
+  - SLACK_BOT_TOKEN      # required, secret (xoxb-…)
+  - SLACK_APP_TOKEN      # optional, secret (xapp-…) — enables inbound over Socket Mode
+  - SLACK_SIGNING_SECRET # optional, secret — only for legacy webhook ingress
 ```
 
 The OpenNeko loader translates the network declaration into the plugin VM's network policy. Any attempt by the plugin to reach a different host is blocked at the VM boundary.
