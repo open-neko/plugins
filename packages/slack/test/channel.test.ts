@@ -244,6 +244,52 @@ describe("deliver", () => {
     expect(Array.isArray(calls[0].body.blocks)).toBe(true);
   });
 
+  it("threads the reply when recipient.thread_ts is set", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const calls: Array<{ method: string; body: Record<string, unknown> }> = [];
+    await deliver(
+      {
+        recipient: { channel: "C9", thread_ts: "171.2" },
+        events: [{ kind: "converse", text: "in thread" }],
+        profile,
+      } as never,
+      {
+        createClient: () => ({
+          postJson: async (method, body) => {
+            calls.push({ method, body });
+            return { ok: true, ts: "171.9" } as never;
+          },
+        }),
+      },
+    );
+    delete process.env.SLACK_BOT_TOKEN;
+    expect(calls[0].method).toBe("chat.postMessage");
+    expect(calls[0].body.thread_ts).toBe("171.2");
+  });
+
+  it("posts ephemerally for a slash-command recipient (user + ephemeral)", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const calls: Array<{ method: string; body: Record<string, unknown> }> = [];
+    await deliver(
+      {
+        recipient: { channel: "C9", user: "U7", ephemeral: true },
+        events: [{ kind: "converse", text: "only you see this" }],
+        profile,
+      } as never,
+      {
+        createClient: () => ({
+          postJson: async (method, body) => {
+            calls.push({ method, body });
+            return { ok: true } as never;
+          },
+        }),
+      },
+    );
+    delete process.env.SLACK_BOT_TOKEN;
+    expect(calls[0].method).toBe("chat.postEphemeral");
+    expect(calls[0].body.user).toBe("U7");
+  });
+
   it("dry-runs without a token", async () => {
     delete process.env.SLACK_BOT_TOKEN;
     const result = await deliver(
