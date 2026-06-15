@@ -1,6 +1,6 @@
 {
   "packages/types": "0.5.0",
-  "packages/slack": "0.3.0",
+  "packages/slack": "0.4.0",
   "packages/shopify": "0.2.1",
   "packages/parallel-search": "0.3.1",
   "packages/scalekit": "0.2.1",
