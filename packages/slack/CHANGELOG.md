@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/open-neko/plugins/compare/plugin-slack-v0.3.0...plugin-slack-v0.4.0) (2026-06-15)
+
+
+### Features
+
+* **slack:** continue channel threads without re-mention (W3.2) ([2dd6af3](https://github.com/open-neko/plugins/commit/2dd6af3497ae024e79135b541734582b80143902))
+* **slack:** conversational channel — DMs, @-mentions, slash commands ([b270465](https://github.com/open-neko/plugins/commit/b2704657f9d988ea60009a98a173edb4190cb7d8))
+* **slack:** conversational channel — DMs, @-mentions, slash commands ([da3ce77](https://github.com/open-neko/plugins/commit/da3ce77d4ff60116a29ecdd62118f502f804a01b))
+
 ## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-slack-v0.2.1...plugin-slack-v0.3.0) (2026-06-11)
 
 
