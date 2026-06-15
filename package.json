@@ -14,6 +14,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "validate": "node scripts/validate-marketplace.mjs",
+    "sync:marketplace": "node scripts/sync-marketplace.mjs",
     "site:build": "node scripts/build-site.mjs"
   },
   "devDependencies": {

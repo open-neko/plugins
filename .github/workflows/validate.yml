@@ -43,3 +43,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm validate -- --live
+      # Catalog drift guard: fail if a version that's live on npm is missing
+      # from marketplace.json (the fix is `pnpm sync:marketplace`).
+      - run: pnpm sync:marketplace -- --check

@@ -32,10 +32,15 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  # contents: write — commit the marketplace.json catalog sync back to main
+  # after a successful publish (main is unprotected).
+  contents: write
   # id-token: write enables the OIDC token exchange with npmjs.com that
   # Trusted Publishing relies on (no long-lived token in repo secrets).
   id-token: write
+  # actions: write — dispatch the Pages rebuild; a GITHUB_TOKEN push to main
+  # does not itself re-trigger the pages workflow.
+  actions: write
 
 jobs:
   publish:
@@ -85,3 +90,25 @@ jobs:
             tarball="$(cd "$pkg" && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -n1)"
             npm publish "$tarball" --provenance --access public
           done
+
+      # Mirror the now-live versions into marketplace.json (integrity from npm),
+      # commit it back to main, and dispatch the Pages rebuild — so the catalog
+      # and site track every release with zero manual edits. Idempotent.
+      - name: Sync marketplace catalog + rebuild site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          node scripts/sync-marketplace.mjs
+          if git diff --quiet -- marketplace.json; then
+            echo "[sync] catalog already current"
+            exit 0
+          fi
+          git add marketplace.json
+          git commit -m "chore(marketplace): sync published plugin versions"
+          git push origin HEAD:main
+          gh workflow run pages.yml --ref main
