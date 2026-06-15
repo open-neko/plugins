@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Channel capability — a plugin is a frontend (Slack, WhatsApp, Telegram, …).
+ * Channel capability — a plugin is a frontend (Slack, Telegram, …).
  *
  * Non-singleton like `connect`: any number of installed plugins may declare it,
  * and an operator can run several at once. The worker projects the agent's
@@ -93,15 +93,15 @@ export type ParseInboundParams = z.infer<typeof ParseInboundParams>;
 
 /**
  * CH1: the human who sent the inbound message — the channel-native user
- * identity (Telegram `from.id`, Slack `event.user` + `team_id`, WhatsApp
- * `from`). Distinct from `recipient`, which is the chat to reply to.
+ * identity (Telegram `from.id`, Slack `event.user` + `team_id`). Distinct
+ * from `recipient`, which is the chat to reply to.
  */
 export const ChannelSender = z.object({
   /** Channel-native user id, stringified. */
   id: z.string().min(1),
   /** Display name when the substrate provides one. */
   displayName: z.string().optional(),
-  /** Workspace/team scope (Slack team_id, WhatsApp business number). */
+  /** Workspace/team scope (Slack team_id). */
   workspaceId: z.string().optional(),
   /** Email when the substrate provides one — enables CH3 SSO auto-link. */
   email: z.string().optional(),
