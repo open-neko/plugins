@@ -20,7 +20,7 @@ projects them into Telegram's native shape inside its sandbox VM.
 
 The capability profile it declares: `text` modality, Markdown, inline buttons
 (`interactiveControls` + `canApproveInline` + `quickReplies`), 4096-char limit,
-`push` attention — richer than WhatsApp, leaner than the web dashboard.
+`push` attention — leaner than the web dashboard.
 
 ## Setup
 

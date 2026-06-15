@@ -23,8 +23,8 @@ import { createTelegramClient, type TelegramClient } from "./telegram-client.js"
 /**
  * What the Telegram substrate can carry. Kept identical to the manifest's
  * capabilities.channel.profile (package.json) and to @neko/interaction's
- * TELEGRAM_PROFILE — richer than WhatsApp (Markdown, 4096 chars), leaner than
- * web (no cards/charts).
+ * TELEGRAM_PROFILE — Markdown + 4096-char messages, leaner than web (no
+ * cards/charts).
  */
 export const TELEGRAM_PROFILE: CapabilityProfile = {
   modalities: ["text"],
