@@ -67,17 +67,21 @@ export const parseSlackInbound = (raw: unknown): IntentEvent[] => {
       const threadRef = asStr(event.thread_ts) ?? asStr(event.ts) ?? undefined;
       return text ? [{ kind: "utterance", text, threadRef }] : [];
     }
-    // DM → always respond. Channel messages without a mention are ignored: the
-    // bot only subscribes to message.im + app_mention, so it never spams a room.
-    if (
-      event.type === "message" &&
-      typeof event.text === "string" &&
-      !event.subtype &&
-      event.channel_type === "im"
-    ) {
-      return [
-        { kind: "utterance", text: event.text, threadRef: asStr(event.thread_ts) ?? undefined },
-      ];
+    if (event.type === "message" && typeof event.text === "string" && !event.subtype) {
+      // DM → always respond.
+      if (event.channel_type === "im") {
+        return [
+          { kind: "utterance", text: event.text, threadRef: asStr(event.thread_ts) ?? undefined },
+        ];
+      }
+      // Channel reply inside a thread → continue only a thread the bot already
+      // owns; the worker drops it (recipient.requireThread) when no such thread
+      // exists. Top-level channel chatter (no thread_ts) stays ignored, so the
+      // bot still never reacts to every message in a room.
+      const threadTs = asStr(event.thread_ts);
+      if (threadTs) {
+        return [{ kind: "utterance", text: event.text, threadRef: threadTs }];
+      }
     }
   }
   return [];
@@ -110,7 +114,18 @@ export const recipientFromSlackPayload = (raw: unknown): ChannelRecipient | unde
     asStr(asObj(payload.channel)?.id) ??
     asStr(container?.channel_id);
   if (!channel) return undefined;
-  return { kind: "slack", channel, ...(threadTs ? { thread_ts: threadTs } : {}) };
+  // A bare in-thread channel reply must only continue a thread the bot already
+  // owns — flag it so the worker gates on an existing work_thread.
+  const requireThread =
+    event?.type === "message" &&
+    event.channel_type !== "im" &&
+    typeof event.thread_ts === "string";
+  return {
+    kind: "slack",
+    channel,
+    ...(threadTs ? { thread_ts: threadTs } : {}),
+    ...(requireThread ? { requireThread: true } : {}),
+  };
 };
 
 /**

@@ -44,7 +44,10 @@ it answers the web `/work` UI, with per-conversation memory. Inbound arrives ove
 
 - **1:1 DM** — message the bot; it replies in the DM and remembers the thread.
 - **@-mention in a channel** — mention the bot; it replies in a thread. Plain
-  channel chatter is ignored — the bot only hears DMs and explicit mentions.
+  channel chatter is ignored — by default the bot only hears DMs and explicit
+  mentions. *Optional thread follow-up:* with `message.channels` subscribed it
+  also continues a thread it already owns when you reply **without** re-mentioning
+  it (replies in threads it doesn't own are still dropped).
 - **Slash commands** — one umbrella command `/openneko`; the first word is the
   sub-command (`/openneko rules-list …`). Replies are ephemeral (invoker-only).
 
@@ -55,8 +58,11 @@ it answers the web `/work` UI, with per-conversation memory. Inbound arrives ove
 2. **Socket Mode** → enable. **Basic Information → App-Level Tokens** → generate a
    token with `connections:write` (starts `xapp-`).
 3. **Event Subscriptions** → enable; subscribe to bot events `message.im` and
-   `app_mention`. (Add `message.channels` only if you want the bot to read every
-   message in channels it's in — off by default.)
+   `app_mention`. *Optional:* also subscribe `message.channels` (+ scope
+   `channels:history`) for **thread follow-up** — the bot then continues a thread
+   it already owns without a re-mention. Trade-off: Slack delivers *every* channel
+   message to the bot (the worker drops top-level and unknown-thread ones), so
+   leave it off if you don't want that volume.
 4. **Slash Commands** → create `/openneko` (the Request URL is ignored under Socket
    Mode — any placeholder works).
 

@@ -108,6 +108,34 @@ describe("parseInbound", () => {
     expect(out.intents).toEqual([]);
   });
 
+  it("continues a channel thread reply with a requireThread recipient for the worker gate", () => {
+    const out = parseInbound({
+      raw: {
+        type: "event_callback",
+        team_id: "T1",
+        event: {
+          type: "message",
+          channel_type: "channel",
+          text: "and last quarter?",
+          user: "U7",
+          channel: "C9",
+          thread_ts: "171.5",
+        },
+      },
+      headers: {},
+      body: "",
+    } as never);
+    expect(out.intents).toEqual([
+      { kind: "utterance", text: "and last quarter?", threadRef: "171.5" },
+    ]);
+    expect(out.recipient).toEqual({
+      kind: "slack",
+      channel: "C9",
+      thread_ts: "171.5",
+      requireThread: true,
+    });
+  });
+
   it("normalizes an @-mention into a threaded utterance", () => {
     const out = parseInbound({
       raw: {
