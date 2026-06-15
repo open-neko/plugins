@@ -34,9 +34,24 @@ function escape(s) {
   );
 }
 
+function cmpSemver(a, b) {
+  const [ma, pa = ""] = a.split("-");
+  const [mb, pb = ""] = b.split("-");
+  const na = ma.split(".").map(Number);
+  const nb = mb.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((na[i] || 0) !== (nb[i] || 0)) return (na[i] || 0) - (nb[i] || 0);
+  }
+  if (!pa && pb) return 1; // a release outranks a prerelease of the same core
+  if (pa && !pb) return -1;
+  return pa < pb ? -1 : pa > pb ? 1 : 0;
+}
+
+// Highest semver wins — array order in marketplace.json doesn't matter.
 function pickLatest(versions) {
   const live = versions.filter((v) => !v.yanked);
-  return live[live.length - 1] ?? versions[versions.length - 1];
+  const pool = live.length ? live : versions;
+  return pool.reduce((a, b) => (cmpSemver(b.version, a.version) >= 0 ? b : a));
 }
 
 function renderPluginCard(plugin, index) {

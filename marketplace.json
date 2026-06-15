@@ -189,6 +189,63 @@
             }
           },
           "publishedAt": "2026-05-25"
+        },
+        {
+          "version": "0.4.0",
+          "integrity": "sha512-VyemqbEcmj3q90JWyQd6m9WOQP7ml8J2Aa7IUSvVPoc48bzyIStBSj14UDNshex6bZDz+uN+Ytih2tyT04zr3A==",
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH...). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token set via setWebhook; verify_inbound checks Telegram's X-Telegram-Bot-Api-Secret-Token header against it. Not needed for getUpdates long-poll."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-11"
         }
       ]
     },
