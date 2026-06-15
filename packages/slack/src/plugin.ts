@@ -457,20 +457,36 @@ export async function deliver(
   const { blocks, text } = projectSlack(events, params.profile);
   if (blocks.length === 0) return { delivered: false };
   const channel = resolveChannel(params.recipient);
+  const recipient = params.recipient as {
+    thread_ts?: unknown;
+    user?: unknown;
+    ephemeral?: unknown;
+  };
+  const thread_ts =
+    typeof recipient.thread_ts === "string" ? recipient.thread_ts : undefined;
+  const user = typeof recipient.user === "string" ? recipient.user : undefined;
+  // Slash-command replies are ephemeral (private to the invoker); DMs and
+  // mention-threads post normally, threaded when a thread_ts is present.
+  const ephemeral = recipient.ephemeral === true && Boolean(user);
 
   if (!process.env.SLACK_BOT_TOKEN) {
     process.stderr.write(
-      `[channel-slack dry-run] channel=${channel} ${JSON.stringify({ blocks, text })}\n`,
+      `[channel-slack dry-run] channel=${channel} ${JSON.stringify({ blocks, text, thread_ts, ephemeral })}\n`,
     );
     return { delivered: false, ref: `dry-run:${blocks.length}` };
   }
 
   const client = clientOrDefault(options);
-  const envelope = await client.postJson("chat.postMessage", {
-    channel,
-    blocks,
-    text,
-  });
+  const envelope = await client.postJson(
+    ephemeral ? "chat.postEphemeral" : "chat.postMessage",
+    {
+      channel,
+      blocks,
+      text,
+      ...(thread_ts ? { thread_ts } : {}),
+      ...(ephemeral ? { user } : {}),
+    },
+  );
   const ts = (envelope as { ts?: unknown }).ts;
   return { delivered: true, ...(typeof ts === "string" ? { ref: ts } : {}) };
 }
@@ -499,7 +515,7 @@ export default definePlugin({
       providerLabel: "Slack",
       profile: SLACK_PROFILE,
       directions: ["outbound", "inbound"],
-      ingress: "webhook",
+      ingress: "socket",
       deliver,
       parseInbound,
       verifyInbound,

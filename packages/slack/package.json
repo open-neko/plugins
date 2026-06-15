@@ -26,13 +26,19 @@
           "key": "SLACK_BOT_TOKEN",
           "required": true,
           "secret": true,
-          "description": "xoxb-... bot token from your Slack app. Needs scopes: chat:write, im:write (for DMs), reactions:write, users:read, users:read.email (for email lookup), channels:read, groups:read (for channel lookup)."
+          "description": "xoxb-... bot token from your Slack app. Scopes: chat:write, im:write, im:history (DMs), app_mentions:read (mentions), reactions:write, users:read, users:read.email (email lookup), channels:read, groups:read (channel lookup)."
         },
         {
           "key": "SLACK_SIGNING_SECRET",
           "required": false,
           "secret": true,
-          "description": "Slack app signing secret - verifies inbound webhook requests (X-Slack-Signature over v0:<ts>:<body>). Required only when the channel surface receives webhooks; pure outbound/action use can omit it."
+          "description": "Slack app signing secret - verifies inbound webhook requests (X-Slack-Signature over v0:<ts>:<body>). Only needed for webhook ingress; Socket Mode (the default) doesn't use it."
+        },
+        {
+          "key": "SLACK_APP_TOKEN",
+          "required": false,
+          "secret": true,
+          "description": "xapp-... app-level token with connections:write. Enables inbound (DMs, @-mentions, slash commands) over Socket Mode. Omit for outbound/action-only installs. Subscribe bot events message.im + app_mention and add a /openneko slash command in the Slack app."
         }
       ]
     },
@@ -84,7 +90,7 @@
           "outbound",
           "inbound"
         ],
-        "ingress": "webhook",
+        "ingress": "socket",
         "profile": {
           "modalities": [
             "text",
