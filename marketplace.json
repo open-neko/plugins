@@ -668,8 +668,8 @@
     },
     {
       "name": "@open-neko/plugin-slack",
-      "title": "Slack actions",
-      "description": "Post messages, send DMs, react with emoji, and look up users/channels in Slack. Four actions, each separately approvable by operator rules. Authenticated via Slack bot token (xoxb-) stored in the per-user secrets file.",
+      "title": "Slack",
+      "description": "A bidirectional Slack channel — DM the agent, @-mention it in a channel, and run /openneko slash commands (inbound over Socket Mode) — plus four separately approvable actions: post messages, send DMs, react with emoji, and look up users/channels. Authenticated via a Slack bot token (xoxb-); inbound adds an app-level token (xapp-).",
       "source": "https://github.com/open-neko/plugins/tree/main/packages/slack",
       "homepage": "https://api.slack.com/web",
       "maintainers": [
@@ -811,6 +811,93 @@
             }
           },
           "publishedAt": "2026-05-24"
+        },
+        {
+          "version": "0.4.0",
+          "integrity": "sha512-oRknzVVbidkkl2c1p46IEGgG26cs0w9gGFEkZ6Q8yIcak+IOIp04GeA4Iyd6a0RDDDT+3Z2QEX7oGQcA0TVLog==",
+          "permissions": {
+            "network": [
+              "slack.com"
+            ],
+            "env": [
+              {
+                "key": "SLACK_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "xoxb-... bot token from your Slack app. Scopes: chat:write, im:write, im:history (DMs), app_mentions:read (mentions), reactions:write, users:read, users:read.email (email lookup), channels:read, groups:read (channel lookup)."
+              },
+              {
+                "key": "SLACK_APP_TOKEN",
+                "required": false,
+                "secret": true,
+                "description": "xapp-... app-level token with connections:write. Enables inbound (DMs, @-mentions, slash commands) over Socket Mode. Omit for outbound/action-only installs."
+              },
+              {
+                "key": "SLACK_SIGNING_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Slack signing secret — only for the legacy webhook ingress; Socket Mode (the default) doesn't use it."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_slack_message",
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "send_slack_dm",
+                  "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "react_slack_message",
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "lookup_slack_entity",
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
+                }
+              ]
+            },
+            "channel": {
+              "providerLabel": "Slack",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "socket",
+              "profile": {
+                "modalities": [
+                  "text",
+                  "visual"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": true,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-15"
         }
       ]
     }
