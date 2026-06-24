@@ -246,6 +246,63 @@
             }
           },
           "publishedAt": "2026-06-11"
+        },
+        {
+          "version": "0.5.0",
+          "integrity": "sha512-FqMkx69a97sACbBGQOjGGFbpljJsScsDDNweiT0/sNXU6iM6B8Eo9Vl1OYt9owFLcT5DvIA3GxFhcGJS0R2WFQ==",
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token you set when registering a webhook via setWebhook. When present, verify_inbound requires Telegram's X-Telegram-Bot-Api-Secret-Token header to match it (constant-time). Not needed for long-polling (getUpdates)."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-24"
         }
       ]
     },
