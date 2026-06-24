@@ -67,7 +67,7 @@ export interface RichEnrichment {
 
 /** Outbound: agent → human. */
 export type InteractionEvent =
-  | { kind: "converse"; id: string; role: "assistant"; text: string }
+  | { kind: "converse"; id: string; role: "assistant"; text: string; enrichment?: RichEnrichment }
   | { kind: "progress"; id: string; label: string; phase: "start" | "end" }
   | {
       kind: "inform";

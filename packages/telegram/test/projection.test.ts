@@ -94,4 +94,85 @@ describe("projectTelegram", () => {
     expect(msgs[0]!.text).toContain("Reorder now?");
     expect(msgs[0]!.reply_markup?.inline_keyboard[0]?.[0]?.callback_data).toBe("approve:dr-1");
   });
+
+  it("converts Markdown in a converse message to Telegram HTML", () => {
+    const events: InteractionEvent[] = [
+      { kind: "converse", id: "c", role: "assistant", text: "Run `npm i` then **deploy**." },
+    ];
+    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
+    expect(text).toContain("<code>npm i</code>");
+    expect(text).toContain("<b>deploy</b>");
+  });
+
+  it("renders the A2UI surface from inform.enrichment and lists Choice follow-ups", () => {
+    const events: InteractionEvent[] = [
+      {
+        kind: "inform",
+        id: "i",
+        mood: "good",
+        title: "flat title ignored when a surface is present",
+        body: "flat body ignored",
+        enrichment: {
+          surfaces: [
+            { version: "v0.9", createSurface: { surfaceId: "s1", catalogId: "x" } },
+            {
+              version: "v0.9",
+              updateComponents: {
+                surfaceId: "s1",
+                components: [
+                  { id: "root", component: "Answer", title: "Revenue", children: ["c1", "ch"] },
+                  { id: "c1", component: "MetricCard", mood: "good", metric: "$4.7M", label: "MTD" },
+                  { id: "ch", component: "Choice", options: [{ label: "Break it down", prompt: "..." }] },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
+    expect(text).toContain("<b>Revenue</b>");
+    expect(text).toContain("<b>$4.7M</b> — MTD");
+    expect(text).toContain("💡 <b>Ask next</b>");
+    expect(text).toContain("• Break it down");
+    expect(text).not.toContain("flat title");
+  });
+
+  it("renders a surface carried on a converse reply (the chat-answer path)", () => {
+    const events: InteractionEvent[] = [
+      {
+        kind: "converse",
+        id: "c",
+        role: "assistant",
+        text: "",
+        enrichment: {
+          surfaces: [
+            { version: "v0.9", createSurface: { surfaceId: "s1", catalogId: "x" } },
+            {
+              version: "v0.9",
+              updateComponents: {
+                surfaceId: "s1",
+                components: [
+                  { id: "root", component: "Answer", title: "Revenue by region", children: ["t"] },
+                  {
+                    id: "t",
+                    component: "Table",
+                    columns: [
+                      { key: "r", label: "Region" },
+                      { key: "v", label: "Rev", align: "right" },
+                    ],
+                    rows: [{ r: "SW", v: "$4.7M" }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
+    expect(text).toContain("<b>Revenue by region</b>");
+    expect(text).toContain("<pre>");
+    expect(text).toContain("SW");
+  });
 });
