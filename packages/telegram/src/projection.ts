@@ -69,9 +69,17 @@ export const projectTelegram = (
 
   for (const event of events) {
     switch (event.kind) {
-      case "converse":
-        parts.push(mdToTelegramHtml(event.text));
+      case "converse": {
+        const surfaces = event.enrichment?.surfaces;
+        if (surfaces && surfaces.length) {
+          const rendered = renderSurface(surfaces, profile);
+          if (rendered.html) parts.push(rendered.html);
+          followups.push(...rendered.followups);
+        } else {
+          parts.push(mdToTelegramHtml(event.text));
+        }
         break;
+      }
       case "inform": {
         const surfaces = event.enrichment?.surfaces;
         if (surfaces && surfaces.length) {

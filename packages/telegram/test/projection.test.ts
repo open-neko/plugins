@@ -137,4 +137,42 @@ describe("projectTelegram", () => {
     expect(text).toContain("• Break it down");
     expect(text).not.toContain("flat title");
   });
+
+  it("renders a surface carried on a converse reply (the chat-answer path)", () => {
+    const events: InteractionEvent[] = [
+      {
+        kind: "converse",
+        id: "c",
+        role: "assistant",
+        text: "",
+        enrichment: {
+          surfaces: [
+            { version: "v0.9", createSurface: { surfaceId: "s1", catalogId: "x" } },
+            {
+              version: "v0.9",
+              updateComponents: {
+                surfaceId: "s1",
+                components: [
+                  { id: "root", component: "Answer", title: "Revenue by region", children: ["t"] },
+                  {
+                    id: "t",
+                    component: "Table",
+                    columns: [
+                      { key: "r", label: "Region" },
+                      { key: "v", label: "Rev", align: "right" },
+                    ],
+                    rows: [{ r: "SW", v: "$4.7M" }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
+    expect(text).toContain("<b>Revenue by region</b>");
+    expect(text).toContain("<pre>");
+    expect(text).toContain("SW");
+  });
 });
