@@ -1,4 +1,6 @@
 import type { CapabilityProfile, InteractionEvent } from "@open-neko/plugin-types";
+import { escapeHtml, mdToTelegramHtml } from "./markdown.js";
+import { renderSurface } from "./surface.js";
 
 /**
  * Telegram projection: modality-free InteractionEvents → Telegram sendMessage
@@ -6,6 +8,11 @@ import type { CapabilityProfile, InteractionEvent } from "@open-neko/plugin-type
  * never on channel identity. HTML parse mode (forgiving escaping vs MarkdownV2);
  * an `ask` becomes an inline keyboard whose callback_data carries the decision
  * ref in the shared `verb:rest` convention the inbound parser decodes.
+ *
+ * When an `inform` carries an A2UI surface (`enrichment.surfaces`), the full
+ * rich answer (tables, callouts, metric cards, sections) is rendered via
+ * `renderSurface`; otherwise we render the modality-free fields. Agent prose is
+ * Markdown — `mdToTelegramHtml` converts the subset Telegram renders.
  */
 
 export interface TelegramInlineButton {
@@ -20,9 +27,6 @@ export interface TelegramMessage {
 }
 
 const MOOD_ICON: Record<string, string> = { good: "✅", watch: "👀", act: "🚨" };
-
-const escapeHtml = (s: string): string =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const summarizeBody = (body: string, fidelity: CapabilityProfile["fidelity"]): string => {
   if (fidelity === "full") return body;
@@ -60,25 +64,33 @@ export const projectTelegram = (
   profile: CapabilityProfile,
 ): TelegramMessage[] => {
   const parts: string[] = [];
+  const followups: string[] = [];
   let keyboard: TelegramInlineButton[][] | undefined;
 
   for (const event of events) {
     switch (event.kind) {
       case "converse":
-        parts.push(escapeHtml(event.text));
+        parts.push(mdToTelegramHtml(event.text));
         break;
       case "inform": {
+        const surfaces = event.enrichment?.surfaces;
+        if (surfaces && surfaces.length) {
+          const rendered = renderSurface(surfaces, profile);
+          if (rendered.html) parts.push(rendered.html);
+          followups.push(...rendered.followups);
+          break;
+        }
         const icon = MOOD_ICON[event.mood] ?? "";
         const head = `${icon ? `${icon} ` : ""}<b>${escapeHtml(event.title)}</b>`;
         const body = summarizeBody(event.body, profile.fidelity);
         const metric = event.metric
           ? `\n<b>${escapeHtml(event.metric.label)}:</b> ${escapeHtml(event.metric.value)}`
           : "";
-        parts.push(`${head}${body ? `\n${escapeHtml(body)}` : ""}${metric}`);
+        parts.push(`${head}${body ? `\n${mdToTelegramHtml(body)}` : ""}${metric}`);
         break;
       }
       case "ask":
-        parts.push(escapeHtml(event.prompt));
+        parts.push(mdToTelegramHtml(event.prompt));
         if (!keyboard && profile.interaction.quickReplies) {
           const buttons = askButtons(event);
           if (buttons.length) keyboard = buttons;
@@ -91,13 +103,27 @@ export const projectTelegram = (
         break;
       }
       case "offer":
-        parts.push(`📎 ${escapeHtml(event.label)}`);
+        parts.push(
+          /^https?:\/\//.test(event.artifactRef)
+            ? `📎 <a href="${escapeHtml(event.artifactRef)}">${escapeHtml(event.label)}</a>`
+            : `📎 ${escapeHtml(event.label)}`,
+        );
         break;
       // `progress` (tool start/end) isn't delivered as a message on an async push channel
     }
   }
 
-  const text = clampChars(parts.join("\n\n"), profile.constraints.maxOutboundChars);
+  // A2UI Choice options become suggested follow-ups: Telegram callback_data
+  // can't carry a full prompt, so we list them for the user to tap-and-send.
+  if (followups.length) {
+    const list = followups
+      .slice(0, 6)
+      .map((f) => `• ${escapeHtml(f)}`)
+      .join("\n");
+    parts.push(`💡 <b>Ask next</b>\n${list}`);
+  }
+
+  const text = clampChars(parts.filter(Boolean).join("\n\n"), profile.constraints.maxOutboundChars);
   if (!text) return [];
   const message: TelegramMessage = { text, parse_mode: "HTML" };
   if (keyboard) message.reply_markup = { inline_keyboard: keyboard };
