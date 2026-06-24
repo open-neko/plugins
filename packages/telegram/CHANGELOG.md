@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.4.0...channel-telegram-v0.5.0) (2026-06-24)
+
+
+### Features
+
+* **telegram:** render A2UI rich answers (Markdown, tables, callouts, metrics) ([dbd0cf0](https://github.com/open-neko/plugins/commit/dbd0cf0218b433c9449ca3cdcb1780ea10a3f260))
+* **telegram:** render an A2UI surface delivered on a converse reply ([151eda0](https://github.com/open-neko/plugins/commit/151eda07b3be45c0151d65d955677dd69cb24294))
+
 ## [0.4.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.3.2...channel-telegram-v0.4.0) (2026-06-11)
 
 

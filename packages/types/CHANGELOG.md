@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.5.0...plugin-types-v0.6.0) (2026-06-24)
+
+
+### Features
+
+* **plugin-types:** carry optional enrichment on converse events ([53a6418](https://github.com/open-neko/plugins/commit/53a64180f279d7e4095f42b1ac334ab199a4316c))
+
 ## [0.5.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.4.0...plugin-types-v0.5.0) (2026-06-11)
 
 

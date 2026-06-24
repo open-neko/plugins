@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/channel-telegram",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Telegram channel for OpenNeko: delivers the agent's Briefing, findings, and approvals to a Telegram chat, and turns replies + inline-button taps back into agent intents. Bidirectional. Runs in a microsandbox VM with network egress limited to api.telegram.org.",
   "license": "Apache-2.0",
   "repository": {
