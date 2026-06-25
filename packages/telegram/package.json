@@ -24,6 +24,7 @@
           "key": "TELEGRAM_BOT_TOKEN",
           "required": true,
           "secret": true,
+          "inject": "egress",
           "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
         },
         {

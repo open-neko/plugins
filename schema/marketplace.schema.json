@@ -140,6 +140,10 @@
           "default": true,
           "description": "Hide the value at prompt; the CLI will not echo it back."
         },
+        "inject": {
+          "enum": ["egress", "box"],
+          "description": "How a secret reaches the plugin VM. 'egress': held gateway-side and substituted by the proxy onto outbound requests — the box sees only a placeholder (for credentials sent to an external API, e.g. a bot token). 'box' (default): the value lives in the VM, for secrets compared locally and never sent out (e.g. a webhook signing secret)."
+        },
         "description": {
           "type": "string",
           "minLength": 1,
