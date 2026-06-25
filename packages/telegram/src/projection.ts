@@ -20,10 +20,20 @@ export interface TelegramInlineButton {
   callback_data: string;
 }
 
+export interface TelegramReplyButton {
+  text: string;
+}
+
 export interface TelegramMessage {
   text: string;
   parse_mode: "HTML";
-  reply_markup?: { inline_keyboard: TelegramInlineButton[][] };
+  reply_markup?: {
+    inline_keyboard?: TelegramInlineButton[][];
+    keyboard?: TelegramReplyButton[][];
+    one_time_keyboard?: boolean;
+    resize_keyboard?: boolean;
+    input_field_placeholder?: string;
+  };
 }
 
 const MOOD_ICON: Record<string, string> = { good: "✅", watch: "👀", act: "🚨" };
@@ -121,19 +131,31 @@ export const projectTelegram = (
     }
   }
 
-  // A2UI Choice options become suggested follow-ups: Telegram callback_data
-  // can't carry a full prompt, so we list them for the user to tap-and-send.
+  // A2UI Choice options become tappable follow-ups via a reply keyboard — the
+  // button text is sent verbatim as the next message (→ an `utterance` the agent
+  // runs), sidestepping the 64-byte callback_data cap. Telegram allows one
+  // reply_markup per message, so a pending approval (inline keyboard) wins; with
+  // no quick replies or no body to attach to, fall back to a plain list.
+  let replyKeyboard: TelegramReplyButton[][] | undefined;
   if (followups.length) {
-    const list = followups
-      .slice(0, 6)
-      .map((f) => `• ${escapeHtml(f)}`)
-      .join("\n");
-    parts.push(`💡 <b>Ask next</b>\n${list}`);
+    const labels = followups.slice(0, 6);
+    if (!keyboard && profile.interaction.quickReplies && parts.some(Boolean)) {
+      replyKeyboard = labels.map((f) => [{ text: f }]);
+    } else {
+      parts.push(`💡 <b>Ask next</b>\n${labels.map((f) => `• ${escapeHtml(f)}`).join("\n")}`);
+    }
   }
 
   const text = clampChars(parts.filter(Boolean).join("\n\n"), profile.constraints.maxOutboundChars);
   if (!text) return [];
   const message: TelegramMessage = { text, parse_mode: "HTML" };
   if (keyboard) message.reply_markup = { inline_keyboard: keyboard };
+  else if (replyKeyboard)
+    message.reply_markup = {
+      keyboard: replyKeyboard,
+      one_time_keyboard: true,
+      resize_keyboard: true,
+      input_field_placeholder: "Ask a follow-up…",
+    };
   return [message];
 };
