@@ -34,7 +34,7 @@ describe("projectTelegram", () => {
     ];
     const msg = projectTelegram(events, TELEGRAM_PROFILE)[0]!;
     expect(msg.text).toContain("Approve the refund?");
-    const row = msg.reply_markup?.inline_keyboard[0];
+    const row = msg.reply_markup?.inline_keyboard?.[0];
     expect(row?.map((b) => b.callback_data)).toEqual(["approve:dr-123", "reject:dr-123"]);
   });
 
@@ -92,7 +92,7 @@ describe("projectTelegram", () => {
     expect(msgs).toHaveLength(1);
     expect(msgs[0]!.text).toContain("<b>Stock low</b>");
     expect(msgs[0]!.text).toContain("Reorder now?");
-    expect(msgs[0]!.reply_markup?.inline_keyboard[0]?.[0]?.callback_data).toBe("approve:dr-1");
+    expect(msgs[0]!.reply_markup?.inline_keyboard?.[0]?.[0]?.callback_data).toBe("approve:dr-1");
   });
 
   it("converts Markdown in a converse message to Telegram HTML", () => {
@@ -104,7 +104,7 @@ describe("projectTelegram", () => {
     expect(text).toContain("<b>deploy</b>");
   });
 
-  it("renders the A2UI surface from inform.enrichment and lists Choice follow-ups", () => {
+  it("renders the A2UI surface from inform.enrichment and makes Choice follow-ups a tappable reply keyboard", () => {
     const events: InteractionEvent[] = [
       {
         kind: "inform",
@@ -122,7 +122,11 @@ describe("projectTelegram", () => {
                 components: [
                   { id: "root", component: "Answer", title: "Revenue", children: ["c1", "ch"] },
                   { id: "c1", component: "MetricCard", mood: "good", metric: "$4.7M", label: "MTD" },
-                  { id: "ch", component: "Choice", options: [{ label: "Break it down", prompt: "..." }] },
+                  {
+                    id: "ch",
+                    component: "Choice",
+                    options: [{ label: "Break it down", prompt: "..." }, { label: "Show the trend" }],
+                  },
                 ],
               },
             },
@@ -130,12 +134,79 @@ describe("projectTelegram", () => {
         },
       },
     ];
-    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
-    expect(text).toContain("<b>Revenue</b>");
-    expect(text).toContain("<b>$4.7M</b> — MTD");
-    expect(text).toContain("💡 <b>Ask next</b>");
-    expect(text).toContain("• Break it down");
-    expect(text).not.toContain("flat title");
+    const msg = projectTelegram(events, TELEGRAM_PROFILE)[0]!;
+    expect(msg.text).toContain("<b>Revenue</b>");
+    expect(msg.text).toContain("<b>$4.7M</b> — MTD");
+    // follow-ups are tappable buttons (sent verbatim as the next message), not a text list
+    expect(msg.reply_markup?.keyboard).toEqual([[{ text: "Break it down" }], [{ text: "Show the trend" }]]);
+    expect(msg.reply_markup?.one_time_keyboard).toBe(true);
+    expect(msg.text).not.toContain("💡");
+    expect(msg.text).not.toContain("flat title");
+  });
+
+  it("renders Choice follow-ups on a converse surface as a reply keyboard", () => {
+    const events: InteractionEvent[] = [
+      {
+        kind: "converse",
+        id: "c",
+        role: "assistant",
+        text: "",
+        enrichment: {
+          surfaces: [
+            { version: "v0.9", createSurface: { surfaceId: "s1", catalogId: "x" } },
+            {
+              version: "v0.9",
+              updateComponents: {
+                surfaceId: "s1",
+                components: [
+                  { id: "root", component: "Answer", title: "Top territories", children: ["m", "ch"] },
+                  { id: "m", component: "Markdown", text: "Southwest leads." },
+                  { id: "ch", component: "Choice", options: [{ label: "Why is Central down?" }] },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const msg = projectTelegram(events, TELEGRAM_PROFILE)[0]!;
+    expect(msg.text).toContain("Southwest leads.");
+    expect(msg.reply_markup?.keyboard).toEqual([[{ text: "Why is Central down?" }]]);
+  });
+
+  it("lets a pending approval (inline keyboard) win, listing follow-ups as text instead", () => {
+    const events: InteractionEvent[] = [
+      {
+        kind: "inform",
+        id: "i",
+        mood: "good",
+        title: "Revenue",
+        body: "",
+        enrichment: {
+          surfaces: [
+            { version: "v0.9", createSurface: { surfaceId: "s1", catalogId: "x" } },
+            {
+              version: "v0.9",
+              updateComponents: {
+                surfaceId: "s1",
+                components: [
+                  { id: "root", component: "Answer", title: "Revenue", children: ["m", "ch"] },
+                  { id: "m", component: "Markdown", text: "Up 12%." },
+                  { id: "ch", component: "Choice", options: [{ label: "Break it down" }] },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      { kind: "ask", id: "a", ask: "approval", prompt: "Post to exec channel?", decisionRef: "dr-1" },
+    ];
+    const msg = projectTelegram(events, TELEGRAM_PROFILE)[0]!;
+    // inline keyboard claims reply_markup; the follow-up survives as a text list
+    expect(msg.reply_markup?.inline_keyboard?.[0]?.[0]?.callback_data).toBe("approve:dr-1");
+    expect(msg.reply_markup?.keyboard).toBeUndefined();
+    expect(msg.text).toContain("💡 <b>Ask next</b>");
+    expect(msg.text).toContain("• Break it down");
   });
 
   it("renders a surface carried on a converse reply (the chat-answer path)", () => {
