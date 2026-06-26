@@ -303,6 +303,64 @@
             }
           },
           "publishedAt": "2026-06-24"
+        },
+        {
+          "version": "0.6.0",
+          "integrity": "sha512-Lq9rKJD0GdvsgEi/L3K5aLIoAJQlKAHypNJ4/tBqYpCDtQ1QukwfthA2KL4op7SdcuDfB47HjA4eZ5YCbfatLA==",
+          "permissions": {
+            "network": [
+              "api.telegram.org"
+            ],
+            "env": [
+              {
+                "key": "TELEGRAM_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "inject": "egress",
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+              },
+              {
+                "key": "TELEGRAM_WEBHOOK_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Optional secret_token you set when registering a webhook via setWebhook. When present, verify_inbound requires Telegram's X-Telegram-Bot-Api-Secret-Token header to match it (constant-time). Not needed for long-polling (getUpdates)."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "Telegram",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": false,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "maxOutboundChars": 4096,
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-26"
         }
       ]
     },
@@ -1012,6 +1070,95 @@
             }
           },
           "publishedAt": "2026-06-15"
+        },
+        {
+          "version": "0.5.0",
+          "integrity": "sha512-SMNIMM27wyYHZgW2J8tXfOIi7i/3W350g2Zr663QD1V26o+I4EC7at0T9uVWrmAujdSpI4jDE5aBH8WWPUYu3g==",
+          "permissions": {
+            "network": [
+              "slack.com"
+            ],
+            "env": [
+              {
+                "key": "SLACK_BOT_TOKEN",
+                "required": true,
+                "secret": true,
+                "inject": "egress",
+                "description": "xoxb-... bot token from your Slack app. Scopes: chat:write, im:write, im:history (DMs), app_mentions:read (mentions), reactions:write, users:read, users:read.email (email lookup), channels:read, groups:read (channel lookup)."
+              },
+              {
+                "key": "SLACK_SIGNING_SECRET",
+                "required": false,
+                "secret": true,
+                "description": "Slack app signing secret - verifies inbound webhook requests (X-Slack-Signature over v0:<ts>:<body>). Only needed for webhook ingress; Socket Mode (the default) doesn't use it."
+              },
+              {
+                "key": "SLACK_APP_TOKEN",
+                "required": false,
+                "secret": true,
+                "inject": "egress",
+                "description": "xapp-... app-level token with connections:write. Enables inbound (DMs, @-mentions, slash commands) over Socket Mode. Omit for outbound/action-only installs. Subscribe bot events message.im + app_mention and add a /openneko slash command in the Slack app."
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_slack_message",
+                  "description": "Post a message to a Slack channel.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "send_slack_dm",
+                  "description": "Send a direct message to a Slack user. `user` may be a name, email, or Slack id.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "react_slack_message",
+                  "description": "Add an emoji reaction to a Slack message.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "lookup_slack_entity",
+                  "description": "Look up a Slack user or channel by name or ID.",
+                  "default_mode": "auto"
+                }
+              ]
+            },
+            "channel": {
+              "providerLabel": "Slack",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "socket",
+              "profile": {
+                "modalities": [
+                  "text",
+                  "visual"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": true,
+                  "charts": false,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "summary"
+              }
+            }
+          },
+          "publishedAt": "2026-06-26"
         }
       ]
     }
