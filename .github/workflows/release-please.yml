@@ -52,9 +52,13 @@ jobs:
         if: steps.release.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          # Pass the release-please JSON through env, NOT inline ${{ }} into the
+          # script: its CHANGELOG bodies carry ( ) and apostrophes that closed the
+          # single-quoted string and broke the shell (syntax error near `(`).
+          PRS_JSON: ${{ steps.release.outputs.prs }}
         run: |
           rc=0
-          for pr in $(echo '${{ steps.release.outputs.prs }}' | jq -r '.[].number'); do
+          for pr in $(echo "$PRS_JSON" | jq -r '.[].number'); do
             ok=0
             for attempt in 1 2 3 4 5 6; do
               if gh pr merge --auto --squash "$pr" --repo "$GITHUB_REPOSITORY"; then

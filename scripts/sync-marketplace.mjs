@@ -95,7 +95,23 @@ const readPackages = () =>
     })
     .filter(Boolean);
 
-const lookupIntegrity = (name, version) => npm(["view", `${name}@${version}`, "dist.integrity"]) || null;
+// A just-published version can lag the npm registry by tens of seconds. When
+// the publish workflow runs the sync it sets SYNC_WAIT_NPM_SECONDS so we poll
+// for the version instead of silently dropping it from the catalog (the old
+// drift bug, which then tripped `validate-live` on the next PR). Default 0 — the
+// --check guard only ever sees already-propagated versions, so it never waits.
+const SYNC_WAIT_MS = (Number(process.env.SYNC_WAIT_NPM_SECONDS) || 0) * 1000;
+const sleepSync = (ms) => {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+};
+const lookupIntegrity = (name, version) => {
+  const deadline = Date.now() + SYNC_WAIT_MS;
+  for (;;) {
+    const integ = npm(["view", `${name}@${version}`, "dist.integrity"]) || null;
+    if (integ || Date.now() >= deadline) return integ;
+    sleepSync(5000); // version not propagated yet — wait and retry
+  }
+};
 
 const lookupPublishedAt = (name, version) => {
   const timeJson = npm(["view", name, "time", "--json"]);
