@@ -133,7 +133,7 @@ export async function pollInbound(
 
 export default definePlugin({
   name: "@open-neko/channel-telegram",
-  version: "0.5.0", // x-release-please-version
+  version: "0.6.0", // x-release-please-version
   capabilities: {
     channel: {
       providerLabel: "Telegram",

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/open-neko/plugins/compare/plugin-slack-v0.4.0...plugin-slack-v0.5.0) (2026-06-26)
+
+
+### Features
+
+* **types,telegram,slack:** declare egress secrets for proxy injection ([378fcf0](https://github.com/open-neko/plugins/commit/378fcf0e777299ec4263befd0c8922970c9e1f80))
+
 ## [0.4.0](https://github.com/open-neko/plugins/compare/plugin-slack-v0.3.0...plugin-slack-v0.4.0) (2026-06-15)
 
 
