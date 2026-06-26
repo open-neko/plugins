@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.2](https://github.com/open-neko/plugins/compare/channel-telegram-v0.7.1...channel-telegram-v0.7.2) (2026-06-26)
+
+
+### Bug Fixes
+
+* **telegram:** split long replies into multiple messages (don't truncate) ([bc2b159](https://github.com/open-neko/plugins/commit/bc2b159de75454454426b8b44c5a6dbaee6bf94d))
+* **telegram:** split long replies into multiple messages instead of truncating ([5d47e16](https://github.com/open-neko/plugins/commit/5d47e16f5c13a5199d6aa2e3ec0ceb5815734db3))
+
 ## [0.7.1](https://github.com/open-neko/plugins/compare/channel-telegram-v0.7.0...channel-telegram-v0.7.1) (2026-06-26)
 
 
