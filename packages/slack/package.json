@@ -26,6 +26,7 @@
           "key": "SLACK_BOT_TOKEN",
           "required": true,
           "secret": true,
+          "inject": "egress",
           "description": "xoxb-... bot token from your Slack app. Scopes: chat:write, im:write, im:history (DMs), app_mentions:read (mentions), reactions:write, users:read, users:read.email (email lookup), channels:read, groups:read (channel lookup)."
         },
         {
@@ -38,6 +39,7 @@
           "key": "SLACK_APP_TOKEN",
           "required": false,
           "secret": true,
+          "inject": "egress",
           "description": "xapp-... app-level token with connections:write. Enables inbound (DMs, @-mentions, slash commands) over Socket Mode. Omit for outbound/action-only installs. Subscribe bot events message.im + app_mention and add a /openneko slash command in the Slack app."
         }
       ]
