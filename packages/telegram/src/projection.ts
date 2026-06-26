@@ -45,9 +45,30 @@ const summarizeBody = (body: string, fidelity: CapabilityProfile["fidelity"]): s
   return firstPara.split(/(?<=[.!?])\s/)[0] ?? firstPara; // headline: first sentence
 };
 
-const clampChars = (text: string, max?: number): string => {
-  if (max == null || text.length <= max) return text;
-  return `${text.slice(0, Math.max(0, max - 1))}…`;
+// Telegram parses parse_mode=HTML, so the length clamp must never slice through
+// a tag: an orphaned `<b>` makes Telegram reject the ENTIRE message ("can't
+// parse entities: can't find end tag"). Truncate with headroom, drop a
+// half-written trailing tag, then close whatever tags the cut left open so the
+// result is always well-formed.
+const clampHtml = (html: string, max?: number): string => {
+  if (max == null || html.length <= max) return html;
+  let cut = html.slice(0, Math.max(0, max - 32));
+  if (cut.lastIndexOf("<") > cut.lastIndexOf(">")) {
+    cut = cut.slice(0, cut.lastIndexOf("<")); // drop a partially-written tag
+  }
+  const open: string[] = [];
+  const tagRe = /<(\/?)([a-z0-9-]+)(?:\s[^>]*)?>/gi;
+  for (let m = tagRe.exec(cut); m; m = tagRe.exec(cut)) {
+    const name = (m[2] ?? "").toLowerCase();
+    if (m[1]) {
+      const at = open.lastIndexOf(name);
+      if (at !== -1) open.splice(at, 1);
+    } else {
+      open.push(name);
+    }
+  }
+  const closers = open.reverse().map((t) => `</${t}>`).join("");
+  return `${cut}…${closers}`;
 };
 
 const askButtons = (
@@ -146,7 +167,7 @@ export const projectTelegram = (
     }
   }
 
-  const text = clampChars(parts.filter(Boolean).join("\n\n"), profile.constraints.maxOutboundChars);
+  const text = clampHtml(parts.filter(Boolean).join("\n\n"), profile.constraints.maxOutboundChars);
   if (!text) return [];
   const message: TelegramMessage = { text, parse_mode: "HTML" };
   if (keyboard) message.reply_markup = { inline_keyboard: keyboard };
