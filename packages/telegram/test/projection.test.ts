@@ -67,25 +67,42 @@ describe("projectTelegram", () => {
     );
   });
 
-  it("clamps to maxOutboundChars", () => {
+  it("splits a long reply into multiple full messages, never truncating", () => {
     const events: InteractionEvent[] = [
-      { kind: "converse", id: "c2", role: "assistant", text: "x".repeat(5000) },
+      { kind: "converse", id: "c2", role: "assistant", text: `${"x".repeat(5000)} ENDMARK` },
     ];
-    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
-    expect(text.length).toBeLessThanOrEqual(4096);
-    expect(text.endsWith("…")).toBe(true);
+    const msgs = projectTelegram(events, TELEGRAM_PROFILE);
+    expect(msgs.length).toBeGreaterThan(1); // split across messages, not one clamp
+    for (const m of msgs) expect(m.text.length).toBeLessThanOrEqual(4096);
+    expect(msgs.some((m) => m.text.includes("…"))).toBe(false); // nothing dropped
+    expect(msgs[msgs.length - 1]!.text).toContain("ENDMARK"); // the tail is delivered
   });
 
-  it("clamps long HTML without orphaning a tag (Telegram 400s unbalanced HTML)", () => {
-    // One <b>…</b> spanning past 4096 — the clamp lands inside the tag.
+  it("keeps every split message valid HTML (balanced tags)", () => {
+    // One <b>…</b> spanning past 4096 — a split lands inside the tag.
     const events: InteractionEvent[] = [
       { kind: "converse", id: "c3", role: "assistant", text: `**${"word ".repeat(1200)}**` },
     ];
-    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
-    expect(text.length).toBeLessThanOrEqual(4096);
-    // Every <b> must have a matching </b>, else Telegram rejects the whole send.
-    expect((text.match(/<b>/g) ?? []).length).toBe((text.match(/<\/b>/g) ?? []).length);
-    expect(text).toMatch(/<\/b>$/);
+    const msgs = projectTelegram(events, TELEGRAM_PROFILE);
+    expect(msgs.length).toBeGreaterThan(1);
+    for (const m of msgs) {
+      expect(m.text.length).toBeLessThanOrEqual(4096);
+      // Every <b> matched by a </b> — else Telegram rejects the whole send.
+      expect((m.text.match(/<b>/g) ?? []).length).toBe((m.text.match(/<\/b>/g) ?? []).length);
+    }
+  });
+
+  it("attaches the reply keyboard to the last split message only", () => {
+    const long = `${"x".repeat(5000)}`;
+    const events: InteractionEvent[] = [
+      { kind: "converse", id: "c4", role: "assistant", text: long },
+      { kind: "ask", id: "a1", ask: "choice", prompt: "Next?", decisionRef: "d1",
+        options: [{ id: "o1", label: "Drill in" }] },
+    ];
+    const msgs = projectTelegram(events, TELEGRAM_PROFILE);
+    expect(msgs.length).toBeGreaterThan(1);
+    expect(msgs.slice(0, -1).every((m) => m.reply_markup === undefined)).toBe(true);
+    expect(msgs[msgs.length - 1]!.reply_markup).toBeDefined();
   });
 
   it("drops progress events (not delivered on an async push channel)", () => {
