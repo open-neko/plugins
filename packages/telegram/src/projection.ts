@@ -50,15 +50,13 @@ const summarizeBody = (body: string, fidelity: CapabilityProfile["fidelity"]): s
 // parse entities: can't find end tag"). Truncate with headroom, drop a
 // half-written trailing tag, then close whatever tags the cut left open so the
 // result is always well-formed.
-const clampHtml = (html: string, max?: number): string => {
-  if (max == null || html.length <= max) return html;
-  let cut = html.slice(0, Math.max(0, max - 32));
-  if (cut.lastIndexOf("<") > cut.lastIndexOf(">")) {
-    cut = cut.slice(0, cut.lastIndexOf("<")); // drop a partially-written tag
-  }
+// Tags still open at an arbitrary cut point (a <pre> table, a <blockquote>
+// callout, a <b> run) — so a split can close them on one message and reopen
+// them on the next.
+const openTags = (html: string): string[] => {
   const open: string[] = [];
-  const tagRe = /<(\/?)([a-z0-9-]+)(?:\s[^>]*)?>/gi;
-  for (let m = tagRe.exec(cut); m; m = tagRe.exec(cut)) {
+  const re = /<(\/?)([a-z0-9-]+)(?:\s[^>]*)?>/gi;
+  for (let m = re.exec(html); m; m = re.exec(html)) {
     const name = (m[2] ?? "").toLowerCase();
     if (m[1]) {
       const at = open.lastIndexOf(name);
@@ -67,8 +65,44 @@ const clampHtml = (html: string, max?: number): string => {
       open.push(name);
     }
   }
-  const closers = open.reverse().map((t) => `</${t}>`).join("");
-  return `${cut}…${closers}`;
+  return open;
+};
+
+// Telegram caps ONE message at 4096 chars but accepts many, so a long answer
+// (deep research, a big table) is split ACROSS messages, never truncated — the
+// agent's full output is always delivered. Each message is valid HTML on its
+// own: break at a paragraph/line/word boundary, never inside a tag, and if a
+// chunk leaves tags open, close them here and reopen them on the next message.
+const splitHtml = (html: string, max?: number): string[] => {
+  if (max == null || html.length <= max) return [html];
+  const out: string[] = [];
+  let prefix = ""; // tags carried (reopened) from the previous chunk
+  let rest = html;
+  while (prefix.length + rest.length > max) {
+    const room = Math.max(1, max - prefix.length - 24); // headroom for closers
+    let at = Math.min(room, rest.length);
+    const window = rest.slice(0, at);
+    for (const sep of ["\n\n", "\n", " "]) {
+      const idx = window.lastIndexOf(sep);
+      if (idx > room * 0.4) {
+        at = idx + sep.length;
+        break;
+      }
+    }
+    const head = rest.slice(0, at);
+    if (head.lastIndexOf("<") > head.lastIndexOf(">")) {
+      const safe = head.lastIndexOf("<"); // never cut inside a tag
+      if (safe > 0) at = safe;
+    }
+    const chunk = prefix + rest.slice(0, at);
+    const open = openTags(chunk);
+    out.push((chunk + open.slice().reverse().map((t) => `</${t}>`).join("")).trimEnd());
+    prefix = open.map((t) => `<${t}>`).join("");
+    rest = rest.slice(at).replace(/^\n+/, "");
+  }
+  const tail = (prefix + rest).trimEnd();
+  if (tail) out.push(tail);
+  return out;
 };
 
 const askButtons = (
@@ -167,16 +201,21 @@ export const projectTelegram = (
     }
   }
 
-  const text = clampHtml(parts.filter(Boolean).join("\n\n"), profile.constraints.maxOutboundChars);
-  if (!text) return [];
-  const message: TelegramMessage = { text, parse_mode: "HTML" };
-  if (keyboard) message.reply_markup = { inline_keyboard: keyboard };
+  const full = parts.filter(Boolean).join("\n\n");
+  if (!full) return [];
+  const messages: TelegramMessage[] = splitHtml(
+    full,
+    profile.constraints.maxOutboundChars,
+  ).map((text) => ({ text, parse_mode: "HTML" }));
+  // reply_markup rides the LAST message — Telegram shows it under the final bubble.
+  const last = messages[messages.length - 1]!;
+  if (keyboard) last.reply_markup = { inline_keyboard: keyboard };
   else if (replyKeyboard)
-    message.reply_markup = {
+    last.reply_markup = {
       keyboard: replyKeyboard,
       one_time_keyboard: true,
       resize_keyboard: true,
       input_field_placeholder: "Ask a follow-up…",
     };
-  return [message];
+  return messages;
 };
