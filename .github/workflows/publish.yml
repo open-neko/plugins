@@ -97,6 +97,10 @@ jobs:
       - name: Sync marketplace catalog + rebuild site
         env:
           GH_TOKEN: ${{ github.token }}
+          # Just-published versions can lag the npm registry by tens of seconds;
+          # wait for propagation so the sync never silently drops them (the
+          # catalog-drift bug that then trips validate-live on the next PR).
+          SYNC_WAIT_NPM_SECONDS: "120"
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
