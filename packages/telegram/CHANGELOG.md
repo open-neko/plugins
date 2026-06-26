@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/open-neko/plugins/compare/channel-telegram-v0.7.0...channel-telegram-v0.7.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* **telegram:** close open HTML tags when clamping (Telegram 400 on long replies) ([9e9077e](https://github.com/open-neko/plugins/commit/9e9077eac5d6f243983fcb299a95415b791259e2))
+* **telegram:** close open tags when clamping to maxOutboundChars ([fdfabec](https://github.com/open-neko/plugins/commit/fdfabec896a8b636d96ed6a9ed32f5763aa44fe1))
+
 ## [0.7.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.6.0...channel-telegram-v0.7.0) (2026-06-26)
 
 
