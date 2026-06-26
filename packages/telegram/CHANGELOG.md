@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.6.0...channel-telegram-v0.7.0) (2026-06-26)
+
+
+### Features
+
+* **telegram:** tappable reply keyboard for "Ask next" Choice follow-ups ([32ff12b](https://github.com/open-neko/plugins/commit/32ff12be290c50e773d7f18df6b0b26baa7c46a7))
+
 ## [0.6.0](https://github.com/open-neko/plugins/compare/channel-telegram-v0.5.0...channel-telegram-v0.6.0) (2026-06-26)
 
 
