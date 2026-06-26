@@ -76,6 +76,18 @@ describe("projectTelegram", () => {
     expect(text.endsWith("…")).toBe(true);
   });
 
+  it("clamps long HTML without orphaning a tag (Telegram 400s unbalanced HTML)", () => {
+    // One <b>…</b> spanning past 4096 — the clamp lands inside the tag.
+    const events: InteractionEvent[] = [
+      { kind: "converse", id: "c3", role: "assistant", text: `**${"word ".repeat(1200)}**` },
+    ];
+    const text = projectTelegram(events, TELEGRAM_PROFILE)[0]!.text;
+    expect(text.length).toBeLessThanOrEqual(4096);
+    // Every <b> must have a matching </b>, else Telegram rejects the whole send.
+    expect((text.match(/<b>/g) ?? []).length).toBe((text.match(/<\/b>/g) ?? []).length);
+    expect(text).toMatch(/<\/b>$/);
+  });
+
   it("drops progress events (not delivered on an async push channel)", () => {
     const events: InteractionEvent[] = [
       { kind: "progress", id: "p1", label: "thinking", phase: "start" },
