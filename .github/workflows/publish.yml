@@ -86,16 +86,20 @@ jobs:
               echo "[skip] $name@$version already on npm"
               continue
             fi
-            # Versions marked draft in the catalog are intentionally
-            # unpublished (e.g. demo channels) — never try to publish them.
-            draft=$(node -p "
+            # The catalog is the publish gate: packages with no marketplace
+            # block (e.g. demo channels intentionally kept out of the
+            # registry) are never auto-published, and neither are versions
+            # explicitly marked draft.
+            catalogState=$(node -p "
               const fs = require('fs');
               const m = JSON.parse(fs.readFileSync('marketplace.json', 'utf8'));
               const e = m.plugins.find(p => p.name === '$name');
-              (e && e.versions.some(v => v.version === '$version' && v.draft)) ? 'true' : 'false';
+              if (!e) 'absent';
+              else if (e.versions.some(v => v.version === '$version' && v.draft)) 'draft';
+              else 'listed';
             ")
-            if [ "$draft" = "true" ]; then
-              echo "[skip] $name@$version draft in catalog"
+            if [ "$catalogState" != "listed" ]; then
+              echo "[skip] $name@$version catalog=$catalogState"
               continue
             fi
             echo "[publish] $name@$version"
