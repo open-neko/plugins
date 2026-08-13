@@ -1,8 +1,12 @@
 # @open-neko/plugin-scalekit
 
-Scalekit SSO provider for [OpenNeko](https://github.com/open-neko/neko). Implements OpenNeko's generic OIDC auth contract over [Scalekit](https://www.scalekit.com)'s hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, Ping, and the rest of the enterprise IdP stack behind one integration.
+Scalekit SSO + workspace management for [OpenNeko](https://github.com/open-neko/neko). One plugin, three capabilities:
 
-Install once, get the entire enterprise identity ecosystem.
+- **`auth`** — OpenNeko's generic OIDC sign-in contract over [Scalekit](https://www.scalekit.com)'s hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, Ping, and the rest of the enterprise IdP stack behind one integration.
+- **`connect`** — deployment-scoped OAuth consent against Scalekit's workspace MCP server (`https://mcp.scalekit.com/`). One admin consents once; the token bundle lives in OpenNeko's encrypted vault and is refreshed forever.
+- **`action`** — 35 workspace-management tools surfaced to the OpenNeko agent: environments, organizations, users, connections, roles/scopes, redirect URIs, MCP server registration, and admin portal links.
+
+Install once, get the entire enterprise identity ecosystem — and never visit the Scalekit dashboard again after setup.
 
 ## Install
 
@@ -14,22 +18,32 @@ openneko install @open-neko/plugin-scalekit
 openneko install @open-neko/plugin-scalekit --unverified
 ```
 
-During install the CLI prompts for three values (`SCALEKIT_ENVIRONMENT_URL`, `SCALEKIT_CLIENT_ID`, `SCALEKIT_CLIENT_SECRET`) and stores them in the per-user secrets file at `~/.config/openneko/secrets.json` (0600 perms). The worker injects them into the plugin's VM at exec time — the secret never lands in `openneko.plugins.json` or anywhere else tracked by git.
+The CLI prompts for three sign-in values (`SCALEKIT_ENVIRONMENT_URL`, `SCALEKIT_CLIENT_ID`, `SCALEKIT_CLIENT_SECRET`) and stores them in the per-user secrets file at `~/.config/openneko/secrets.json` (0600 perms). The worker injects them into the plugin's VM at exec time — the secret never lands in `openneko.plugins.json` or anywhere else tracked by git.
 
-Rotate any of them later with:
+Optional env:
+
+- `SCALEKIT_MCP_URL` — Scalekit MCP server URL for workspace management. Defaults to the hosted `https://mcp.scalekit.com/`.
+
+Rotate any value later with:
 
 ```sh
 openneko secrets set @open-neko/plugin-scalekit SCALEKIT_CLIENT_SECRET
 ```
 
-## Scalekit setup
+## Connect the Scalekit workspace
 
-1. Create a Scalekit account at <https://www.scalekit.com>. Copy your **environment URL** from the API config screen — looks like `https://your-app.scalekit.com`.
-2. Under **Applications → New**, register OpenNeko as an app. Set the **Redirect URI** to your OpenNeko deployment's callback: `https://<your-openneko-host>/api/auth/callback`.
-3. Copy the issued **Client ID** and **Client Secret**.
-4. Connect at least one IdP (Okta, Entra, Google Workspace, …) to the application from Scalekit's **Connections** screen. Scalekit handles the per-IdP wiring.
+On the **Integrations** page, click **Connect** under "Scalekit workspace". This opens a browser consent screen (which names the scopes and the endpoint). Signing in creates the Scalekit account if one doesn't exist — and every workspace gets a **Dev** and a **Prod** environment automatically at creation.
 
-That's it — every IdP you ever connect in Scalekit lights up in OpenNeko without code changes.
+The access + refresh tokens are stored in the encrypted vault under a deployment-level slot; the agent uses them for every workspace tool regardless of which operator triggers the call, and they are refreshed transparently.
+
+## SSO setup (Dev by default)
+
+1. The agent picks the **Dev** environment by default (free; Prod is opt-in when you go live). It fetches `SCALEKIT_ENVIRONMENT_URL` and `SCALEKIT_CLIENT_ID` automatically via `get_environment_credentials`.
+2. You paste `SCALEKIT_CLIENT_SECRET` **once** — it is shown only once in the Scalekit dashboard (**API Credentials**) and is intentionally not retrievable via any API.
+3. The agent calls `generate_admin_portal_link` and hands you the link. You configure your IdP (Okta/Entra/…) in the guided portal — the one step nothing on our side can automate.
+4. The agent polls `list_organization_connections` until the connection is `COMPLETED`, then reports SSO live.
+
+Going to production later: switch the environment to **Prod**, paste the Prod secret once, and repeat the portal-link step. Environments are isolated — nothing carries over automatically.
 
 ## How the auth flow works
 
@@ -38,53 +52,17 @@ OpenNeko's web app and this plugin implement a standard OIDC authorization-code 
 1. User clicks **Sign in with Scalekit** on `/signin`.
 2. OpenNeko mints a CSRF token, calls `begin_auth` on the plugin, gets back a Scalekit `/oauth/authorize` URL, and redirects the browser.
 3. Scalekit routes to the right downstream IdP (Okta / Entra / etc.) using `login_hint` if supplied.
-4. The IdP authenticates the user and bounces back to `/api/auth/callback` with a `code`.
-5. OpenNeko verifies the CSRF token, calls `complete_auth`, which exchanges the code for tokens at `/oauth/token` and fetches the user profile from `/userinfo`.
-6. OpenNeko upserts the user in `app_user`, sets a session cookie, and redirects to the dashboard.
 
-The plugin only ever sees Scalekit URLs. The plugin **never** sees OpenNeko's session cookie or app DB.
+## What data reaches Scalekit
 
-## Capabilities (manifest)
+The workspace tools talk to `mcp.scalekit.com` (Scalekit's own service): MCP protocol traffic, tool arguments (your Scalekit workspace configuration — data Scalekit already holds), and the OAuth access token. OpenNeko business data, sessions, and other plugin secrets never leave the sandbox; the plugin's egress is locked to `*.scalekit.com`.
 
-```yaml
-network:
-  - "*.scalekit.com"
-env:
-  - SCALEKIT_ENVIRONMENT_URL   # required, not secret (it's the public env URL)
-  - SCALEKIT_CLIENT_ID         # required, not secret
-  - SCALEKIT_CLIENT_SECRET     # required, secret
-provides_auth: true
-```
-
-The OpenNeko plugin loader translates `network` into the microsandbox VM's egress policy. Any attempt to reach a non-Scalekit host is blocked at the VM boundary.
-
-## Identity mapping
-
-The plugin's `complete_auth` returns an `AuthIdentity` object with the following fields, derived from Scalekit's `/userinfo` claims:
-
-| OpenNeko field | Source claim | Notes |
-|---|---|---|
-| `sub` | `sub` | Stable IdP subject. Treated as the primary key. |
-| `email` | `email` | Required. If the IdP didn't release email, the plugin errors clearly. |
-| `name` | `name`, else `given_name + family_name` | `null` if neither is present. |
-| `orgId` | `organization_id` | Scalekit's tenant id. `null` for IdPs that don't supply one. |
-| `groups` | union of `groups` + `roles` | Both are passed through — IdPs differ in which they emit. |
-
-OpenNeko's core decides how (or whether) to map `groups` to internal roles; the plugin doesn't impose a mapping.
-
-## Local development
+## Development
 
 ```sh
 pnpm install
-pnpm test
-pnpm build       # → dist/run.js (bundled, single file for the microVM)
-
-# Smoke-test the runner directly:
-SCALEKIT_ENVIRONMENT_URL=https://your-app.scalekit.com \
-SCALEKIT_CLIENT_ID=… SCALEKIT_CLIENT_SECRET=… \
-  node dist/run.js register '{}'
+pnpm build       # tsc + esbuild → dist/run.js
+pnpm test        # vitest
 ```
 
-## License
-
-Apache-2.0
+The bundled runner is self-contained (the MCP SDK is bundled in) and executes in the plugin sandbox with no `node_modules` access.

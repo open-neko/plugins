@@ -1,7 +1,7 @@
 {
   "name": "@open-neko/plugin-scalekit",
-  "version": "0.2.1",
-  "description": "Scalekit SSO provider for OpenNeko. Implements OpenNeko's generic OIDC auth contract over Scalekit's hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, and other enterprise IdPs behind one integration. Runs in a microsandbox VM with network egress limited to *.scalekit.com.",
+  "version": "0.4.0",
+  "description": "Scalekit SSO + workspace management for OpenNeko. Implements OpenNeko's generic OIDC auth contract (sign-in via Scalekit's hosted gateway, which fronts Okta, Entra ID, Google Workspace, and others) and exposes the Scalekit workspace-management MCP server as agent tools (environments, organizations, users, connections, roles, MCP server registration, admin portal links) backed by a deployment-scoped OAuth consent.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -24,25 +24,83 @@
           "key": "SCALEKIT_ENVIRONMENT_URL",
           "required": true,
           "secret": false,
-          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config. The agent can fetch this automatically via get_environment_credentials."
         },
         {
           "key": "SCALEKIT_CLIENT_ID",
           "required": true,
           "secret": false,
-          "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+          "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange. The agent can fetch this automatically via get_environment_credentials."
         },
         {
           "key": "SCALEKIT_CLIENT_SECRET",
           "required": true,
           "secret": true,
-          "description": "The OAuth client_secret from the Scalekit dashboard. Stored in the per-user secrets file, never echoed."
+          "description": "The OAuth client_secret from the Scalekit dashboard. Shown only once in the dashboard — stored in the per-user secrets file, never echoed."
+        },
+        {
+          "key": "SCALEKIT_MCP_URL",
+          "required": false,
+          "secret": false,
+          "description": "Optional Scalekit MCP server URL for workspace management. Defaults to the hosted https://mcp.scalekit.com/."
         }
       ]
     },
     "capabilities": {
       "auth": {
         "providerLabel": "Scalekit"
+      },
+      "connect": {
+        "providerLabel": "Scalekit workspace",
+        "flow": "mcp-oauth",
+        "credentialScope": "deployment",
+        "scopes": [
+          "environment_read",
+          "environment_write",
+          "workspace_read",
+          "workspace_write",
+          "organization_read",
+          "organization_write"
+        ]
+      },
+      "action": {
+        "kinds": [
+          { "kind": "list_environments", "description": "List all Scalekit environments in the workspace (Dev/Prod, ids + domains).", "default_mode": "auto", "example": {} },
+          { "kind": "get_environment_details", "description": "Get details of one Scalekit environment by id.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "get_environment_credentials", "description": "Return SCALEKIT_ENVIRONMENT_URL + SCALEKIT_CLIENT_ID for an environment (the client secret is dashboard-only).", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "list_environment_roles", "description": "List roles defined in a Scalekit environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "create_environment_role", "description": "Create a new role in a Scalekit environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "roleName": "viewer", "roleDisplayName": "Viewer", "description": "", "isDefault": false } },
+          { "kind": "list_environment_scopes", "description": "List scopes defined in a Scalekit environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "create_environment_scope", "description": "Create a new scope in a Scalekit environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "scopeName": "billing_read", "description": "" } },
+          { "kind": "list_workspace_members", "description": "List members of the Scalekit workspace.", "default_mode": "auto", "example": {} },
+          { "kind": "invite_workspace_member", "description": "Invite a member to the Scalekit workspace by email.", "default_mode": "ask", "example": { "email": "admin@company.com" } },
+          { "kind": "list_organizations", "description": "List organizations under a Scalekit environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "get_organization_details", "description": "Get details of one Scalekit organization.", "default_mode": "auto", "example": { "environmentId": "env_123", "organizationId": "org_123" } },
+          { "kind": "create_organization", "description": "Create a new organization under a Scalekit environment.", "default_mode": "ask", "example": { "environmentId": "env_123" } },
+          { "kind": "generate_admin_portal_link", "description": "Generate a single-use admin portal magic link for an organization (guides the operator through IdP setup).", "default_mode": "ask", "example": { "environmentId": "env_123", "organizationId": "org_123" } },
+          { "kind": "list_environment_connections", "description": "List SSO/OIDC connections configured in an environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "list_organization_connections", "description": "List connections for an organization (status DRAFT/IN_PROGRESS/COMPLETED).", "default_mode": "auto", "example": { "environmentId": "env_123", "organizationId": "org_123" } },
+          { "kind": "enable_environment_connection", "description": "Enable an existing connection in an environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "connectionId": "conn_123" } },
+          { "kind": "list_connected_accounts", "description": "List connected accounts (connector authorizations) in an environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "create_connected_account_magic_link", "description": "Create a magic link to connect an OAuth connector account at the environment level.", "default_mode": "ask", "example": { "environmentId": "env_123", "identifier": "notion-main", "connector": "notion" } },
+          { "kind": "create_organization_user", "description": "Create a user in a Scalekit organization.", "default_mode": "ask", "example": { "environmentId": "env_123", "organizationId": "org_123", "email": "user@company.com", "role": "admin" } },
+          { "kind": "list_organization_users", "description": "List users of a Scalekit organization.", "default_mode": "auto", "example": { "environmentId": "env_123", "organizationId": "org_123" } },
+          { "kind": "update_organization_settings", "description": "Update an organization's settings (e.g. directory sync features).", "default_mode": "ask", "example": { "environmentId": "env_123", "organizationId": "org_123", "feature": [{ "name": "dir_sync", "enabled": true }] } },
+          { "kind": "list_mcp_servers", "description": "List MCP servers registered in an environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "register_mcp_server", "description": "Register a new MCP server in an environment (Scalekit-auth or custom provider).", "default_mode": "ask", "example": { "environmentId": "env_123", "name": "my-mcp", "description": "", "url": "https://mcp.example.com/", "access_token_expiry": 3600, "use_scalekit_authentication": true } },
+          { "kind": "update_mcp_server", "description": "Update a registered MCP server in an environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "id": "mcp_123" } },
+          { "kind": "switch_mcp_auth_to_scalekit", "description": "Switch an MCP server's authentication to Scalekit.", "default_mode": "ask", "example": { "environmentId": "env_123", "id": "mcp_123" } },
+          { "kind": "search_connectors", "description": "Search the Scalekit connector catalog for an environment.", "default_mode": "auto", "example": { "environmentId": "env_123", "query": "google" } },
+          { "kind": "search_tools", "description": "Search tools (actions) exposed by connectors in an environment.", "default_mode": "auto", "example": { "environmentId": "env_123", "query": "send email" } },
+          { "kind": "search_docs", "description": "Search Scalekit documentation by keyword.", "default_mode": "auto", "example": { "query": "sso connection" } },
+          { "kind": "list_redirect_uris", "description": "List allowed callback URLs (redirect URIs) for an environment.", "default_mode": "auto", "example": { "environmentId": "env_123" } },
+          { "kind": "add_redirect_uri", "description": "Add a callback URL to an environment's allowed redirect URIs.", "default_mode": "ask", "example": { "environmentId": "env_123", "uri": "https://app.example.com/api/auth/callback" } },
+          { "kind": "remove_redirect_uri", "description": "Remove a callback URL from an environment's allowed redirect URIs.", "default_mode": "ask", "example": { "environmentId": "env_123", "uri": "https://app.example.com/api/auth/callback" } },
+          { "kind": "set_initiate_login_uri", "description": "Set the initiate-login URI for an environment (IdP-initiated SSO).", "default_mode": "ask", "example": { "environmentId": "env_123", "uri": "https://app.example.com/signin" } },
+          { "kind": "remove_initiate_login_uri", "description": "Clear the initiate-login URI for an environment.", "default_mode": "ask", "example": { "environmentId": "env_123" } },
+          { "kind": "add_post_logout_redirect_uri", "description": "Add a post-logout redirect URL for an environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "uri": "https://app.example.com/" } },
+          { "kind": "remove_post_logout_redirect_uri", "description": "Remove a post-logout redirect URL from an environment.", "default_mode": "ask", "example": { "environmentId": "env_123", "uri": "https://app.example.com/" } }
+        ]
       }
     }
   },
@@ -53,6 +111,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@open-neko/plugin-types": "workspace:*"
   },
   "devDependencies": {

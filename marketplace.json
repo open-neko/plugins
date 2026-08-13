@@ -259,7 +259,7 @@
                 "key": "TELEGRAM_BOT_TOKEN",
                 "required": true,
                 "secret": true,
-                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH\u2026). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode \u2014 it still projects the native payload but sends nothing."
               },
               {
                 "key": "TELEGRAM_WEBHOOK_SECRET",
@@ -317,7 +317,7 @@
                 "required": true,
                 "secret": true,
                 "inject": "egress",
-                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH\u2026). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode \u2014 it still projects the native payload but sends nothing."
               },
               {
                 "key": "TELEGRAM_WEBHOOK_SECRET",
@@ -375,7 +375,7 @@
                 "required": true,
                 "secret": true,
                 "inject": "egress",
-                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH\u2026). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode \u2014 it still projects the native payload but sends nothing."
               },
               {
                 "key": "TELEGRAM_WEBHOOK_SECRET",
@@ -433,7 +433,7 @@
                 "required": true,
                 "secret": true,
                 "inject": "egress",
-                "description": "Bot token from @BotFather (e.g. 123456789:AAH…). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode — it still projects the native payload but sends nothing."
+                "description": "Bot token from @BotFather (e.g. 123456789:AAH\u2026). The plugin calls https://api.telegram.org/bot<token>/sendMessage to deliver. When unset at exec time the plugin runs in dry-run mode \u2014 it still projects the native payload but sends nothing."
               },
               {
                 "key": "TELEGRAM_WEBHOOK_SECRET",
@@ -580,7 +580,7 @@
     {
       "name": "@open-neko/plugin-scalekit",
       "title": "Scalekit SSO",
-      "description": "Enterprise SSO via Scalekit. One integration that fronts Okta, Entra ID, Google Workspace, JumpCloud, and other identity providers. Implements OpenNeko's generic OIDC auth contract — install this plugin and the 'Sign in with Scalekit' button lights up in the web app.",
+      "description": "Enterprise SSO via Scalekit. One integration that fronts Okta, Entra ID, Google Workspace, JumpCloud, and other identity providers. Implements OpenNeko's generic OIDC auth contract \u2014 install this plugin and the 'Sign in with Scalekit' button lights up in the web app.",
       "source": "https://github.com/open-neko/plugins/tree/main/packages/scalekit",
       "homepage": "https://docs.scalekit.com/sso/quickstart",
       "maintainers": [
@@ -602,13 +602,13 @@
                 "key": "SCALEKIT_ENVIRONMENT_URL",
                 "required": true,
                 "secret": false,
-                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com \u2014 copied from the Scalekit dashboard under API config."
               },
               {
                 "key": "SCALEKIT_CLIENT_ID",
                 "required": true,
                 "secret": false,
-                "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+                "description": "The OAuth client_id from the Scalekit dashboard. Public \u2014 paired with the secret below for token exchange."
               },
               {
                 "key": "SCALEKIT_CLIENT_SECRET",
@@ -638,7 +638,7 @@
                 "key": "SCALEKIT_ENVIRONMENT_URL",
                 "required": true,
                 "secret": false,
-                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard."
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com \u2014 copied from the Scalekit dashboard."
               },
               {
                 "key": "SCALEKIT_CLIENT_ID",
@@ -673,13 +673,13 @@
                 "key": "SCALEKIT_ENVIRONMENT_URL",
                 "required": true,
                 "secret": false,
-                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config."
+                "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com \u2014 copied from the Scalekit dashboard under API config."
               },
               {
                 "key": "SCALEKIT_CLIENT_ID",
                 "required": true,
                 "secret": false,
-                "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange."
+                "description": "The OAuth client_id from the Scalekit dashboard. Public \u2014 paired with the secret below for token exchange."
               },
               {
                 "key": "SCALEKIT_CLIENT_SECRET",
@@ -701,7 +701,7 @@
     {
       "name": "@open-neko/connector-google-workspace",
       "title": "Google Workspace connector",
-      "description": "Per-operator Google Workspace connector — PKCE OAuth2 against your own Cloud Console OAuth client. Each operator authorises independently; OpenNeko persists their refresh token in the per-operator section of the secrets file and rotates the access token on demand. Three actions: send_gmail, list_calendar_events, append_sheet_row.",
+      "description": "Per-operator Google Workspace connector \u2014 PKCE OAuth2 against your own Cloud Console OAuth client. Each operator authorises independently; OpenNeko persists their refresh token in the per-operator section of the secrets file and rotates the access token on demand. Three actions: send_gmail, list_calendar_events, append_sheet_row.",
       "source": "https://github.com/open-neko/plugins/tree/main/packages/google-workspace",
       "homepage": "https://developers.google.com/identity/protocols/oauth2",
       "maintainers": [
@@ -728,7 +728,7 @@
                 "key": "GOOGLE_CLIENT_ID",
                 "required": true,
                 "secret": false,
-                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide — all operators share one client). Create at https://console.cloud.google.com/apis/credentials → Create credentials → OAuth client ID → Web application; set the redirect URI to your deployment's connect callback."
+                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide \u2014 all operators share one client). Create at https://console.cloud.google.com/apis/credentials \u2192 Create credentials \u2192 OAuth client ID \u2192 Web application; set the redirect URI to your deployment's connect callback."
               },
               {
                 "key": "GOOGLE_CLIENT_SECRET",
@@ -790,7 +790,7 @@
                 "key": "GOOGLE_CLIENT_ID",
                 "required": true,
                 "secret": false,
-                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide — all operators share one client). Create at https://console.cloud.google.com/apis/credentials → Create credentials → OAuth client ID → Web application; set the redirect URI to your deployment's connect callback."
+                "description": "OAuth 2.0 Client ID from Google Cloud Console (deployment-wide \u2014 all operators share one client). Create at https://console.cloud.google.com/apis/credentials \u2192 Create credentials \u2192 OAuth client ID \u2192 Web application; set the redirect URI to your deployment's connect callback."
               },
               {
                 "key": "GOOGLE_CLIENT_SECRET",
@@ -840,7 +840,7 @@
     {
       "name": "@open-neko/plugin-shopify",
       "title": "Shopify Admin connector",
-      "description": "Per-deployment Shopify Admin API connector — list orders, fetch order detail, update internal order notes. Bound to one *.myshopify.com store via a deployment-wide Admin API access token. Three actions: list_shopify_orders, get_shopify_order, update_shopify_order_note.",
+      "description": "Per-deployment Shopify Admin API connector \u2014 list orders, fetch order detail, update internal order notes. Bound to one *.myshopify.com store via a deployment-wide Admin API access token. Three actions: list_shopify_orders, get_shopify_order, update_shopify_order_note.",
       "source": "https://github.com/open-neko/plugins/tree/main/packages/shopify",
       "homepage": "https://shopify.dev/docs/api/admin-rest",
       "maintainers": [
@@ -862,13 +862,13 @@
                 "key": "SHOPIFY_STORE_DOMAIN",
                 "required": true,
                 "secret": false,
-                "description": "Your store's permanent myshopify.com subdomain — e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
+                "description": "Your store's permanent myshopify.com subdomain \u2014 e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
               },
               {
                 "key": "SHOPIFY_ACCESS_TOKEN",
                 "required": true,
                 "secret": true,
-                "description": "Shopify Admin API access token (starts with shpat_). Create at admin → Settings → Apps and sales channels → Develop apps → Create an app → Configuration → Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install — copy it immediately."
+                "description": "Shopify Admin API access token (starts with shpat_). Create at admin \u2192 Settings \u2192 Apps and sales channels \u2192 Develop apps \u2192 Create an app \u2192 Configuration \u2192 Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install \u2014 copy it immediately."
               },
               {
                 "key": "SHOPIFY_API_VERSION",
@@ -888,7 +888,7 @@
                 },
                 {
                   "kind": "get_shopify_order",
-                  "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
+                  "description": "Fetch full detail for one order by id \u2014 line items, customer, addresses, refunds, tags.",
                   "default_mode": "auto"
                 },
                 {
@@ -913,13 +913,13 @@
                 "key": "SHOPIFY_STORE_DOMAIN",
                 "required": true,
                 "secret": false,
-                "description": "Your store's permanent myshopify.com subdomain — e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
+                "description": "Your store's permanent myshopify.com subdomain \u2014 e.g. acme.myshopify.com. Use the .myshopify.com domain even if you've configured a custom storefront domain; the Admin API only honors the canonical one."
               },
               {
                 "key": "SHOPIFY_ACCESS_TOKEN",
                 "required": true,
                 "secret": true,
-                "description": "Shopify Admin API access token (starts with shpat_). Create at admin → Settings → Apps and sales channels → Develop apps → Create an app → Configuration → Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install — copy it immediately."
+                "description": "Shopify Admin API access token (starts with shpat_). Create at admin \u2192 Settings \u2192 Apps and sales channels \u2192 Develop apps \u2192 Create an app \u2192 Configuration \u2192 Admin API access scopes. Needs read_orders + write_orders. Token is shown ONCE on install \u2014 copy it immediately."
               },
               {
                 "key": "SHOPIFY_API_VERSION",
@@ -939,7 +939,7 @@
                 },
                 {
                   "kind": "get_shopify_order",
-                  "description": "Fetch full detail for one order by id — line items, customer, addresses, refunds, tags.",
+                  "description": "Fetch full detail for one order by id \u2014 line items, customer, addresses, refunds, tags.",
                   "default_mode": "auto"
                 },
                 {
@@ -957,7 +957,7 @@
     {
       "name": "@open-neko/plugin-slack",
       "title": "Slack",
-      "description": "A bidirectional Slack channel — DM the agent, @-mention it in a channel, and run /openneko slash commands (inbound over Socket Mode) — plus four separately approvable actions: post messages, send DMs, react with emoji, and look up users/channels. Authenticated via a Slack bot token (xoxb-); inbound adds an app-level token (xapp-).",
+      "description": "A bidirectional Slack channel \u2014 DM the agent, @-mention it in a channel, and run /openneko slash commands (inbound over Socket Mode) \u2014 plus four separately approvable actions: post messages, send DMs, react with emoji, and look up users/channels. Authenticated via a Slack bot token (xoxb-); inbound adds an app-level token (xapp-).",
       "source": "https://github.com/open-neko/plugins/tree/main/packages/slack",
       "homepage": "https://api.slack.com/web",
       "maintainers": [
@@ -1124,7 +1124,7 @@
                 "key": "SLACK_SIGNING_SECRET",
                 "required": false,
                 "secret": true,
-                "description": "Slack signing secret — only for the legacy webhook ingress; Socket Mode (the default) doesn't use it."
+                "description": "Slack signing secret \u2014 only for the legacy webhook ingress; Socket Mode (the default) doesn't use it."
               }
             ]
           },
@@ -1275,6 +1275,79 @@
             }
           },
           "publishedAt": "2026-06-26"
+        }
+      ]
+    },
+    {
+      "name": "@open-neko/channel-hud",
+      "title": "HUD surface channel",
+      "description": "Bidirectional signed channel for OpenNeko visual demo packs. Projects findings, metrics, progress, and approvals into a pack-owned HUD and turns operator controls back into normal OpenNeko intents.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/hud-channel",
+      "maintainers": [
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+          "draft": true,
+          "permissions": {
+            "network": [
+              "demo-channel"
+            ],
+            "env": [
+              {
+                "key": "HUD_CHANNEL_SECRET",
+                "required": true,
+                "secret": true,
+                "inject": "box",
+                "description": "HMAC secret shared with the selected demo pack's HUD bridge. Generated by the demo-pack installer."
+              },
+              {
+                "key": "HUD_CHANNEL_WORKSPACE",
+                "required": false,
+                "secret": false,
+                "description": "Stable pack identifier used for inbound sender and recipient scoping."
+              }
+            ]
+          },
+          "capabilities": {
+            "channel": {
+              "providerLabel": "HUD surface",
+              "directions": [
+                "outbound",
+                "inbound"
+              ],
+              "ingress": "webhook",
+              "profile": {
+                "modalities": [
+                  "text",
+                  "visual"
+                ],
+                "richMedia": {
+                  "markdown": true,
+                  "cards": true,
+                  "charts": true,
+                  "images": true,
+                  "interactiveControls": true
+                },
+                "interaction": {
+                  "turnTaking": "async",
+                  "canApproveInline": true,
+                  "quickReplies": true
+                },
+                "constraints": {
+                  "latencyClass": "interactive",
+                  "attentionModel": "push"
+                },
+                "fidelity": "full"
+              }
+            }
+          },
+          "publishedAt": "2026-08-08"
         }
       ]
     }

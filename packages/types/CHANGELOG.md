@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.7.0...plugin-types-v0.8.0) (2026-08-13)
+
+
+### Features
+
+* **types:** mcp-oauth connect flow, deployment credential scope, and oauthState begin/complete bridge
+
+
 ## [0.7.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.6.0...plugin-types-v0.7.0) (2026-06-26)
 
 
