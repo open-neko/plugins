@@ -154,7 +154,7 @@ export function verifyInbound(params: VerifyInboundParams): VerifyInboundResult 
 
 export default definePlugin({
   name: "@open-neko/channel-hud",
-  version: "0.1.0", // x-release-please-version
+  version: "0.2.0", // x-release-please-version
   capabilities: {
     channel: {
       providerLabel: "HUD surface",

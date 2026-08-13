@@ -5,6 +5,14 @@
 
 ### Features
 
+* **scalekit,types:** add mcp-oauth deployment-scoped workspace connect + 35 MCP tool actions ([b30640e](https://github.com/open-neko/plugins/commit/b30640ecab882e5b2096f7614c06e2e63b41b443))
+* **scalekit:** mcp-oauth workspace connect + MCP tool actions ([92cfe22](https://github.com/open-neko/plugins/commit/92cfe2247c574a4deedfa2c5fb1982976153980b))
+
+## [0.8.0](https://github.com/open-neko/plugins/compare/plugin-types-v0.7.0...plugin-types-v0.8.0) (2026-08-13)
+
+
+### Features
+
 * **types:** mcp-oauth connect flow, deployment credential scope, and oauthState begin/complete bridge
 
 
