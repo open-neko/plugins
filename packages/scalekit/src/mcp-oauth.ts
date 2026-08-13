@@ -155,16 +155,40 @@ export function createMcpOAuth(options: McpOAuthOptions = {}) {
     async discoverAuthorizationServer(
       asUrl: string,
     ): Promise<AuthorizationServerMetadata> {
-      const body = await call<{
+      const base = asUrl.replace(/\/+$/, "");
+      // RFC 9728: authorization server metadata is fetched at
+      // {issuer}/.well-known/oauth-authorization-server. Some hosts
+      // advertise the full metadata URL already; accept that too.
+      const wellKnown = base.endsWith("/.well-known/oauth-authorization-server")
+        ? base
+        : `${base}/.well-known/oauth-authorization-server`;
+      let body = await call<{
         issuer?: string;
         authorization_endpoint?: string;
         token_endpoint?: string;
         registration_endpoint?: string;
       }>(
-        asUrl,
+        wellKnown,
         { method: "GET", headers: { Accept: "application/json" } },
         "authorization server discovery",
-      );
+      ).catch((err) => {
+        if (err instanceof McpOAuthError && err.status === 404 && wellKnown !== asUrl) {
+          return null;
+        }
+        throw err;
+      });
+      if (body === null) {
+        body = await call<{
+          issuer?: string;
+          authorization_endpoint?: string;
+          token_endpoint?: string;
+          registration_endpoint?: string;
+        }>(
+          asUrl,
+          { method: "GET", headers: { Accept: "application/json" } },
+          "authorization server discovery (raw URL fallback)",
+        );
+      }
       if (!body.authorization_endpoint || !body.token_endpoint) {
         throw new McpOAuthError(
           "authorization server metadata missing endpoints",

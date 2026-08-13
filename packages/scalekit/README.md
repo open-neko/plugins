@@ -32,18 +32,14 @@ openneko secrets set @open-neko/plugin-scalekit SCALEKIT_CLIENT_SECRET
 
 ## Connect the Scalekit workspace
 
-On the **Integrations** page, click **Connect** under "Scalekit workspace". This opens a browser consent screen (which names the scopes and the endpoint). Signing in creates the Scalekit account if one doesn't exist — and every workspace gets a **Dev** and a **Prod** environment automatically at creation.
+Open **Admin → Settings → Single sign-on** (`/admin/settings/sso`). The page is a 4-step checklist — each step turns green ✓ once done:
 
-The access + refresh tokens are stored in the encrypted vault under a deployment-level slot; the agent uses them for every workspace tool regardless of which operator triggers the call, and they are refreshed transparently.
+1. **Authorize the Scalekit workspace** — opens a browser consent screen (which names the scopes and the endpoint). Signing in creates the Scalekit account if one doesn't exist, and every workspace gets a **Dev** and a **Prod** environment automatically at creation. The access + refresh tokens land in the encrypted vault under a deployment-level slot; the agent uses them for every workspace tool regardless of which operator triggers the call, and they are refreshed transparently.
+2. **Select the environment** — the list loads from your workspace (no id pasting); **Dev** is the default (free trial).
+3. **Sign-in credentials** — **Auto-fill from Scalekit** fetches the environment URL + client id via the agent. Paste `SCALEKIT_CLIENT_SECRET` **once** (shown only once in the dashboard — the page links you straight to it) and the gate flips on: sign in at `/signin` and the first user becomes the admin.
+4. **Connect the identity provider** (optional for the trial) — `generate_admin_portal_link` hands you a guided portal where you configure your IdP (Okta/Entra/…) — the one step nothing on our side can automate. The agent polls `list_organization_connections` until the connection is `COMPLETED`, then reports SSO live.
 
-## SSO setup (Dev by default)
-
-1. The agent picks the **Dev** environment by default (free; Prod is opt-in when you go live). It fetches `SCALEKIT_ENVIRONMENT_URL` and `SCALEKIT_CLIENT_ID` automatically via `get_environment_credentials`.
-2. You paste `SCALEKIT_CLIENT_SECRET` **once** — it is shown only once in the Scalekit dashboard (**API Credentials**) and is intentionally not retrievable via any API.
-3. The agent calls `generate_admin_portal_link` and hands you the link. You configure your IdP (Okta/Entra/…) in the guided portal — the one step nothing on our side can automate.
-4. The agent polls `list_organization_connections` until the connection is `COMPLETED`, then reports SSO live.
-
-Going to production later: switch the environment to **Prod**, paste the Prod secret once, and repeat the portal-link step. Environments are isolated — nothing carries over automatically.
+Going to production later: use **Change** on step 2, pick **Prod**, paste the Prod secret once, and repeat the portal-link step. Environments are isolated — nothing carries over automatically.
 
 ## How the auth flow works
 
@@ -55,7 +51,7 @@ OpenNeko's web app and this plugin implement a standard OIDC authorization-code 
 
 ## What data reaches Scalekit
 
-The workspace tools talk to `mcp.scalekit.com` (Scalekit's own service): MCP protocol traffic, tool arguments (your Scalekit workspace configuration — data Scalekit already holds), and the OAuth access token. OpenNeko business data, sessions, and other plugin secrets never leave the sandbox; the plugin's egress is locked to `*.scalekit.com`.
+The workspace tools talk to `mcp.scalekit.com` (Scalekit's own service): MCP protocol traffic, tool arguments (your Scalekit workspace configuration — data Scalekit already holds), and the OAuth access token. OpenNeko business data, sessions, and other plugin secrets never leave the sandbox; the plugin's egress is locked to `*.scalekit.com` and `*.scalekit.dev` (development environments).
 
 ## Development
 
