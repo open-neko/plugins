@@ -201,9 +201,15 @@
             },
             "flow": {
               "type": "string",
-              "enum": ["oauth2-pkce"],
+              "enum": ["oauth2-pkce", "mcp-oauth"],
               "default": "oauth2-pkce",
-              "description": "Flow type the worker should drive. v1 supports oauth2-pkce only."
+              "description": "Flow type the worker should drive. oauth2-pkce: pre-registered client, core-minted code_verifier. mcp-oauth: the plugin does MCP-OAuth-2.1 discovery + DCR and bridges begin → complete via the oauthState echo."
+            },
+            "credentialScope": {
+              "type": "string",
+              "enum": ["operator", "deployment"],
+              "default": "operator",
+              "description": "operator: per-operator credentials. deployment: one org-wide credential consented by an admin, injected on every action call and stored under a reserved secrets slot."
             }
           }
         },

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.3.0...plugin-scalekit-v0.4.0) (2026-08-13)
+
+
+### Features
+
+* **scalekit:** add deployment-scoped MCP-OAuth workspace connect (mcp-oauth flow + credentialScope) and 35 workspace-management tool actions over the hosted Scalekit MCP server; drop the thin client_credentials management actions
+
+## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.2.1...plugin-scalekit-v0.3.0) (2026-08-13)
+
+
+### Features
+
+* **scalekit:** add admin-setup actions (organization, portal link, connection state) over the Scalekit management API
+
 ## [0.2.1](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.2.0...plugin-scalekit-v0.2.1) (2026-06-02)
 
 
