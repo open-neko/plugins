@@ -2,7 +2,7 @@
 
 Two things in one repo:
 
-1. **First-party plugin source code** under `packages/` — `@open-neko/plugin-types` (the public contract) and `@open-neko/plugin-parallel-search` (web search via Parallel.ai's MCP). These are written, tested, and supported by the OpenNeko team and published to npm under `@open-neko/*`.
+1. **First-party plugin source code** under `packages/` — `@open-neko/plugin-types` (the public contract) plus the first-party plugins (Scalekit SSO + workspace management, web search, Slack, Telegram, Shopify, Google Workspace, and more). These are written, tested, and supported by the OpenNeko team and published to npm under `@open-neko/*`.
 
 2. **The official OpenNeko marketplace** at `marketplace.json` — the catalog the `openneko` CLI consults by default when an operator runs `openneko install <name>`. It lists only the first-party plugins above. Browse it at <https://open-neko.github.io/plugins/>.
 
@@ -40,8 +40,13 @@ If you want to publish your own marketplace, see [CONTRIBUTING.md](./CONTRIBUTIN
 │   ├── static/                     ← stylesheet, assets
 │   └── dist/                       ← Pages artifact (gitignored)
 ├── packages/
-│   ├── types/                      ← @open-neko/plugin-types
-│   └── parallel-search/            ← @open-neko/plugin-parallel-search
+│   ├── types/                      ← @open-neko/plugin-types (the public contract)
+│   ├── scalekit/                   ← @open-neko/plugin-scalekit (SSO + workspace management)
+│   ├── parallel-search/            ← @open-neko/plugin-parallel-search (web search)
+│   ├── slack/                      ← @open-neko/plugin-slack (channel + actions)
+│   ├── telegram/                   ← @open-neko/channel-telegram (channel)
+│   ├── shopify/                    ← @open-neko/plugin-shopify (Admin API actions)
+│   └── google-workspace/           ← @open-neko/connector-google-workspace (per-operator OAuth)
 └── test/                           ← marketplace + site-build tests
 ```
 
