@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.3.0...plugin-scalekit-v0.4.0) (2026-08-13)
+
+
+### Features
+
+* **scalekit:** v1.0.0 — deployment-scoped MCP-OAuth workspace connect + workspace tool actions ([681293a](https://github.com/open-neko/plugins/commit/681293afdfe1afa752e85673eab75ee2a1c25883))
+* **scalekit:** v1.0.0 — MCP-OAuth workspace connect + workspace tool actions ([bed2f32](https://github.com/open-neko/plugins/commit/bed2f3281de979de6594735712fcd4d07e6c4251))
+
 ## [1.0.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.3.0...plugin-scalekit-v1.0.0) (2026-08-13)
 
 
