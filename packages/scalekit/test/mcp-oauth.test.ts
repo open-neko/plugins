@@ -69,9 +69,9 @@ describe("discoverResource", () => {
 });
 
 describe("discoverAuthorizationServer", () => {
-  it("maps the endpoints", async () => {
-    const { fetch } = routeFetch({
-      "GET /as": {
+  it("fetches metadata at /.well-known/oauth-authorization-server", async () => {
+    const { fetch, calls } = routeFetch({
+      "GET /as/.well-known/oauth-authorization-server": {
         body: {
           issuer: "https://as.scalekit.com",
           authorization_endpoint: "https://as.scalekit.com/authorize",
@@ -82,6 +82,9 @@ describe("discoverAuthorizationServer", () => {
     });
     const oauth = createMcpOAuth({ fetchImpl: fetch });
     const as = await oauth.discoverAuthorizationServer("https://mcp.test/as");
+    expect(calls[0]!.url).toBe(
+      "https://mcp.test/as/.well-known/oauth-authorization-server",
+    );
     expect(as).toEqual({
       issuer: "https://as.scalekit.com",
       authorizationEndpoint: "https://as.scalekit.com/authorize",
@@ -90,9 +93,46 @@ describe("discoverAuthorizationServer", () => {
     });
   });
 
+  it("does not double-append the well-known path", async () => {
+    const { fetch, calls } = routeFetch({
+      "GET /as/.well-known/oauth-authorization-server": {
+        body: {
+          authorization_endpoint: "https://as.scalekit.com/authorize",
+          token_endpoint: "https://as.scalekit.com/token",
+        },
+      },
+    });
+    const oauth = createMcpOAuth({ fetchImpl: fetch });
+    await oauth.discoverAuthorizationServer(
+      "https://mcp.test/as/.well-known/oauth-authorization-server",
+    );
+    expect(calls[0]!.url).toBe(
+      "https://mcp.test/as/.well-known/oauth-authorization-server",
+    );
+  });
+
+  it("falls back to the raw URL when the well-known path 404s", async () => {
+    const { fetch, calls } = routeFetch({
+      "GET /as/.well-known/oauth-authorization-server": {
+        status: 404,
+        body: { error: "not found" },
+      },
+      "GET /as": {
+        body: {
+          authorization_endpoint: "https://as.scalekit.com/authorize",
+          token_endpoint: "https://as.scalekit.com/token",
+        },
+      },
+    });
+    const oauth = createMcpOAuth({ fetchImpl: fetch });
+    const as = await oauth.discoverAuthorizationServer("https://mcp.test/as");
+    expect(calls[1]!.url).toBe("https://mcp.test/as");
+    expect(as.tokenEndpoint).toBe("https://as.scalekit.com/token");
+  });
+
   it("throws when endpoints are missing", async () => {
     const { fetch } = routeFetch({
-      "GET /as": { body: { issuer: "x" } },
+      "GET /as/.well-known/oauth-authorization-server": { body: { issuer: "x" } },
     });
     const oauth = createMcpOAuth({ fetchImpl: fetch });
     await expect(

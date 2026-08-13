@@ -39,15 +39,17 @@ const DEFAULT_MCP_URL = "https://mcp.scalekit.com/";
 /**
  * Display list of OAuth scopes for the consent screen. The actual OAuth
  * scope strings are discovered at runtime from the MCP server's protected
- * resource metadata (`scopes_supported`); begin requests the full list.
+ * resource metadata (`scopes_supported`); begin requests the full menu
+ * (wks:read/write, env:read/write, org:read/write on Scalekit's hosted
+ * server) and the consent screen enumerates them.
  */
 const DECLARED_SCOPES = [
-  "environment_read",
-  "environment_write",
-  "workspace_read",
-  "workspace_write",
-  "organization_read",
-  "organization_write",
+  "wks:read",
+  "wks:write",
+  "env:read",
+  "env:write",
+  "org:read",
+  "org:write",
 ];
 
 /** Test seam: inject fakes instead of constructing the real clients. */
@@ -241,8 +243,11 @@ export async function runBeginConnect(
     );
   }
   const codeVerifier = params.codeVerifier ?? generatePkceVerifier();
-  const scopes =
-    params.scopes.length > 0 ? params.scopes : resource.scopesSupported;
+  // mcp-oauth: the authorization server's discovered scopes are the truth.
+  // The manifest list is display metadata only — requesting anything less
+  // than the full menu yields a token that fails the server's per-tool
+  // scope validation (401 on tools/call).
+  const scopes = resource.scopesSupported;
   const authorizationUrl = oauth.buildAuthorizationUrl({
     authorizationEndpoint: as.authorizationEndpoint,
     clientId,
@@ -442,7 +447,7 @@ function num(value: unknown): number | null {
 
 export default definePlugin({
   name: "@open-neko/plugin-scalekit",
-  version: "0.3.0", // x-release-please-version
+  version: "1.0.0", // x-release-please-version
   capabilities: {
     auth: {
       providerLabel: "Scalekit",

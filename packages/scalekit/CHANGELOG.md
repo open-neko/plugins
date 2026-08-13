@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.3.0...plugin-scalekit-v1.0.0) (2026-08-13)
+
+
+### Features
+
+* **scalekit:** deployment-scoped MCP-OAuth workspace connect + all Scalekit workspace tools as agent actions; SSO setup flow (environment picker, credential auto-fill, portal-link + connection polling)
+
+
+### Bug Fixes
+
+* **scalekit:** request discovered OAuth scopes (wks/env/org) instead of declared names
+* **scalekit:** fetch AS metadata at /.well-known/oauth-authorization-server per RFC 9728
+* **scalekit:** allow egress to *.scalekit.dev (development environments)
+
+
 ## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-scalekit-v0.2.1...plugin-scalekit-v0.3.0) (2026-08-13)
 
 
