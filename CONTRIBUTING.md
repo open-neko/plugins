@@ -25,7 +25,7 @@ This is how third parties ship plugins to OpenNeko users without going through u
     "requires_network": ["..."]
   }
   ```
-- The runner is a single bundled file (e.g. esbuild --bundle, all deps inlined except node built-ins). The microsandbox VM does not see your npm dependencies.
+- The runner is a single bundled file (e.g. esbuild --bundle, all deps inlined except node built-ins). The OpenShell sandbox does not see your npm dependencies.
 - Each declared host in `requires_network` is the narrowest legitimate domain (no `*` unless necessary; never `0.0.0.0` or metadata-service IPs).
 
 ### 2. Author your `marketplace.json`

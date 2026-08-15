@@ -203,7 +203,7 @@ export async function buildSite() {
       <div class="support-rail reveal reveal-delay-3">
         <div class="support-intro">
           <p class="support-kicker">How operators install</p>
-          <p class="support-summary"><code>openneko install &lt;name&gt;</code> writes the manifest entry and pulls the pinned version from npm. On the next worker start, every listed plugin boots in its own microsandbox VM.</p>
+          <p class="support-summary"><code>openneko install &lt;name&gt;</code> writes the manifest entry and pulls the pinned version from npm. On the next worker start, every listed plugin boots in its own OpenShell sandbox.</p>
         </div>
         <div class="support-item">
           <p class="support-label">Marketplace URL</p>
@@ -220,7 +220,7 @@ export async function buildSite() {
     <section class="page section" id="plugins">
       <header class="section-heading">
         <h2 class="section-title">Plugins</h2>
-        <p class="section-copy">Click <em>view source</em> for each plugin's repository. Every plugin runs inside a microsandbox microVM with outbound network limited to the hosts shown on the card — the manifest declaration is enforced at the VM boundary.</p>
+        <p class="section-copy">Click <em>view source</em> for each plugin's repository. Every plugin runs inside an OpenShell sandbox with outbound network limited to the hosts shown on the card — the manifest declaration is enforced at the sandbox boundary.</p>
       </header>
       <div class="plugin-grid">
         ${cards || '<p class="section-copy">No plugins listed yet.</p>'}
@@ -292,7 +292,7 @@ export async function buildSite() {
         <a href="${NEKO_URL}">OpenNeko ↗</a>
       </nav>
     </div>
-    <p class="footer-legal">Every plugin runs inside a microsandbox microVM with manifest-declared network egress. Curation is on top of that floor, not in place of it.</p>
+    <p class="footer-legal">Every plugin runs inside an OpenShell sandbox with manifest-declared network egress. Curation is on top of that floor, not in place of it.</p>
   </footer>
 </body>
 </html>

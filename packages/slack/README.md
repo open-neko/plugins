@@ -1,6 +1,6 @@
 # @open-neko/plugin-slack
 
-Slack for [OpenNeko](https://github.com/open-neko/neko): a bidirectional **channel** (DM the agent, @-mention it in a channel, run `/openneko` slash commands — it replies like the web `/work` UI) **plus actions** (post messages, send DMs, react, look up users/channels). The action handlers run inside a microsandbox microVM whose outbound network is limited to `slack.com`; inbound is carried by the worker over Slack Socket Mode.
+Slack for [OpenNeko](https://github.com/open-neko/neko): a bidirectional **channel** (DM the agent, @-mention it in a channel, run `/openneko` slash commands — it replies like the web `/work` UI) **plus actions** (post messages, send DMs, react, look up users/channels). The action handlers run inside an OpenShell sandbox whose outbound network is limited to `slack.com`; inbound is carried by the worker over Slack Socket Mode.
 
 ## Install
 

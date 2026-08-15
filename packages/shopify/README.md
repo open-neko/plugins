@@ -4,7 +4,7 @@ Shopify Admin connector for OpenNeko. List orders, fetch order
 detail, and stamp internal notes against your `*.myshopify.com`
 store. Network egress is sandbox-restricted to your store's
 canonical domain — no other host is reachable from this plugin's
-microVM, even if instructed.
+OpenShell sandbox, even if instructed.
 
 ## Setup
 
@@ -46,8 +46,8 @@ a future OAuth-based variant.
 
 ## Sandbox
 
-Network egress restricted to `*.myshopify.com`. The microsandbox
-VM enforces this — the plugin cannot reach any other host even if
+Network egress restricted to `*.myshopify.com`. The OpenShell
+sandbox enforces this — the plugin cannot reach any other host even if
 instructed.
 
 ## License

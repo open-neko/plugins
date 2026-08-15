@@ -1,6 +1,6 @@
 // Bundles src/run.ts (plus its imports) into a single dist/run.js.
-// Why bundling: the plugin runs inside a microsandbox VM that bind-
-// mounts only the workspace dir containing this file. The VM does NOT
+// Why bundling: the plugin runs inside an OpenShell sandbox that bind-
+// mounts only the workspace dir containing this file. The sandbox does NOT
 // have access to the host's node_modules, so every import must be
 // resolved at build time and inlined here. Node built-ins are kept
 // external — they exist inside the VM's node runtime.
