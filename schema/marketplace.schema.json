@@ -144,6 +144,11 @@
           "enum": ["egress", "box"],
           "description": "How a secret reaches the plugin VM. 'egress': held gateway-side and substituted by the proxy onto outbound requests — the box sees only a placeholder (for credentials sent to an external API, e.g. a bot token). 'box' (default): the value lives in the VM, for secrets compared locally and never sent out (e.g. a webhook signing secret)."
         },
+        "autogenerate": {
+          "type": "boolean",
+          "default": false,
+          "description": "The host mints this value itself (48 random bytes, base64url) at install/load and stores it in the secrets file — the operator is never prompted and never sees it. For purely internal secrets like HMAC signing keys."
+        },
         "description": {
           "type": "string",
           "minLength": 1,
@@ -179,6 +184,17 @@
               "type": "string",
               "minLength": 1,
               "description": "Short label rendered on the sign-in button (e.g. \"Scalekit\", \"Okta\")."
+            },
+            "provisioning": {
+              "type": "string",
+              "enum": ["automatic", "manual"],
+              "default": "automatic",
+              "description": "automatic: IdP-attested identity — the core may create an app_user on first sign-in. manual: self-asserted identity (e.g. magic link) — the core only signs in users an admin pre-provisioned and silently drops unknown emails."
+            },
+            "loginHintRequired": {
+              "type": "boolean",
+              "default": false,
+              "description": "begin_auth is unusable without a loginHint (e.g. magic link needs the email). The sign-in page requires the email field and the begin route rejects hint-less requests."
             }
           }
         },

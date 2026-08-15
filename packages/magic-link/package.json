@@ -1,0 +1,87 @@
+{
+  "name": "@open-neko/plugin-magic-link",
+  "version": "0.1.0",
+  "description": "Passwordless email sign-in for OpenNeko. Implements the auth contract with manual provisioning: an admin creates each user (email + role) in OpenNeko first, and only those users can request a single-use, HMAC-signed sign-in link — possession of a mailbox never mints an account. Delivery via Resend, Postmark, or SendGrid.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/magic-link"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "permissions": {
+      "network": [
+        "api.resend.com",
+        "api.postmarkapp.com",
+        "api.sendgrid.com"
+      ],
+      "env": [
+        {
+          "key": "MAGIC_LINK_SIGNING_SECRET",
+          "required": true,
+          "secret": true,
+          "autogenerate": true,
+          "description": "HMAC key that signs each sign-in token. Generated and stored by the host automatically — never prompted, never seen. Deleting the stored value and restarting rotates it, which invalidates every outstanding link."
+        },
+        {
+          "key": "MAGIC_LINK_FROM",
+          "required": true,
+          "secret": false,
+          "description": "From address for the sign-in email, e.g. \"OpenNeko <signin@company.com>\". Must be a sender verified with your email provider."
+        },
+        {
+          "key": "RESEND_API_KEY",
+          "required": false,
+          "secret": true,
+          "description": "Resend API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY — it selects the delivery provider."
+        },
+        {
+          "key": "POSTMARK_SERVER_TOKEN",
+          "required": false,
+          "secret": true,
+          "description": "Postmark server token. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+        },
+        {
+          "key": "SENDGRID_API_KEY",
+          "required": false,
+          "secret": true,
+          "description": "SendGrid API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+        },
+        {
+          "key": "MAGIC_LINK_TTL_SECONDS",
+          "required": false,
+          "secret": false,
+          "description": "Sign-in link lifetime in seconds, 60–600. Defaults to 600 (10 minutes) — the core's state cookie expires then anyway, so longer values buy nothing."
+        }
+      ]
+    },
+    "capabilities": {
+      "auth": {
+        "providerLabel": "Email link",
+        "provisioning": "manual",
+        "loginHintRequired": true
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
