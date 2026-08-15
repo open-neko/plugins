@@ -54,7 +54,7 @@ Gmail / Calendar / Sheets actions back into the agent.
   at any time via <https://myaccount.google.com/permissions>. A revoked
   refresh token surfaces as `invalid_grant` on the next action call —
   the operator must reconnect via /integrations.
-- Tokens never leave the worker's microsandbox VM except via the
+- Tokens never leave the worker's OpenShell sandbox except via the
   worker-mediated writeback path. The plugin does not persist anything
   to disk.
 
@@ -81,7 +81,7 @@ Network egress is limited to:
 - `gmail.googleapis.com`, `www.googleapis.com`, `sheets.googleapis.com`,
   `docs.googleapis.com` (action APIs)
 
-The microsandbox VM enforces this at the network boundary; the plugin
+The OpenShell sandbox enforces this at the network boundary; the plugin
 cannot reach any other host even if instructed.
 
 ## License

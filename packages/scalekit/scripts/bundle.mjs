@@ -1,6 +1,6 @@
 // Bundles src/run.ts (plus its imports) into a single dist/run.js for
-// execution inside the microsandbox VM. No external deps survive — the
-// VM has no node_modules access.
+// execution inside the OpenShell sandbox. No external deps survive — the
+// sandbox has no node_modules access.
 import { build } from "esbuild";
 
 await build({
