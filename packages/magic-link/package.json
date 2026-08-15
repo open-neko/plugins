@@ -26,7 +26,8 @@
           "key": "MAGIC_LINK_SIGNING_SECRET",
           "required": true,
           "secret": true,
-          "description": "HMAC key (at least 32 characters) that signs each sign-in token. Rotating it invalidates every outstanding link immediately."
+          "autogenerate": true,
+          "description": "HMAC key that signs each sign-in token. Generated and stored by the host automatically — never prompted, never seen. Deleting the stored value and restarting rotates it, which invalidates every outstanding link."
         },
         {
           "key": "MAGIC_LINK_FROM",

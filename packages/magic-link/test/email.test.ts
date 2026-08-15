@@ -35,6 +35,57 @@ describe("provider senders", () => {
     );
   });
 
+  it("shapes the Resend payload with bearer auth", async () => {
+    const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await resolveProvider({ resendApiKey: "rk_123" }).send(message);
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((init.headers as Record<string, string>).Authorization).toBe(
+      "Bearer rk_123",
+    );
+    const body = JSON.parse(init.body as string);
+    expect(body).toMatchObject({
+      from: message.from,
+      to: [message.to],
+      subject: message.subject,
+    });
+  });
+
+  it("shapes the Postmark payload with the server-token header", async () => {
+    const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await resolveProvider({ postmarkServerToken: "pm_123" }).send(message);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.postmarkapp.com/email");
+    expect(
+      (init.headers as Record<string, string>)["X-Postmark-Server-Token"],
+    ).toBe("pm_123");
+    const body = JSON.parse(init.body as string);
+    expect(body).toMatchObject({
+      From: message.from,
+      To: message.to,
+      Subject: message.subject,
+      MessageStream: "outbound",
+    });
+  });
+
+  it("shapes the SendGrid payload with parsed from and both content types", async () => {
+    const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await resolveProvider({ sendgridApiKey: "sg_123" }).send(message);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.sendgrid.com/v3/mail/send");
+    const body = JSON.parse(init.body as string);
+    expect(body.from).toEqual({ email: "signin@company.com", name: "OpenNeko" });
+    expect(body.personalizations).toEqual([
+      { to: [{ email: message.to }] },
+    ]);
+    expect(body.content.map((c: { type: string }) => c.type)).toEqual([
+      "text/plain",
+      "text/html",
+    ]);
+  });
+
   it("surfaces provider rejections with status and truncated body", async () => {
     vi.stubGlobal(
       "fetch",

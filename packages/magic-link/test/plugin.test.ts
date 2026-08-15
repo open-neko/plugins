@@ -137,4 +137,132 @@ describe("magic-link auth flow", () => {
       ),
     ).rejects.toThrow(/MAGIC_LINK_SIGNING_SECRET/);
   });
+
+  it("fails begin when MAGIC_LINK_FROM is unset", async () => {
+    delete process.env.MAGIC_LINK_FROM;
+    await expect(
+      runBeginAuth(
+        { redirectUri: CALLBACK, state: "s", loginHint: "a@b.co" },
+        { send, nowMs: NOW },
+      ),
+    ).rejects.toThrow(/MAGIC_LINK_FROM/);
+  });
+
+  it("rejects a relative redirectUri", async () => {
+    await expect(
+      runBeginAuth(
+        { redirectUri: "/api/auth/callback", state: "s", loginHint: "a@b.co" },
+        { send, nowMs: NOW },
+      ),
+    ).rejects.toThrow(/absolute URL/);
+  });
+
+  it("requires redirectUri and state", async () => {
+    await expect(
+      runBeginAuth(
+        { redirectUri: "", state: "s", loginHint: "a@b.co" },
+        { send, nowMs: NOW },
+      ),
+    ).rejects.toThrow(/redirectUri/);
+    await expect(
+      runBeginAuth(
+        { redirectUri: CALLBACK, state: "", loginHint: "a@b.co" },
+        { send, nowMs: NOW },
+      ),
+    ).rejects.toThrow(/state/);
+    await expect(
+      runCompleteAuth(
+        { code: "", redirectUri: CALLBACK, state: "s" },
+        { nowMs: NOW },
+      ),
+    ).rejects.toThrow(/code/);
+    await expect(
+      runCompleteAuth(
+        { code: "x.y", redirectUri: CALLBACK, state: "" },
+        { nowMs: NOW },
+      ),
+    ).rejects.toThrow(/state/);
+  });
+
+  it("honors MAGIC_LINK_TTL_SECONDS within its 60–600 clamp", async () => {
+    process.env.MAGIC_LINK_TTL_SECONDS = "120";
+    await runBeginAuth(
+      { redirectUri: CALLBACK, state: "s1", loginHint: "a@b.co" },
+      { send, nowMs: NOW },
+    );
+    const link = new URL(/https:\/\/\S+/.exec(sent[0].text)![0]);
+    const code = link.searchParams.get("code")!;
+    // Valid inside the window…
+    await runCompleteAuth(
+      { code, redirectUri: CALLBACK, state: "s1" },
+      { nowMs: NOW + 119_000 },
+    );
+    // …expired after it.
+    await expect(
+      runCompleteAuth(
+        { code, redirectUri: CALLBACK, state: "s1" },
+        { nowMs: NOW + 121_000 },
+      ),
+    ).rejects.toThrow(/expired/);
+    // Below the floor the clamp raises to 60s: still valid at 59s.
+    process.env.MAGIC_LINK_TTL_SECONDS = "5";
+    sent = [];
+    await runBeginAuth(
+      { redirectUri: CALLBACK, state: "s2", loginHint: "a@b.co" },
+      { send, nowMs: NOW },
+    );
+    const clamped = new URL(/https:\/\/\S+/.exec(sent[0].text)![0]);
+    await runCompleteAuth(
+      {
+        code: clamped.searchParams.get("code")!,
+        redirectUri: CALLBACK,
+        state: "s2",
+      },
+      { nowMs: NOW + 59_000 },
+    );
+  });
+
+  it("mentions the expiry window in the email body", async () => {
+    process.env.MAGIC_LINK_TTL_SECONDS = "300";
+    await runBeginAuth(
+      { redirectUri: CALLBACK, state: "s", loginHint: "a@b.co" },
+      { send, nowMs: NOW },
+    );
+    expect(sent[0].text).toContain("5 minutes");
+    expect(sent[0].subject).toContain("sign-in link");
+  });
+
+  it("preserves the callback's existing query params in the link", async () => {
+    await runBeginAuth(
+      {
+        redirectUri: `${CALLBACK}?tenant=acme`,
+        state: "s",
+        loginHint: "a@b.co",
+      },
+      { send, nowMs: NOW },
+    );
+    const link = new URL(/https:\/\/\S+/.exec(sent[0].text)![0]);
+    expect(link.searchParams.get("tenant")).toBe("acme");
+    expect(link.searchParams.get("state")).toBe("s");
+    expect(link.searchParams.get("code")).toBeTruthy();
+  });
+
+  it("a token minted under a rotated secret no longer verifies", async () => {
+    await runBeginAuth(
+      { redirectUri: CALLBACK, state: "s", loginHint: "a@b.co" },
+      { send, nowMs: NOW },
+    );
+    const link = new URL(/https:\/\/\S+/.exec(sent[0].text)![0]);
+    process.env.MAGIC_LINK_SIGNING_SECRET = "r".repeat(48);
+    await expect(
+      runCompleteAuth(
+        {
+          code: link.searchParams.get("code")!,
+          redirectUri: CALLBACK,
+          state: "s",
+        },
+        { nowMs: NOW },
+      ),
+    ).rejects.toThrow(/not valid/);
+  });
 });
