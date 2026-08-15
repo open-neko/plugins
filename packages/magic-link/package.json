@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-magic-link",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Passwordless email sign-in for OpenNeko. Implements the auth contract with manual provisioning: an admin creates each user (email + role) in OpenNeko first, and only those users can request a single-use, HMAC-signed sign-in link — possession of a mailbox never mints an account. Delivery via Resend, Postmark, or SendGrid.",
   "license": "Apache-2.0",
   "repository": {
