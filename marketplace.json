@@ -1745,6 +1745,79 @@
           "publishedAt": "2026-06-26"
         }
       ]
+    },
+    {
+      "name": "@open-neko/plugin-magic-link",
+      "title": "Magic-link sign-in",
+      "description": "Passwordless email sign-in implementing OpenNeko's auth contract with manual provisioning: an admin creates each user (email + role) in OpenNeko first, and only those users can request a single-use, HMAC-signed sign-in link — possession of a mailbox never mints an account. Link delivery via Resend, Postmark, or SendGrid, selected by which API key is configured.",
+      "source": "https://github.com/open-neko/plugins/tree/main/packages/magic-link",
+      "homepage": "https://github.com/open-neko/plugins/tree/main/packages/magic-link",
+      "maintainers": [
+        {
+          "name": "open-neko",
+          "url": "https://github.com/open-neko"
+        }
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "integrity": "sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+          "draft": true,
+          "permissions": {
+            "network": [
+              "api.resend.com",
+              "api.postmarkapp.com",
+              "api.sendgrid.com"
+            ],
+            "env": [
+              {
+                "key": "MAGIC_LINK_SIGNING_SECRET",
+                "required": true,
+                "secret": true,
+                "description": "HMAC key (at least 32 characters) that signs each sign-in token. Rotating it invalidates every outstanding link immediately."
+              },
+              {
+                "key": "MAGIC_LINK_FROM",
+                "required": true,
+                "secret": false,
+                "description": "From address for the sign-in email, e.g. \"OpenNeko <signin@company.com>\". Must be a sender verified with your email provider."
+              },
+              {
+                "key": "RESEND_API_KEY",
+                "required": false,
+                "secret": true,
+                "description": "Resend API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY — it selects the delivery provider."
+              },
+              {
+                "key": "POSTMARK_SERVER_TOKEN",
+                "required": false,
+                "secret": true,
+                "description": "Postmark server token. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+              },
+              {
+                "key": "SENDGRID_API_KEY",
+                "required": false,
+                "secret": true,
+                "description": "SendGrid API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+              },
+              {
+                "key": "MAGIC_LINK_TTL_SECONDS",
+                "required": false,
+                "secret": false,
+                "description": "Sign-in link lifetime in seconds, 60–600. Defaults to 600 (10 minutes) — the core's state cookie expires then anyway, so longer values buy nothing."
+              }
+            ]
+          },
+          "capabilities": {
+            "auth": {
+              "providerLabel": "Email link",
+              "provisioning": "manual",
+              "loginHintRequired": true
+            }
+          },
+          "publishedAt": "2026-08-15"
+        }
+      ]
     }
   ]
 }
