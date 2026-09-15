@@ -24,7 +24,7 @@ The CLI prompts for three sign-in values (`SCALEKIT_ENVIRONMENT_URL`, `SCALEKIT_
 Optional env:
 
 - `SCALEKIT_MCP_URL` — Scalekit MCP server URL for workspace management. Defaults to the hosted `https://mcp.scalekit.com/`.
-- `SCALEKIT_ORGANIZATION_ID` — the organization whose directory OpenNeko syncs, for example `org_123`. Directory sync needs it.
+- `SCALEKIT_ORGANIZATION_ID` — the organization whose directory OpenNeko syncs, for example `org_123`. Directory sync needs it. Step 2 on the SSO settings page sets it when you select the environment.
 
 Rotate any value later with:
 
@@ -45,7 +45,7 @@ Going to production later: use **Change** on step 2, pick **Prod**, paste the Pr
 
 ## Directory sync
 
-Set `SCALEKIT_ORGANIZATION_ID`, then open **Admin → Users → IdP rules** and select **Sync now**.
+Complete steps 1 to 3 on the SSO settings page, so the organization and sign-in credentials are set. Then open **Admin → Users → IdP rules** and select **Sync now**.
 
 - The plugin gets a client-credentials token and reads each enabled directory of the organization.
 - A group's key is its display name. Sign-in claims carry group names, so one IdP group rule matches both sign-in and sync. Renaming a group in the IdP creates a new IdP group in OpenNeko; update the rule after a rename.
