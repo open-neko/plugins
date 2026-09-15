@@ -254,6 +254,32 @@
             },
             "profile": { "$ref": "#/$defs/capabilityProfile" }
           }
+        },
+        "directory": {
+          "type": "object",
+          "description": "Lists the identity provider's users, groups and group memberships. Singleton per deployment.",
+          "required": ["providerLabel"],
+          "additionalProperties": false,
+          "properties": {
+            "providerLabel": { "type": "string", "minLength": 1 },
+            "read": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "users": { "type": "boolean" },
+                "groups": { "type": "boolean" },
+                "memberships": { "type": "boolean" }
+              }
+            },
+            "write": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "createUser": { "type": "boolean" },
+                "deactivateUser": { "type": "boolean" }
+              }
+            }
+          }
         }
       }
     },
