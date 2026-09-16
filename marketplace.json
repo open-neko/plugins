@@ -2128,6 +2128,64 @@
           },
           "publishedAt": "2026-09-16",
           "draft": true
+        },
+        {
+          "version": "0.3.1",
+          "integrity": "sha512-BBHQ8L6q7shZgaP2CuQgIp8i82QqDOsq9MjBnTmCKcUYv60jJqmN6ehl2b0W4pcIjVipEk763j71QiRp4RCaCA==",
+          "permissions": {
+            "network": [
+              "api.resend.com",
+              "api.postmarkapp.com",
+              "api.sendgrid.com"
+            ],
+            "env": [
+              {
+                "key": "MAGIC_LINK_SIGNING_SECRET",
+                "required": true,
+                "secret": true,
+                "autogenerate": true,
+                "description": "HMAC key that signs each sign-in token. The host generates and stores it for you, and never shows it. Delete the stored value and restart to rotate it, which invalidates every outstanding link."
+              },
+              {
+                "key": "MAGIC_LINK_FROM",
+                "required": true,
+                "secret": false,
+                "description": "From address for the sign-in email, e.g. \"OpenNeko <signin@company.com>\". Must be a sender verified with your email provider."
+              },
+              {
+                "key": "RESEND_API_KEY",
+                "required": false,
+                "secret": true,
+                "description": "Resend API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY. The key you set selects the delivery provider."
+              },
+              {
+                "key": "POSTMARK_SERVER_TOKEN",
+                "required": false,
+                "secret": true,
+                "description": "Postmark server token. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+              },
+              {
+                "key": "SENDGRID_API_KEY",
+                "required": false,
+                "secret": true,
+                "description": "SendGrid API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY."
+              },
+              {
+                "key": "MAGIC_LINK_TTL_SECONDS",
+                "required": false,
+                "secret": false,
+                "description": "Sign-in link lifetime in seconds, 60 to 600. The default is 600, which is 10 minutes. The state cookie expires then anyway, so a longer value buys nothing."
+              }
+            ]
+          },
+          "capabilities": {
+            "auth": {
+              "providerLabel": "Email link",
+              "provisioning": "manual",
+              "loginHintRequired": true
+            }
+          },
+          "publishedAt": "2026-09-16"
         }
       ]
     }
