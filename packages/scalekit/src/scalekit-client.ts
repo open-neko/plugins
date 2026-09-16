@@ -6,7 +6,7 @@
 //   GET  {env}/userinfo           — access_token → identity claims
 // See https://docs.scalekit.com/sso/quickstart.
 
-const DEFAULT_TIMEOUT_MS = 20_000;
+export const DEFAULT_TIMEOUT_MS = 20_000;
 const SCALEKIT_OIDC_SCOPES = "openid profile email";
 
 export class ScalekitApiError extends Error {
@@ -72,7 +72,7 @@ export interface ScalekitClient {
   fetchUserinfo(accessToken: string): Promise<ScalekitUserinfo>;
 }
 
-function normalizeEnvironmentUrl(raw: string): string {
+export function normalizeEnvironmentUrl(raw: string): string {
   const trimmed = raw.trim().replace(/\/+$/, "");
   if (!trimmed) {
     throw new ScalekitApiError(
@@ -89,6 +89,63 @@ function normalizeEnvironmentUrl(raw: string): string {
     );
   }
   return trimmed;
+}
+
+export async function scalekitRequest<T>(
+  fetchImpl: typeof fetch,
+  timeoutMs: number,
+  url: string,
+  init: RequestInit,
+  description: string,
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+  try {
+    response = await fetchImpl(url, { ...init, signal: controller.signal });
+  } catch (err) {
+    if ((err as Error)?.name === "AbortError") {
+      throw new ScalekitApiError(
+        `Scalekit ${description} timed out after ${timeoutMs}ms`,
+        null,
+        "timeout",
+      );
+    }
+    throw new ScalekitApiError(
+      `Scalekit ${description} network error: ${err instanceof Error ? err.message : String(err)}`,
+      null,
+      null,
+      err,
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+  const text = await response.text().catch(() => "");
+  let body: unknown;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch (err) {
+      throw new ScalekitApiError(
+        `Scalekit ${description} returned non-JSON (HTTP ${response.status}): ${text.slice(0, 200)}`,
+        response.status,
+        null,
+        err,
+      );
+    }
+  }
+  if (!response.ok) {
+    const providerError =
+      (body as { error?: string } | undefined)?.error ?? null;
+    const providerDescription =
+      (body as { error_description?: string } | undefined)?.error_description ?? null;
+    throw new ScalekitApiError(
+      `Scalekit ${description} returned HTTP ${response.status} (${providerError ?? "no error code"}${providerDescription ? `: ${providerDescription}` : ""})`,
+      response.status,
+      providerError,
+    );
+  }
+  return (body ?? {}) as T;
 }
 
 export function createScalekitClient(
@@ -110,60 +167,8 @@ export function createScalekitClient(
   const fetchImpl = options.fetchImpl ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  async function call<T>(
-    url: string,
-    init: RequestInit,
-    description: string,
-  ): Promise<T> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    let response: Response;
-    try {
-      response = await fetchImpl(url, { ...init, signal: controller.signal });
-    } catch (err) {
-      if ((err as Error)?.name === "AbortError") {
-        throw new ScalekitApiError(
-          `Scalekit ${description} timed out after ${timeoutMs}ms`,
-          null,
-          "timeout",
-        );
-      }
-      throw new ScalekitApiError(
-        `Scalekit ${description} network error: ${err instanceof Error ? err.message : String(err)}`,
-        null,
-        null,
-        err,
-      );
-    } finally {
-      clearTimeout(timer);
-    }
-    const text = await response.text().catch(() => "");
-    let body: unknown;
-    if (text) {
-      try {
-        body = JSON.parse(text);
-      } catch (err) {
-        throw new ScalekitApiError(
-          `Scalekit ${description} returned non-JSON (HTTP ${response.status}): ${text.slice(0, 200)}`,
-          response.status,
-          null,
-          err,
-        );
-      }
-    }
-    if (!response.ok) {
-      const providerError =
-        (body as { error?: string } | undefined)?.error ?? null;
-      const providerDescription =
-        (body as { error_description?: string } | undefined)?.error_description ?? null;
-      throw new ScalekitApiError(
-        `Scalekit ${description} returned HTTP ${response.status} (${providerError ?? "no error code"}${providerDescription ? `: ${providerDescription}` : ""})`,
-        response.status,
-        providerError,
-      );
-    }
-    return (body ?? {}) as T;
-  }
+  const call = <T>(url: string, init: RequestInit, description: string) =>
+    scalekitRequest<T>(fetchImpl, timeoutMs, url, init, description);
 
   return {
     buildAuthorizationUrl({ redirectUri, state, loginHint, scope }) {

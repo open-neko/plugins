@@ -9,6 +9,10 @@ import {
   type CompleteAuthResult,
   type CompleteConnectParams,
   type CompleteConnectResult,
+  type ApplyDirectoryChangeParams,
+  type ApplyDirectoryChangeResult,
+  type ListDirectoryParams,
+  type ListDirectoryResult,
   type ConnectorCredential,
   type PluginActionOutcome,
   type PluginActionRequest,
@@ -20,6 +24,7 @@ import {
   type ScalekitClient,
   type ScalekitUserinfo,
 } from "./scalekit-client.js";
+import { createScalekitDirectory } from "./directory.js";
 import {
   createMcpClient,
   joinTextContent,
@@ -56,6 +61,7 @@ const DECLARED_SCOPES = [
 export interface InvokeOptions {
   createClient?: (env: ResolvedEnv) => ScalekitClient;
   createMcpOAuth?: () => ReturnType<typeof createMcpOAuth>;
+  createDirectory?: (env: ResolvedEnv & { organizationId: string }) => ReturnType<typeof createScalekitDirectory>;
   createMcpClient?: (options: {
     url: string;
     accessToken: string;
@@ -197,6 +203,34 @@ function collectGroups(info: ScalekitUserinfo): string[] {
     if (typeof r === "string" && r) out.add(r);
   }
   return [...out];
+}
+
+// ─── directory capability (SCIM users and groups) ──────────────────────
+
+function directoryOrDefault(options: InvokeOptions) {
+  const env = resolveEnv();
+  const organizationId = process.env.SCALEKIT_ORGANIZATION_ID?.trim();
+  if (!organizationId) {
+    throw new ScalekitPluginError(
+      "SCALEKIT_ORGANIZATION_ID not set (run `openneko secrets set @open-neko/plugin-scalekit SCALEKIT_ORGANIZATION_ID`)",
+    );
+  }
+  const make = options.createDirectory ?? createScalekitDirectory;
+  return make({ ...env, organizationId });
+}
+
+export async function runListDirectory(
+  params: ListDirectoryParams,
+  options: InvokeOptions = {},
+): Promise<ListDirectoryResult> {
+  return directoryOrDefault(options).list(params);
+}
+
+export async function runApplyDirectoryChange(
+  params: ApplyDirectoryChangeParams,
+  options: InvokeOptions = {},
+): Promise<ApplyDirectoryChangeResult> {
+  return directoryOrDefault(options).apply(params);
 }
 
 // ─── connect capability (deployment-scoped MCP-OAuth) ──────────────────
@@ -462,6 +496,13 @@ export default definePlugin({
       begin: (params) => runBeginConnect(params),
       complete: (params) => runCompleteConnect(params),
       refresh: (params) => runRefreshConnect(params),
+    },
+    directory: {
+      providerLabel: "Scalekit directory",
+      read: { users: true, groups: true, memberships: true },
+      write: { createUser: true, deactivateUser: false },
+      list: (params) => runListDirectory(params),
+      apply: (params) => runApplyDirectoryChange(params),
     },
     action: {
       kinds: SCALEKIT_MCP_TOOLS.map((tool) => ({

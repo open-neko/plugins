@@ -1,9 +1,10 @@
 # @open-neko/plugin-scalekit
 
-Scalekit SSO + workspace management for [OpenNeko](https://github.com/open-neko/neko). One plugin, three capabilities:
+Scalekit SSO + workspace management for [OpenNeko](https://github.com/open-neko/neko). One plugin, four capabilities:
 
 - **`auth`** — OpenNeko's generic OIDC sign-in contract over [Scalekit](https://www.scalekit.com)'s hosted gateway, which fronts Okta, Entra ID, Google Workspace, JumpCloud, Ping, and the rest of the enterprise IdP stack behind one integration.
 - **`connect`** — deployment-scoped OAuth consent against Scalekit's workspace MCP server (`https://mcp.scalekit.com/`). One admin consents once; the token bundle lives in OpenNeko's encrypted vault and is refreshed forever.
+- **`directory`** — reads the SCIM directory of one Scalekit organization: users, groups and group memberships. OpenNeko syncs it every 6 hours and applies its IdP group rules. It can also create an organization user.
 - **`action`** — 35 workspace-management tools surfaced to the OpenNeko agent: environments, organizations, users, connections, roles/scopes, redirect URIs, MCP server registration, and admin portal links.
 
 Install once, get the entire enterprise identity ecosystem — and never visit the Scalekit dashboard again after setup.
@@ -23,6 +24,7 @@ The CLI prompts for three sign-in values (`SCALEKIT_ENVIRONMENT_URL`, `SCALEKIT_
 Optional env:
 
 - `SCALEKIT_MCP_URL` — Scalekit MCP server URL for workspace management. Defaults to the hosted `https://mcp.scalekit.com/`.
+- `SCALEKIT_ORGANIZATION_ID` — the organization whose directory OpenNeko syncs, for example `org_123`. Directory sync needs it. Step 2 on the SSO settings page sets it when you select the environment.
 
 Rotate any value later with:
 
@@ -40,6 +42,14 @@ Open **Admin → Settings → Single sign-on** (`/admin/settings/sso`). The page
 4. **Connect the identity provider** (optional for the trial) — `generate_admin_portal_link` hands you a guided portal where you configure your IdP (Okta/Entra/…) — the one step nothing on our side can automate. The agent polls `list_organization_connections` until the connection is `COMPLETED`, then reports SSO live.
 
 Going to production later: use **Change** on step 2, pick **Prod**, paste the Prod secret once, and repeat the portal-link step. Environments are isolated — nothing carries over automatically.
+
+## Directory sync
+
+Complete steps 1 to 3 on the SSO settings page, so the organization and sign-in credentials are set. Then open **Admin → Users → IdP rules** and select **Sync now**.
+
+- The plugin gets a client-credentials token and reads each enabled directory of the organization.
+- A group's key is its display name. Sign-in claims carry group names, so one IdP group rule matches both sign-in and sync. Renaming a group in the IdP creates a new IdP group in OpenNeko; update the rule after a rename.
+- The plugin does not deactivate users. The identity provider owns user status, and sync marks users that SCIM reports as inactive.
 
 ## How the auth flow works
 

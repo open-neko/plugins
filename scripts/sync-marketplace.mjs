@@ -19,8 +19,8 @@ const MARKETPLACE = path.join(ROOT, "marketplace.json");
 const PACKAGES_DIR = path.join(ROOT, "packages");
 
 // package.json openneko.capabilities → marketplace capabilities: action kinds
-// keep only the catalog's schema fields (drop `example`); channel/connect/auth
-// shapes already match the schema, so they're copied straight through.
+// keep only the catalog's schema fields (drop `example`); the other shapes
+// already match the schema, so they're copied straight through.
 export function toCatalogCapabilities(caps = {}) {
   const out = {};
   if (caps.action) {
@@ -32,7 +32,7 @@ export function toCatalogCapabilities(caps = {}) {
       })),
     };
   }
-  for (const key of ["channel", "connect", "auth"]) {
+  for (const key of ["channel", "connect", "auth", "directory"]) {
     if (caps[key]) out[key] = caps[key];
   }
   return out;

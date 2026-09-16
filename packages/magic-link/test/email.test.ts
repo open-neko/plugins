@@ -122,4 +122,32 @@ describe("buildSignInEmail", () => {
     expect(message.text).toContain("works once");
     expect(message.text).toContain("same browser");
   });
+
+  it("builds an HTML email that names the recipient and links the button", () => {
+    const message = buildSignInEmail({
+      from: "OpenNeko <signin@company.com>",
+      to: "person@company.com",
+      link: "https://neko.example/cb?code=a&state=b",
+      ttlMinutes: 10,
+    });
+    expect(message.html).toContain("person@company.com");
+    expect(message.html).toContain(
+      '<a href="https://neko.example/cb?code=a&amp;state=b"',
+    );
+    expect(message.html).toContain("expires in 10 minutes");
+    // Gmail and Outlook drop stylesheets, so every style stays inline.
+    expect(message.html).not.toContain("<style");
+    expect(message.html).not.toContain("<link");
+  });
+
+  it("escapes a recipient address that carries markup", () => {
+    const message = buildSignInEmail({
+      from: "a@b.co",
+      to: '"<script>x</script>"@company.com',
+      link: "https://neko.example/cb",
+      ttlMinutes: 10,
+    });
+    expect(message.html).not.toContain("<script>");
+    expect(message.html).toContain("&lt;script&gt;");
+  });
 });

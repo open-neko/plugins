@@ -74,13 +74,20 @@ describe("syncMarketplace", () => {
     expect(added).toEqual([]);
   });
 
-  it("strips action `example` and copies the channel capability", () => {
+  it("strips action `example` and copies the channel and directory capabilities", () => {
     const caps = toCatalogCapabilities({
       action: { kinds: [{ kind: "k", description: "d", default_mode: "auto", example: { foo: 1 } }] },
       channel: { providerLabel: "P", directions: ["outbound", "inbound"], ingress: "socket", profile: { x: 1 } },
+      directory: { providerLabel: "P directory", read: { users: true, groups: true, memberships: true }, write: { createUser: true } },
     });
     expect(caps.action.kinds[0]).toEqual({ kind: "k", description: "d", default_mode: "auto" });
     expect(caps.action.kinds[0]).not.toHaveProperty("example");
     expect(caps.channel.ingress).toBe("socket");
+    // A catalog entry without this loses directory sync after publish.
+    expect(caps.directory).toEqual({
+      providerLabel: "P directory",
+      read: { users: true, groups: true, memberships: true },
+      write: { createUser: true },
+    });
   });
 });
