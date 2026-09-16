@@ -77,6 +77,7 @@ jobs:
       - name: Publish changed packages (npm OIDC trusted publishing)
         run: |
           set -euo pipefail
+          failed=""
           for pkg in packages/*/; do
             private=$(node -p "require('./$pkg/package.json').private || false")
             [ "$private" = "true" ] && continue
@@ -109,8 +110,20 @@ jobs:
             fi
             echo "[publish] $name@$version"
             tarball="$(cd "$pkg" && pnpm pack --pack-destination "$RUNNER_TEMP" | tail -n1)"
-            npm publish "$tarball" --provenance --access public
+            # One package that cannot publish must not strand the others. A
+            # package npm has never seen has no trusted publisher yet, and
+            # that failure used to abort the loop before the rest went out.
+            if npm publish "$tarball" --provenance --access public; then
+              echo "[done] $name@$version"
+            else
+              echo "[failed] $name@$version"
+              failed="$failed $name@$version"
+            fi
           done
+          if [ -n "${failed# }" ]; then
+            echo "::error::could not publish:$failed"
+            exit 1
+          fi
 
       # Mirror the now-live versions into marketplace.json (integrity from npm),
       # commit it back to main, and dispatch the Pages rebuild — so the catalog
