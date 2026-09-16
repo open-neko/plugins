@@ -164,7 +164,7 @@ export async function runCompleteAuth(
 
 export default definePlugin({
   name: "@open-neko/plugin-magic-link",
-  version: "0.3.0", // x-release-please-version
+  version: "0.3.1", // x-release-please-version
   capabilities: {
     auth: {
       providerLabel: "Email link",

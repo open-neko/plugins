@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/open-neko/plugins/compare/plugin-magic-link-v0.3.0...plugin-magic-link-v0.3.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **magic-link:** plain punctuation in the copy operators read ([#65](https://github.com/open-neko/plugins/issues/65)) ([d37fd39](https://github.com/open-neko/plugins/commit/d37fd39dcbd714fc206bd62cf29b514faecd0d03))
+
 ## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-magic-link-v0.2.0...plugin-magic-link-v0.3.0) (2026-09-16)
 
 
