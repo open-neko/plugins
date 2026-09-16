@@ -1,7 +1,7 @@
 {
   "name": "@open-neko/plugin-magic-link",
   "version": "0.3.0",
-  "description": "Passwordless email sign-in for OpenNeko. Implements the auth contract with manual provisioning: an admin creates each user (email + role) in OpenNeko first, and only those users can request a single-use, HMAC-signed sign-in link — possession of a mailbox never mints an account. Delivery via Resend, Postmark, or SendGrid.",
+  "description": "Passwordless email sign-in for OpenNeko. Implements the auth contract with manual provisioning: an admin creates each user (email and role) in OpenNeko first, and only those users can request a single-use, HMAC-signed sign-in link. Holding a mailbox never mints an account. Delivery via Resend, Postmark, or SendGrid.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
           "required": true,
           "secret": true,
           "autogenerate": true,
-          "description": "HMAC key that signs each sign-in token. Generated and stored by the host automatically — never prompted, never seen. Deleting the stored value and restarting rotates it, which invalidates every outstanding link."
+          "description": "HMAC key that signs each sign-in token. The host generates and stores it for you, and never shows it. Delete the stored value and restart to rotate it, which invalidates every outstanding link."
         },
         {
           "key": "MAGIC_LINK_FROM",
@@ -39,7 +39,7 @@
           "key": "RESEND_API_KEY",
           "required": false,
           "secret": true,
-          "description": "Resend API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY — it selects the delivery provider."
+          "description": "Resend API key. Set exactly one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY. The key you set selects the delivery provider."
         },
         {
           "key": "POSTMARK_SERVER_TOKEN",
@@ -57,7 +57,7 @@
           "key": "MAGIC_LINK_TTL_SECONDS",
           "required": false,
           "secret": false,
-          "description": "Sign-in link lifetime in seconds, 60–600. Defaults to 600 (10 minutes) — the core's state cookie expires then anyway, so longer values buy nothing."
+          "description": "Sign-in link lifetime in seconds, 60 to 600. The default is 600, which is 10 minutes. The state cookie expires then anyway, so a longer value buys nothing."
         }
       ]
     },
