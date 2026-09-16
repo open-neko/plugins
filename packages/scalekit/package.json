@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-scalekit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Scalekit SSO + workspace management for OpenNeko. Implements OpenNeko's generic OIDC auth contract (sign-in via Scalekit's hosted gateway, which fronts Okta, Entra ID, Google Workspace, and others) and exposes the Scalekit workspace-management MCP server as agent tools (environments, organizations, users, connections, roles, MCP server registration, admin portal links) backed by a deployment-scoped OAuth consent.",
   "license": "Apache-2.0",
   "repository": {
@@ -25,19 +25,19 @@
           "key": "SCALEKIT_ENVIRONMENT_URL",
           "required": true,
           "secret": false,
-          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com \u2014 copied from the Scalekit dashboard under API config. The agent can fetch this automatically via get_environment_credentials."
+          "description": "Your Scalekit environment URL, e.g. https://your-app.scalekit.com — copied from the Scalekit dashboard under API config. The agent can fetch this automatically via get_environment_credentials."
         },
         {
           "key": "SCALEKIT_CLIENT_ID",
           "required": true,
           "secret": false,
-          "description": "The OAuth client_id from the Scalekit dashboard. Public \u2014 paired with the secret below for token exchange. The agent can fetch this automatically via get_environment_credentials."
+          "description": "The OAuth client_id from the Scalekit dashboard. Public — paired with the secret below for token exchange. The agent can fetch this automatically via get_environment_credentials."
         },
         {
           "key": "SCALEKIT_CLIENT_SECRET",
           "required": true,
           "secret": true,
-          "description": "The OAuth client_secret from the Scalekit dashboard. Shown only once in the dashboard \u2014 stored in the per-user secrets file, never echoed."
+          "description": "The OAuth client_secret from the Scalekit dashboard. Shown only once in the dashboard — stored in the per-user secrets file, never echoed."
         },
         {
           "key": "SCALEKIT_ORGANIZATION_ID",

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/open-neko/plugins/compare/plugin-magic-link-v0.2.0...plugin-magic-link-v0.3.0) (2026-09-16)
+
+
+### Features
+
+* **scalekit:** directory sync for groups and entitlements ([#62](https://github.com/open-neko/plugins/issues/62)) ([7b2a7d4](https://github.com/open-neko/plugins/commit/7b2a7d464b2de0e7af5cdfbe3475aa8f7c73d2e6))
+
 ## [0.2.0](https://github.com/open-neko/plugins/compare/plugin-magic-link-v0.1.0...plugin-magic-link-v0.2.0) (2026-08-15)
 
 
