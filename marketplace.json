@@ -2126,7 +2126,8 @@
               "loginHintRequired": true
             }
           },
-          "publishedAt": "2026-09-16"
+          "publishedAt": "2026-09-16",
+          "draft": true
         }
       ]
     }
