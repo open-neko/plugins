@@ -33,12 +33,12 @@ export function resolveProvider(env: ProviderEnv): {
   );
   if (configured.length === 0) {
     throw new Error(
-      "no email provider configured — set one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY",
+      "no email provider configured. Set one of RESEND_API_KEY, POSTMARK_SERVER_TOKEN, or SENDGRID_API_KEY",
     );
   }
   if (configured.length > 1) {
     throw new Error(
-      `multiple email providers configured (${configured.join(", ")}) — set exactly one API key`,
+      `multiple email providers configured (${configured.join(", ")}). Set exactly one API key`,
     );
   }
   if (env.resendApiKey) {
