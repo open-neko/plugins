@@ -12,6 +12,27 @@ metadata:
 The plugin sends email from one fixed sender (`RESEND_FROM`). You cannot
 change the sender. You choose the recipients, the subject, and one body.
 
+## Action payload shape
+
+When calling `send_email`, put every email field inside the top-level
+`payload` object. Keep `intent` beside `payload`; it explains the request
+for approval and is not an email field. For example:
+
+```json
+{
+  "intent": "Send the scheduled inventory summary to the operations team.",
+  "payload": {
+    "to": ["recipient@example.invalid"],
+    "subject": "Inventory summary for {date}",
+    "markdown": "## Inventory summary\n\nA short summary goes here."
+  }
+}
+```
+
+Put optional `cc` and `bcc` inside `payload` too. Do not put `to`,
+`subject`, or the body alongside `intent`: OpenNeko would save an empty
+action payload, and the plugin would receive no recipients.
+
 | Action | Mode | Use it to |
 |---|---|---|
 | `send_email` | ask | Send one email |
