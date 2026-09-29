@@ -1,6 +1,6 @@
 {
   "name": "@open-neko/plugin-resend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Operational email for OpenNeko through Resend. The agent sends an email from a Resend template, from Markdown in a house layout, or from HTML, and checks delivery status. Rules match the real recipient domains. Network egress limited to api.resend.com.",
   "license": "Apache-2.0",
   "repository": {
