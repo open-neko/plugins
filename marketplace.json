@@ -2291,6 +2291,95 @@
           },
           "publishedAt": "2026-09-29",
           "provenanceWaived": true
+        },
+        {
+          "version": "0.2.1",
+          "integrity": "sha512-vlsF5nIxS1/CbZ8JTKPlEd7tIbilCCX7S4dBBOuBD5BsuvtqyFjtox0rjOqkq+ObcguYuHNp1tUwCNANIcJ8Fg==",
+          "permissions": {
+            "network": [
+              "api.resend.com"
+            ],
+            "env": [
+              {
+                "key": "RESEND_API_KEY",
+                "required": true,
+                "secret": true,
+                "inject": "egress",
+                "description": "Resend API key (starts with re_). Create it at resend.com → API Keys with Sending access, or Full access to also list templates. The gateway holds the key; the plugin sandbox never sees it."
+              },
+              {
+                "key": "RESEND_FROM",
+                "required": true,
+                "secret": false,
+                "description": "Sender for every email, e.g. \"Acme Ops <ops@mail.acme.com>\". The domain must be verified in Resend. The agent cannot change it."
+              },
+              {
+                "key": "RESEND_REPLY_TO",
+                "required": false,
+                "secret": false,
+                "description": "Default reply-to address. The agent can set another one per email."
+              },
+              {
+                "key": "RESEND_ALLOWED_RECIPIENTS",
+                "required": false,
+                "secret": false,
+                "description": "Comma-separated recipient domains, e.g. \"acme.com, *.acme.com, partner.com\". When set, the plugin refuses any other recipient, even on an approved email."
+              },
+              {
+                "key": "RESEND_LOGO_URL",
+                "required": false,
+                "secret": false,
+                "description": "HTTPS URL of the logo at the top of the house layout (Markdown emails only)."
+              },
+              {
+                "key": "RESEND_BRAND_COLOR",
+                "required": false,
+                "secret": false,
+                "description": "Hex color for links and the top border in the house layout, e.g. #1f6feb."
+              },
+              {
+                "key": "RESEND_FOOTER_TEXT",
+                "required": false,
+                "secret": false,
+                "description": "One line at the bottom of the house layout, e.g. \"Sent by OpenNeko for Acme Operations.\""
+              }
+            ]
+          },
+          "capabilities": {
+            "action": {
+              "kinds": [
+                {
+                  "kind": "send_email",
+                  "description": "Send one email. Give to (and optional cc, bcc), a subject, and exactly one body: template (a Resend template id or alias with variables), markdown (rendered in the house layout), or html.",
+                  "default_mode": "ask",
+                  "targets": {
+                    "fields": [
+                      "to",
+                      "cc",
+                      "bcc"
+                    ],
+                    "as": "email_domain"
+                  }
+                },
+                {
+                  "kind": "list_email_templates",
+                  "description": "List the published Resend templates: id, alias, and name.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "get_email_template",
+                  "description": "Get one Resend template by id or alias: its subject and the variable keys it expects.",
+                  "default_mode": "auto"
+                },
+                {
+                  "kind": "get_email_status",
+                  "description": "Get the delivery status of a sent email by the id that send_email returned, e.g. delivered, bounced, or opened.",
+                  "default_mode": "auto"
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-09-29"
         }
       ]
     }
