@@ -19,7 +19,7 @@ const MARKETPLACE = path.join(ROOT, "marketplace.json");
 const PACKAGES_DIR = path.join(ROOT, "packages");
 
 // package.json openneko.capabilities → marketplace capabilities: action kinds
-// keep only the catalog's schema fields (drop `example`); the other shapes
+// keep only the catalog's schema fields (drop `example`, keep `targets`); the other shapes
 // already match the schema, so they're copied straight through.
 export function toCatalogCapabilities(caps = {}) {
   const out = {};
@@ -29,6 +29,7 @@ export function toCatalogCapabilities(caps = {}) {
         kind: k.kind,
         description: k.description,
         ...(k.default_mode !== undefined ? { default_mode: k.default_mode } : {}),
+        ...(k.targets !== undefined ? { targets: k.targets } : {}),
       })),
     };
   }

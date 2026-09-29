@@ -90,4 +90,10 @@ describe("syncMarketplace", () => {
       write: { createUser: true },
     });
   });
+
+  it("keeps action `targets` so approval rules match real recipients", () => {
+    const targets = { fields: ["to", "cc", "bcc"], as: "email_domain" };
+    const caps = toCatalogCapabilities({ action: { kinds: [{ kind: "send_email", description: "d", targets }] } });
+    expect(caps.action.kinds[0].targets).toEqual(targets);
+  });
 });
