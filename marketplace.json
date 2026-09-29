@@ -2203,9 +2203,8 @@
       ],
       "versions": [
         {
-          "version": "0.1.0",
-          "integrity": "sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-          "draft": true,
+          "version": "0.2.0",
+          "integrity": "sha512-9S2m56S/k0akOsPf1oaEM6JIlCs7VSV04BOggjJOwcAB2QZ9mh8ai6sIaT5ky+0vTiOWpyUOlsH6ATSQQ4pa1w==",
           "permissions": {
             "network": [
               "api.resend.com"
@@ -2290,7 +2289,8 @@
               ]
             }
           },
-          "publishedAt": "2026-09-29"
+          "publishedAt": "2026-09-29",
+          "provenanceWaived": true
         }
       ]
     }
