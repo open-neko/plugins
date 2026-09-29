@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/open-neko/plugins/compare/plugin-resend-v0.2.0...plugin-resend-v0.2.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **resend:** clarify action payload envelope ([e2b2600](https://github.com/open-neko/plugins/commit/e2b2600ef33f6dfef3104428dd4a58fb9b085728))
+* **resend:** clarify action payload envelope ([698958a](https://github.com/open-neko/plugins/commit/698958a72e80752571631a2dc08154419b50a3c5))
+
 ## [0.2.0](https://github.com/open-neko/plugins/compare/plugin-resend-v0.1.0...plugin-resend-v0.2.0) (2026-09-29)
 
 
