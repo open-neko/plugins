@@ -16,7 +16,9 @@ change the sender. You choose the recipients, the subject, and one body.
 
 When calling `send_email`, put every email field inside the top-level
 `payload` object. Keep `intent` beside `payload`; it explains the request
-for approval and is not an email field. For example:
+for approval and is not an email field. OpenNeko passes the nested `payload`
+to the plugin as the action input, so fields beside `intent` are not received
+by `send_email`. For example:
 
 ```json
 {
