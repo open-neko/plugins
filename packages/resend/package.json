@@ -1,0 +1,137 @@
+{
+  "name": "@open-neko/plugin-resend",
+  "version": "0.1.0",
+  "description": "Operational email for OpenNeko through Resend. The agent sends an email from a Resend template, from Markdown in a house layout, or from HTML, and checks delivery status. Rules match the real recipient domains. Network egress limited to api.resend.com.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-neko/plugins.git",
+    "directory": "packages/resend"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "skill"
+  ],
+  "openneko": {
+    "runner": "./dist/run.js",
+    "skill": "./skill",
+    "permissions": {
+      "network": [
+        "api.resend.com"
+      ],
+      "env": [
+        {
+          "key": "RESEND_API_KEY",
+          "required": true,
+          "secret": true,
+          "inject": "egress",
+          "description": "Resend API key (starts with re_). Create it at resend.com → API Keys with Sending access, or Full access to also list templates. The gateway holds the key; the plugin sandbox never sees it."
+        },
+        {
+          "key": "RESEND_FROM",
+          "required": true,
+          "secret": false,
+          "description": "Sender for every email, e.g. \"Acme Ops <ops@mail.acme.com>\". The domain must be verified in Resend. The agent cannot change it."
+        },
+        {
+          "key": "RESEND_REPLY_TO",
+          "required": false,
+          "secret": false,
+          "description": "Default reply-to address. The agent can set another one per email."
+        },
+        {
+          "key": "RESEND_ALLOWED_RECIPIENTS",
+          "required": false,
+          "secret": false,
+          "description": "Comma-separated recipient domains, e.g. \"acme.com, *.acme.com, partner.com\". When set, the plugin refuses any other recipient, even on an approved email."
+        },
+        {
+          "key": "RESEND_LOGO_URL",
+          "required": false,
+          "secret": false,
+          "description": "HTTPS URL of the logo at the top of the house layout (Markdown emails only)."
+        },
+        {
+          "key": "RESEND_BRAND_COLOR",
+          "required": false,
+          "secret": false,
+          "description": "Hex color for links and the top border in the house layout, e.g. #1f6feb."
+        },
+        {
+          "key": "RESEND_FOOTER_TEXT",
+          "required": false,
+          "secret": false,
+          "description": "One line at the bottom of the house layout, e.g. \"Sent by OpenNeko for Acme Operations.\""
+        }
+      ]
+    },
+    "capabilities": {
+      "action": {
+        "kinds": [
+          {
+            "kind": "send_email",
+            "description": "Send one email. Give to (and optional cc, bcc), a subject, and exactly one body: template (a Resend template id or alias with variables), markdown (rendered in the house layout), or html.",
+            "default_mode": "ask",
+            "targets": {
+              "fields": [
+                "to",
+                "cc",
+                "bcc"
+              ],
+              "as": "email_domain"
+            },
+            "example": {
+              "to": [
+                "ops@acme.com"
+              ],
+              "subject": "Low stock: 3 SKUs below reorder point",
+              "markdown": "## Low stock\n\n| SKU | On hand | Reorder point |\n|---|---|---|\n| WB-120 | 4 | 20 |\n\nThe next purchase order is due on 02 October."
+            }
+          },
+          {
+            "kind": "list_email_templates",
+            "description": "List the published Resend templates: id, alias, and name.",
+            "default_mode": "auto",
+            "example": {
+              "limit": 20
+            }
+          },
+          {
+            "kind": "get_email_template",
+            "description": "Get one Resend template by id or alias: its subject and the variable keys it expects.",
+            "default_mode": "auto",
+            "example": {
+              "template": "daily-ops-summary"
+            }
+          },
+          {
+            "kind": "get_email_status",
+            "description": "Get the delivery status of a sent email by the id that send_email returned, e.g. delivered, bounced, or opened.",
+            "default_mode": "auto",
+            "example": {
+              "emailId": "4ef9a417-02e9-4d39-ad75-9611e0fcc33c"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/bundle.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@open-neko/plugin-types": "workspace:*",
+    "marked": "^18.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

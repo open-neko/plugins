@@ -17,6 +17,7 @@
     "packages/google-workspace": { "release-type": "node", "component": "connector-google-workspace", "extra-files": ["src/plugin.ts"] },
     "packages/telegram": { "release-type": "node", "component": "channel-telegram", "extra-files": ["src/plugin.ts"] },
     "packages/hud-channel": { "release-type": "node", "component": "channel-hud", "extra-files": ["src/plugin.ts"] },
-    "packages/magic-link": { "release-type": "node", "component": "plugin-magic-link", "extra-files": ["src/plugin.ts"] }
+    "packages/magic-link": { "release-type": "node", "component": "plugin-magic-link", "extra-files": ["src/plugin.ts"] },
+    "packages/resend": { "release-type": "node", "component": "plugin-resend", "extra-files": ["src/plugin.ts"] }
   }
 }

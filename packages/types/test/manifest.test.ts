@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PluginActionDeclaration } from "../src/action";
 import {
   EnvVarName,
   HostPattern,
@@ -348,5 +349,19 @@ describe("PluginManifest", () => {
       plugins: [],
     });
     expect(parsed.plugins).toEqual([]);
+  });
+});
+
+describe("PluginActionDeclaration targets", () => {
+  it("keeps targets and defaults `as` to value", () => {
+    const decl = PluginActionDeclaration.parse({ kind: "send_webhook", description: "Post.", targets: { fields: ["url"] } });
+    expect(decl.targets).toEqual({ fields: ["url"], as: "value" });
+  });
+
+  it("rejects an empty field list and an unknown form", () => {
+    expect(() => PluginActionDeclaration.parse({ kind: "a", description: "b", targets: { fields: [] } })).toThrow();
+    expect(() =>
+      PluginActionDeclaration.parse({ kind: "a", description: "b", targets: { fields: ["to"], as: "phone" } }),
+    ).toThrow();
   });
 });

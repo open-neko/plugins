@@ -45,6 +45,7 @@ If you want to publish your own marketplace, see [CONTRIBUTING.md](./CONTRIBUTIN
 │   ├── parallel-search/            ← @open-neko/plugin-parallel-search (web search)
 │   ├── slack/                      ← @open-neko/plugin-slack (channel + actions)
 │   ├── telegram/                   ← @open-neko/channel-telegram (channel)
+│   ├── resend/                     ← @open-neko/plugin-resend (operational email)
 │   ├── shopify/                    ← @open-neko/plugin-shopify (Admin API actions)
 │   └── google-workspace/           ← @open-neko/connector-google-workspace (per-operator OAuth)
 └── test/                           ← marketplace + site-build tests
